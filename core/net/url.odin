@@ -21,7 +21,7 @@ import "core:strconv"
 import "core:unicode/utf8"
 import "core:encoding/hex"
 
-split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host, path: string, queries: map[string]string) {
+split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host, path: string, queries: [][2]string) {
 	s := url
 
 	i := strings.last_index(s, "://")
@@ -37,13 +37,13 @@ split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host,
 		if query_str != "" {
 			queries_parts := strings.split(query_str, "&")
 			defer delete(queries_parts)
-			queries = make(map[string]string, len(queries_parts), allocator)
-			for q in queries_parts {
+			queries = make([][2]string, len(queries_parts), allocator)
+			for q, i in queries_parts {
 				parts := strings.split(q, "=")
 				defer delete(parts)
 				switch len(parts) {
-				case 1:  queries[parts[0]] = ""        // NOTE(tetra): Query not set to anything, was but present.
-				case 2:  queries[parts[0]] = parts[1]  // NOTE(tetra): Query set to something.
+				case 1:  queries[i] = {parts[0], ""}        // NOTE(tetra): Query not set to anything, was but present.
+				case 2:  queries[i] = {parts[0], parts[1]}  // NOTE(tetra): Query set to something.
 				case:    break
 				}
 			}
@@ -62,7 +62,7 @@ split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host,
 	return
 }
 
-join_url :: proc(scheme, host, path: string, queries: map[string]string, allocator := context.allocator) -> string {
+join_url :: proc(scheme, host, path: string, queries: [][2]string, allocator := context.allocator) -> string {
 	using strings
 
 	b := builder_make(allocator)
@@ -77,20 +77,19 @@ join_url :: proc(scheme, host, path: string, queries: map[string]string, allocat
 		write_string(&b, trim_space(path))
 	}
 
-
 	query_length := len(queries)
-	if query_length > 0 do write_string(&b, "?")
-	i := 0
-	for query_name, query_value in queries {
-		write_string(&b, query_name)
-		if query_value != "" {
-			write_string(&b, "=")
-			write_string(&b, query_value)
+	if query_length > 0 {
+		write_string(&b, "?")
+		for query_name_value, i in queries {
+			write_string(&b, query_name_value[0])
+			if query_name_value[1] != "" {
+				write_string(&b, "=")
+				write_string(&b, query_name_value[1])
+			}
+			if i < query_length - 1 {
+				write_string(&b, "&")
+			}
 		}
-		if i < query_length - 1 {
-			write_string(&b, "&")
-		}
-		i += 1
 	}
 
 	return to_string(b)

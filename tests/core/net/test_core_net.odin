@@ -515,7 +515,7 @@ client_sends_server_data :: proc(t: ^testing.T) {
 
 URL_Test :: struct {
 	scheme, host, path: string,
-	queries: map[string]string,
+	queries: [][2]string,
 	url: string,
 }
 
@@ -526,18 +526,17 @@ split_url_test :: proc(t: ^testing.T) {
 		{ "https", "odin-lang.org", "/", {}, "https://odin-lang.org" },
 		{ "https", "odin-lang.org", "/docs/", {}, "https://odin-lang.org/docs/" },
 		{ "https", "odin-lang.org", "/docs/overview", {}, "https://odin-lang.org/docs/overview" },
-		{ "http", "example.com", "/", {"a" = "b"}, "http://example.com?a=b" },
-		{ "http", "example.com", "/", {"a" = ""}, "http://example.com?a" },
-		{ "http", "example.com", "/", {"a" = "b", "c" = "d"}, "http://example.com?a=b&c=d" },
-		{ "http", "example.com", "/", {"a" = "", "c" = "d"}, "http://example.com?a&c=d" },
-		{ "http", "example.com", "/example", {"a" = "", "b" = ""}, "http://example.com/example?a&b" },
+		{ "http", "example.com", "/", {{"a", "b"}}, "http://example.com?a=b" },
+		{ "http", "example.com", "/", {{"a", ""}}, "http://example.com?a" },
+		{ "http", "example.com", "/", {{"a", "b"}, {"c", "d"}}, "http://example.com?a=b&c=d" },
+		{ "http", "example.com", "/", {{"a", ""}, {"c", "d"}}, "http://example.com?a&c=d" },
+		{ "http", "example.com", "/example", {{"a", ""}, {"b", ""}}, "http://example.com/example?a&b" },
 	}
 
 	for test in test_cases {
 		scheme, host, path, queries := net.split_url(test.url)
 		defer {
 			delete(queries)
-			delete(test.queries)
 		}
 
 		msg := fmt.tprintf("Expected `net.split_url` to return %s, got %s", test.scheme, scheme)
@@ -548,10 +547,10 @@ split_url_test :: proc(t: ^testing.T) {
 		expect(t, path == test.path, msg)
 		msg = fmt.tprintf("Expected `net.split_url` to return %d queries, got %d queries", len(test.queries), len(queries))
 		expect(t, len(queries) == len(test.queries), msg)
-		for k, v in queries {
-			expected := test.queries[k]
-			msg = fmt.tprintf("Expected `net.split_url` to return %s, got %s", expected, v)
-			expect(t, v == expected, msg)
+		for q, i in queries {
+			expected := test.queries[i]
+			msg = fmt.tprintf("Expected `net.split_url` to return %s, got %s", expected, q[1])
+			expect(t, q[1] == expected[1], msg)
 		}
 	}
 }
@@ -564,18 +563,17 @@ join_url_test :: proc(t: ^testing.T) {
 		{ "https", "odin-lang.org", "", {}, "https://odin-lang.org" },
 		{ "https", "odin-lang.org", "docs/", {}, "https://odin-lang.org/docs/" },
 		{ "https", "odin-lang.org", "/docs/overview", {}, "https://odin-lang.org/docs/overview" },
-		{ "http", "example.com", "", {"a" = "b"}, "http://example.com?a=b" },
-		{ "http", "example.com", "", {"a" = ""}, "http://example.com?a" },
-		{ "http", "example.com", "", {"a" = "b", "c" = "d"}, "http://example.com?a=b&c=d" },
-		{ "http", "example.com", "", {"a" = "", "c" = "d"}, "http://example.com?a&c=d" },
-		{ "http", "example.com", "example", {"a" = "", "b" = ""}, "http://example.com/example?a&b" },
+		{ "http", "example.com", "", {{"a", "b"}}, "http://example.com?a=b" },
+		{ "http", "example.com", "", {{"a", ""}}, "http://example.com?a" },
+		{ "http", "example.com", "", {{"a", "b"}, {"c", "d"}}, "http://example.com?a=b&c=d" },
+		{ "http", "example.com", "", {{"a", ""}, {"c", "d"}}, "http://example.com?a&c=d" },
+		{ "http", "example.com", "example", {{"a", ""}, {"b", ""}}, "http://example.com/example?a&b" },
 	}
 
 	for test in test_cases {
 		url := net.join_url(test.scheme, test.host, test.path, test.queries)
 		defer {
 			delete(url)
-			delete(test.queries)
 		}
 
 		okay := url == test.url
