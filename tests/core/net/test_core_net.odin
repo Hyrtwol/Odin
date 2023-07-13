@@ -381,6 +381,7 @@ tcp_client :: proc(retval: rawptr) {
 		skt := net.dial_tcp(ENDPOINT) or_return
 		defer net.close(skt)
 
+		net.set_blocking(skt, true)
 		net.set_option(skt, .Send_Timeout,    SEND_TIMEOUT)
 		net.set_option(skt, .Receive_Timeout, RECV_TIMEOUT)
 
@@ -405,6 +406,8 @@ tcp_server :: proc(retval: rawptr) {
 		// Don't accept any connections, just listen.
 		return
 	}
+
+	net.set_blocking(r.skt, true)
 
 	client: net.TCP_Socket
 	if client, _, r.err = net.accept_tcp(r.skt.(net.TCP_Socket)); r.err != nil {
