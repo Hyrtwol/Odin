@@ -79,10 +79,8 @@ set libs= ^
 	kernel32.lib ^
 	Synchronization.lib ^
 	bin\llvm\windows\LLVM-C.lib
-set res= ^
-    misc\odin.res
-set iconrc= ^ 
-    misc\odin.rc
+set res=misc\odin.res
+set iconrc=misc\odin.rc
 
 rem DO NOT TOUCH!
 rem THIS TILDE STUFF IS FOR DEVELOPMENT ONLY!
