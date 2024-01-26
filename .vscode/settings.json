@@ -1,0 +1,29 @@
+{
+	"editor.wordWrapColumn": 120,
+	"editor.rulers": [
+		120
+	],
+	"cSpell.words": [
+		"metaprogramming",
+		"microarch",
+		"reloc",
+		"sandybridge",
+		"struct"
+	],
+	"markdownlint.config": {
+		"no-hard-tabs": false,
+		"line-length": false
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+	},
+	"omnisharp.autoStart": false,
+	"typescript.tsc.autoDetect": "off",
+	"npm.autoDetect": "off",
+	"files.exclude": {
+		"**/.git": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/desktop.ini": true
+	}
+}

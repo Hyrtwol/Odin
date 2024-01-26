@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"command": "make",
+			"group": {
+				"_id": "build",
+				"isDefault": false
+			}
+		}
+	]
+}
