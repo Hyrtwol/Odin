@@ -8,6 +8,10 @@
 		{
 			"name": "core",
 			"path": ".\\core"
+		},
+		{
+			"name": "vendor",
+			"path": ".\\vendor"
 		}
 	],
 	"enable_document_symbols": true,
