@@ -412,6 +412,11 @@ foreign kernel32 {
 	FreeLibrary :: proc(h: HMODULE) -> BOOL ---
 	GetProcAddress :: proc(h: HMODULE, c_str: LPCSTR) -> rawptr ---
 
+	LoadResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
+	FreeResource :: proc(hResData: HGLOBAL) -> BOOL ---
+	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
+	FindResourceW :: proc(hModule: HMODULE, lpName: LPCWSTR, lpType: LPCWSTR) -> HRSRC ---
+	//EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
 
 	GetFullPathNameW  :: proc(filename: LPCWSTR, buffer_length: DWORD, buffer: LPCWSTR, file_part: ^LPCWSTR) -> DWORD ---
 	GetLongPathNameW  :: proc(short, long: LPCWSTR, len: DWORD) -> DWORD ---
