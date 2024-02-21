@@ -475,7 +475,6 @@ client_sends_server_data :: proc(t: ^testing.T) {
 URL_Test :: struct {
 	scheme, host, path: string,
 	queries: map[string]string,
-	//queries: [][2]string,
 	url: []string,
 }
 
