@@ -23,6 +23,7 @@ LPUNKNOWN :: ^IUnknown
 
 @(default_calling_convention="system")
 foreign Ole32 {
+	// CoInitialize(NULL) same as CoInitializeEx(NULL, COINIT_APARTMENTTHREADED)
 	CoInitializeEx :: proc(reserved: rawptr, co_init: COINIT) -> HRESULT ---
 	CoUninitialize :: proc() ---
 
@@ -35,4 +36,7 @@ foreign Ole32 {
 	) -> HRESULT ---
 
 	CoTaskMemFree :: proc(pv: rawptr) ---
+
+	// HRESULT CLSIDFromProgID([in]  LPCOLESTR lpszProgID, [out] LPCLSID   lpclsid);
+	// HRESULT CLSIDFromString([in]  LPCOLESTR lpsz, [out] LPCLSID   pclsid);
 }
