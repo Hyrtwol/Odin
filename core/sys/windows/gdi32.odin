@@ -7,7 +7,7 @@ foreign import gdi32 "system:Gdi32.lib"
 
 @(default_calling_convention="system")
 foreign gdi32 {
-	GetStockObject :: proc(i: c_int) -> HGDIOBJ ---
+	GetStockObject :: proc(i: INT) -> HGDIOBJ ---
 	SelectObject :: proc(hdc: HDC, h: HGDIOBJ) -> HGDIOBJ ---
 	DeleteObject :: proc(ho: HGDIOBJ) -> BOOL ---
 	SetBkColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
@@ -16,80 +16,64 @@ foreign gdi32 {
 	DeleteDC :: proc(hdc: HDC) -> BOOL ---
 
 	CreateDIBPatternBrush :: proc(h: HGLOBAL, iUsage: UINT) -> HBRUSH ---
-
-	CreateDIBitmap :: proc(
-		hdc: HDC,
-		pbmih: ^BITMAPINFOHEADER,
-		flInit: DWORD,
-		pjBits: VOID,
-		pbmi: ^BITMAPINFO,
-		iUsage: UINT,
-	) -> HBITMAP ---
-
-	CreateDIBSection :: proc(
-		hdc: HDC,
-		pbmi: ^BITMAPINFO,
-		usage: UINT,
-		ppvBits: VOID,
-		hSection: HANDLE,
-		offset: DWORD,
-	) -> HBITMAP ---
+	CreateDIBitmap :: proc(hdc: HDC, pbmih: ^BITMAPINFOHEADER, flInit: DWORD, pjBits: VOID, pbmi: ^BITMAPINFO, iUsage: UINT) -> HBITMAP ---
+	CreateDIBSection :: proc(hdc: HDC, pbmi: ^BITMAPINFO, usage: UINT, ppvBits: VOID, hSection: HANDLE, offset: DWORD) -> HBITMAP ---
 
 	StretchDIBits :: proc(
 		hdc: HDC,
-		xDest: c_int,
-		yDest: c_int,
-		DestWidth: c_int,
-		DestHeight: c_int,
-		xSrc: c_int,
-		ySrc: c_int,
-		SrcWidth: c_int,
-		SrcHeight: c_int,
+		xDest: INT,
+		yDest: INT,
+		DestWidth: INT,
+		DestHeight: INT,
+		xSrc: INT,
+		ySrc: INT,
+		SrcWidth: INT,
+		SrcHeight: INT,
 		lpBits: VOID,
 		lpbmi: ^BITMAPINFO,
 		iUsage: UINT,
 		rop: DWORD,
-	) -> c_int ---
+	) -> INT ---
 
 	StretchBlt :: proc(
 		hdcDest: HDC,
-		xDest: c_int,
-		yDest: c_int,
-		wDest: c_int,
-		hDest: c_int,
+		xDest: INT,
+		yDest: INT,
+		wDest: INT,
+		hDest: INT,
 		hdcSrc: HDC,
-		xSrc: c_int,
-		ySrc: c_int,
-		wSrc: c_int,
-		hSrc: c_int,
+		xSrc: INT,
+		ySrc: INT,
+		wSrc: INT,
+		hSrc: INT,
 		rop: DWORD,
 	) -> BOOL ---
 
-	SetPixelFormat :: proc(hdc: HDC, format: c_int, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
-	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> c_int ---
-	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: c_int, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> c_int ---
+	SetPixelFormat :: proc(hdc: HDC, format: INT, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
+	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
+	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: INT, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
 	SwapBuffers :: proc(HDC) -> BOOL ---
 
 	SetDCBrushColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 	GetDCBrushColor :: proc(hdc: HDC) -> COLORREF ---
-	PatBlt :: proc(hdc: HDC, x, y, w, h: c_int, rop: DWORD) -> BOOL ---
-	Rectangle :: proc(hdc: HDC, left, top, right, bottom: c_int) -> BOOL ---
+	PatBlt :: proc(hdc: HDC, x, y, w, h: INT, rop: DWORD) -> BOOL ---
+	Rectangle :: proc(hdc: HDC, left, top, right, bottom: INT) -> BOOL ---
 
 	CreateFontW :: proc(
-		cHeight, cWidth, cEscapement, cOrientation, cWeight: c_int,
+		cHeight, cWidth, cEscapement, cOrientation, cWeight: INT,
 		bItalic, bUnderline, bStrikeOut, iCharSet, iOutPrecision: DWORD,
 		iClipPrecision, iQuality, iPitchAndFamily: DWORD,
 		pszFaceName: LPCWSTR,
 	) -> HFONT ---
-	TextOutW :: proc(hdc: HDC, x, y: c_int, lpString: LPCWSTR, c: c_int) -> BOOL ---
-	GetTextExtentPoint32W :: proc(hdc: HDC, lpString: LPCWSTR, c: c_int, psizl: LPSIZE) -> BOOL ---
+	TextOutW :: proc(hdc: HDC, x, y: INT, lpString: LPCWSTR, c: INT) -> BOOL ---
+	GetTextExtentPoint32W :: proc(hdc: HDC, lpString: LPCWSTR, c: INT, psizl: LPSIZE) -> BOOL ---
 	GetTextMetricsW :: proc(hdc: HDC, lptm: LPTEXTMETRICW) -> BOOL ---
 
 	CreateSolidBrush :: proc(color: COLORREF) -> HBRUSH ---
 
-	GetObjectW :: proc(h: HANDLE, c: c_int, pv: LPVOID) -> int ---
-	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: c_int) -> HBITMAP ---
-	BitBlt :: proc(hdc: HDC, x, y, cx, cy: c_int, hdcSrc: HDC, x1, y1: c_int, rop: DWORD) -> BOOL ---
+	GetObjectW :: proc(h: HANDLE, c: INT, pv: LPVOID) -> int ---
+	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: INT) -> HBITMAP ---
+	BitBlt :: proc(hdc: HDC, x, y, cx, cy: INT, hdcSrc: HDC, x1, y1: INT, rop: DWORD) -> BOOL ---
 	GetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start, cLines: UINT, lpvBits: LPVOID, lpbmi: ^BITMAPINFO, usage: UINT) -> int ---
 }
 
