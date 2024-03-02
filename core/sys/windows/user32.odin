@@ -121,9 +121,9 @@ foreign user32 {
 	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x: int, y: int, nReserved: int, hWnd: HWND, prcRect: ^RECT) -> i32 ---
 	RegisterWindowMessageW :: proc(lpString: LPCWSTR) -> UINT ---
 
-	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT, bErase: BOOL) -> BOOL ---
-	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT) -> BOOL ---
-	InvalidateRect :: proc(hWnd: HWND, lpRect: ^RECT, bErase: BOOL) -> BOOL ---
+	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT = nil, bErase: BOOL = false) -> BOOL ---
+	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT = nil) -> BOOL ---
+	InvalidateRect :: proc(hWnd: HWND, lpRect: ^RECT = nil, bErase: BOOL = false) -> BOOL ---
 
 	BeginPaint :: proc(hWnd: HWND, lpPaint: ^PAINTSTRUCT) -> HDC ---
 	EndPaint :: proc(hWnd: HWND, lpPaint: ^PAINTSTRUCT) -> BOOL ---
