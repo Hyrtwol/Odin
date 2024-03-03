@@ -5,7 +5,19 @@
 			"label": "build",
 			"type": "shell",
 			"windows": {
-				"command": "call build.bat"
+				"command": "call build.bat release"
+			},
+			"command": "make",
+			"group": {
+				"_id": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "build debug",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat debug"
 			},
 			"command": "make",
 			"group": {

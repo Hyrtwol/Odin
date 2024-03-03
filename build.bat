@@ -106,15 +106,28 @@ set linker_settings=%libs% %res% %linker_flags%
 del *.pdb > NUL 2> NUL
 del *.ilk > NUL 2> NUL
 
-rc %iconrc%
+echo Building %exe_name% %release_mode%
+
+rc -nologo %iconrc%
 cl %compiler_settings% "src\main.cpp" "src\libtommath.cpp" /link %linker_settings% -OUT:%exe_name%
 if %errorlevel% neq 0 goto end_of_build
+
+echo Building vendor
 
 call build_vendor.bat
 if %errorlevel% neq 0 goto end_of_build
 
+if %release_mode% neq 0 goto cleanup_build
+
+echo Running demo
+
+set demo_log=demo.log
+del %demo_log% > NUL 2> NUL
+
 rem If the demo doesn't run for you and your CPU is more than a decade old, try -microarch:native
-if %release_mode% EQU 0 odin run examples/demo -resource:%iconrc% -- Hellope World
+odin run examples/demo -resource:%iconrc% > %demo_log% -- Hellope World
+
+:cleanup_build
 
 del *.obj > NUL 2> NUL
 
