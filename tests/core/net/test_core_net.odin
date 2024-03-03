@@ -548,7 +548,7 @@ split_url_test :: proc(t: ^testing.T) {
 		expect(t, path == test.path, msg)
 		msg = fmt.tprintf("Expected `net.split_url` to return %d queries, got %d queries", len(test.queries), len(queries))
 		expect(t, len(queries) == len(test.queries), msg)
-		for q, i in queries {
+		for q in queries {
 			expected := test.queries[q[0]]
 			msg = fmt.tprintf("Expected `net.split_url` to return %s, got %s", expected, q[1])
 			expect(t, q[1] == expected, msg)
