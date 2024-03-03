@@ -92,9 +92,9 @@ echo ---
 %PATH_TO_ODIN% run container %COMMON% %COLLECTION% -out:test_core_container.exe || exit /b
 
 echo ---
-echo Running core:sys_windows tests
+echo Running core:sys/windows tests
 echo ---
-%PATH_TO_ODIN% run sys_windows %COMMON% %COLLECTION% -out:test_core_sys_windows.exe || exit /b
+%PATH_TO_ODIN% run sys\windows %COMMON% %COLLECTION% -out:test_core_sys_windows.exe || exit /b
 
 echo ---
 echo Running core:thread tests

@@ -6,24 +6,22 @@ import win32 "core:sys/windows"
 
 @(test)
 verify_gdi32_struct_sizes :: proc(t: ^testing.T) {
-	using win32
-	expect_size(t, BITMAPV5HEADER, 124)
-	expect_size(t, CIEXYZTRIPLE, 36)
-	expect_size(t, CIEXYZ, 12)
-	expect_size(t, FXPT2DOT30, 4)
-	expect_size(t, RGBQUAD, 4)
-	expect_size(t, PIXELFORMATDESCRIPTOR, 40)
-	expect_size(t, BITMAPINFOHEADER, 40)
-	expect_size(t, BITMAP, 32)
+	expect_size(t, win32.BITMAPV5HEADER, 124)
+	expect_size(t, win32.CIEXYZTRIPLE, 36)
+	expect_size(t, win32.CIEXYZ, 12)
+	expect_size(t, win32.FXPT2DOT30, 4)
+	expect_size(t, win32.RGBQUAD, 4)
+	expect_size(t, win32.PIXELFORMATDESCRIPTOR, 40)
+	expect_size(t, win32.BITMAPINFOHEADER, 40)
+	expect_size(t, win32.BITMAP, 32)
 }
 
 @(test)
 verify_winmm_struct_sizes :: proc(t: ^testing.T) {
-	using win32
-	expect_size(t, TIMECAPS, 8)
-	expect_size(t, MMTIME, 12)
-	expect_size(t, WAVEFORMATEX, 20)
-	expect_size(t, WAVEHDR, 48)
-	expect_size(t, WAVEINCAPSW, 80)
-	expect_size(t, WAVEOUTCAPSW, 84)
+	expect_size(t, win32.TIMECAPS, 8)
+	expect_size(t, win32.MMTIME, 12)
+	expect_size(t, win32.WAVEFORMATEX, 20)
+	expect_size(t, win32.WAVEHDR, 48)
+	expect_size(t, win32.WAVEINCAPSW, 80)
+	expect_size(t, win32.WAVEOUTCAPSW, 84)
 }
