@@ -26,5 +26,6 @@
 		"**/.DS_Store": true,
 		"**/Thumbs.db": true,
 		"**/desktop.ini": true
-	}
+	},
+	"terminal.integrated.defaultProfile.windows": "Command Prompt"
 }
