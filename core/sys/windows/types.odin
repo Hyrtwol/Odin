@@ -30,14 +30,18 @@ HICON :: distinct HANDLE
 HCURSOR :: distinct HANDLE
 HMENU :: distinct HANDLE
 HBRUSH :: distinct HANDLE
+HPEN :: distinct HANDLE
 HGDIOBJ :: distinct HANDLE
 HBITMAP :: distinct HANDLE
+HPALETTE :: distinct HANDLE
 HGLOBAL :: distinct HANDLE
 HHOOK :: distinct HANDLE
 HKEY :: distinct HANDLE
 HDESK :: distinct HANDLE
 HFONT :: distinct HANDLE
 HRGN :: distinct HANDLE
+HRSRC :: distinct HANDLE
+HWINSTA :: distinct HANDLE
 BOOL :: distinct b32
 BYTE :: distinct u8
 BOOLEAN :: distinct b8
@@ -133,11 +137,14 @@ LPSTR :: ^CHAR
 LPWSTR :: ^WCHAR
 OLECHAR :: WCHAR
 LPOLESTR :: ^OLECHAR
+LPCOLESTR :: LPCSTR
 LPFILETIME :: ^FILETIME
 LPWSABUF :: ^WSABUF
 LPWSAOVERLAPPED :: distinct rawptr
 LPWSAOVERLAPPED_COMPLETION_ROUTINE :: distinct rawptr
 LPCVOID :: rawptr
+SCODE :: LONG
+PSCODE :: ^SCODE
 
 PACCESS_TOKEN :: PVOID
 PSECURITY_DESCRIPTOR :: PVOID
@@ -1969,7 +1976,7 @@ BITMAPINFOHEADER :: struct {
 
 BITMAPINFO :: struct {
 	bmiHeader: BITMAPINFOHEADER,
-	bmiColors: [1]RGBQUAD,
+	bmiColors: [^]RGBQUAD,
 }
 
 BITMAP :: struct {
@@ -2168,6 +2175,16 @@ CP_THREAD_ACP :: 3     // current thread's ANSI code page
 CP_SYMBOL     :: 42    // SYMBOL translations
 CP_UTF7       :: 65000 // UTF-7 translation
 CP_UTF8       :: 65001 // UTF-8 translation
+
+LCID :: DWORD
+LANGID :: WORD
+
+LANG_NEUTRAL :: 0x00
+LANG_INVARIANT :: 0x7f
+SUBLANG_NEUTRAL :: 0x00 // language neutral
+SUBLANG_DEFAULT :: 0x01 // user default
+// #define MAKELANGID(p, s)((((WORD)(s)) << 10) | (WORD)(p))
+LANGID_NEUTRAL :: (SUBLANG_DEFAULT << 10) | (LANG_NEUTRAL & 0x3ff) //= MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT)
 
 MB_ERR_INVALID_CHARS :: 8
 WC_ERR_INVALID_CHARS :: 128
@@ -2383,8 +2400,10 @@ REFIID  :: ^GUID
 
 REFGUID :: GUID
 IID :: GUID
+LPIID :: ^IID
 CLSID :: GUID
 REFCLSID :: ^CLSID
+LPCLSID :: ^CLSID
 
 CLSCTX_INPROC_SERVER                  :: 0x1
 CLSCTX_INPROC_HANDLER                 :: 0x2
@@ -4155,7 +4174,7 @@ DNS_STATUS :: distinct DWORD // zero is success
 DNS_INFO_NO_RECORDS :: 9501
 DNS_QUERY_NO_RECURSION :: 0x00000004
 
-DNS_RECORD :: struct {
+DNS_RECORD :: struct { // aka DNS_RECORDA
     pNext: ^DNS_RECORD,
     pName: cstring,
     wType: WORD,

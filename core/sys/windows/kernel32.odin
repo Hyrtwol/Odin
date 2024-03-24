@@ -46,8 +46,11 @@ foreign kernel32 {
 						   dwCursorPosition: COORD) -> BOOL ---
 	SetConsoleTextAttribute :: proc(hConsoleOutput: HANDLE,
 									wAttributes: WORD) -> BOOL ---
-	SetConsoleOutputCP :: proc(wCodePageID: UINT) -> BOOL ---
-	
+	GetConsoleCP :: proc() -> CODEPAGE ---
+	SetConsoleCP :: proc(wCodePageID: CODEPAGE) -> BOOL ---
+	GetConsoleOutputCP :: proc() -> CODEPAGE ---
+	SetConsoleOutputCP :: proc(wCodePageID: CODEPAGE) -> BOOL ---
+
 	GetFileInformationByHandle :: proc(hFile: HANDLE, lpFileInformation: LPBY_HANDLE_FILE_INFORMATION) -> BOOL ---
 	SetHandleInformation :: proc(hObject: HANDLE,
 	                             dwMask: DWORD,
@@ -407,11 +410,26 @@ foreign kernel32 {
 	GetFileAttributesExW :: proc(lpFileName: LPCWSTR, fInfoLevelId: GET_FILEEX_INFO_LEVELS, lpFileInformation: LPVOID) -> BOOL ---
 	GetSystemInfo :: proc(system_info: ^SYSTEM_INFO) ---
 	GetVersionExW :: proc(osvi: ^OSVERSIONINFOEXW) ---
-
+	GetSystemDirectoryW :: proc(lpBuffer: LPWSTR, uSize: UINT) -> UINT ---
+	GetWindowsDirectoryW :: proc(lpBuffer: LPWSTR, uSize: UINT) -> UINT ---
+	GetSystemDefaultLangID :: proc() -> LANGID ---
+	GetSystemDefaultLCID :: proc() -> LCID ---
+	GetSystemDefaultLocaleName :: proc(lpLocaleName: LPWSTR, cchLocaleName: INT) -> INT ---
+	LCIDToLocaleName :: proc(Locale: LCID, lpName: LPWSTR, cchName: INT, dwFlags: DWORD) -> INT ---
+	LocaleNameToLCID :: proc(lpName: LPCWSTR, dwFlags: DWORD) -> LCID ---
+	SetDllDirectoryW :: proc(lpPathName: LPCWSTR) -> BOOL ---
+	AddDllDirectory :: proc(NewDirectory: PCWSTR) -> rawptr ---
+	RemoveDllDirectory :: proc(Cookie: rawptr) -> BOOL ---
 	LoadLibraryW :: proc(c_str: LPCWSTR) -> HMODULE ---
+	LoadLibraryExW :: proc(c_str: LPCWSTR, hFile: HANDLE, dwFlags: LOAD_LIBRARY_FLAGS) -> HMODULE ---
 	FreeLibrary :: proc(h: HMODULE) -> BOOL ---
 	GetProcAddress :: proc(h: HMODULE, c_str: LPCSTR) -> rawptr ---
 
+	LoadResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
+	FreeResource :: proc(hResData: HGLOBAL) -> BOOL ---
+	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
+	FindResourceW :: proc(hModule: HMODULE, lpName: LPCWSTR, lpType: LPCWSTR) -> HRSRC ---
+	//EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
 
 	GetFullPathNameW  :: proc(filename: LPCWSTR, buffer_length: DWORD, buffer: LPCWSTR, file_part: ^LPCWSTR) -> DWORD ---
 	GetLongPathNameW  :: proc(short, long: LPCWSTR, len: DWORD) -> DWORD ---
@@ -1219,3 +1237,19 @@ GMEM_INVALID_HANDLE :: 0x8000
 
 GHND                :: (GMEM_MOVEABLE | GMEM_ZEROINIT)
 GPTR                :: (GMEM_FIXED | GMEM_ZEROINIT)
+
+LOAD_LIBRARY_FLAGS :: enum DWORD {
+	DONT_RESOLVE_DLL_REFERENCES         = 0x00000001,
+	LOAD_LIBRARY_AS_DATAFILE            = 0x00000002,
+	// reserved for internal LOAD_PACKAGED_LIBRARY = 0x00000004,
+	LOAD_WITH_ALTERED_SEARCH_PATH       = 0x00000008,
+	LOAD_IGNORE_CODE_AUTHZ_LEVEL        = 0x00000010,
+	LOAD_LIBRARY_AS_IMAGE_RESOURCE      = 0x00000020,
+	LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE  = 0x00000040,
+	LOAD_LIBRARY_REQUIRE_SIGNED_TARGET  = 0x00000080,
+	LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR    = 0x00000100,
+	LOAD_LIBRARY_SEARCH_APPLICATION_DIR = 0x00000200,
+	LOAD_LIBRARY_SEARCH_USER_DIRS       = 0x00000400,
+	LOAD_LIBRARY_SEARCH_SYSTEM32        = 0x00000800,
+	LOAD_LIBRARY_SEARCH_DEFAULT_DIRS    = 0x00001000,
+}
