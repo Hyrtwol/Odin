@@ -105,19 +105,16 @@ MINIDUMP_INCLUDE_THREAD_CALLBACK :: struct {
 
 // NOTE(jakubtomsu): From verrsrc.h
 VS_FIXEDFILEINFO :: struct {
-	dwSignature:        DWORD, /* e.g. 0xfeef04bd */
-	dwStrucVersion:     DWORD, /* e.g. 0x00000042 = "0.42" */
-	dwFileVersionMS:    DWORD, /* e.g. 0x00030075 = "3.75" */
-	dwFileVersionLS:    DWORD, /* e.g. 0x00000031 = "0.31" */
-	dwProductVersionMS: DWORD, /* e.g. 0x00030010 = "3.10" */
-	dwProductVersionLS: DWORD, /* e.g. 0x00000031 = "0.31" */
-	dwFileFlagsMask:    DWORD, /* = 0x3F for version "0.42" */
-	dwFileFlags:        DWORD, /* e.g. VFF_DEBUG | VFF_PRERELEASE */
-	dwFileOS:           DWORD, /* e.g. VOS_DOS_WINDOWS16 */
-	dwFileType:         DWORD, /* e.g. VFT_DRIVER */
-	dwFileSubtype:      DWORD, /* e.g. VFT2_DRV_KEYBOARD */
-	dwFileDateMS:       DWORD, /* e.g. 0 */
-	dwFileDateLS:       DWORD, /* e.g. 0 */
+	dwSignature:        DWORD, /* e.g. 0xFEEF04BD */
+	dwStrucVersion:     [2]WORD, /* note need to swizzle with .yx */
+	dwFileVersion:      [4]WORD, /* note need to swizzle with .yxwz */
+	dwProductVersion:   [4]WORD, /* note need to swizzle with .yxwz */
+	dwFileFlagsMask:    VS_FILEFLAGS, /* e.g. 0x3F for version "0.42" */
+	dwFileFlags:        VS_FILEFLAGS, /* e.g. VS_FF.DEBUG | VS_FF.PRERELEASE */
+	dwFileOS:           struct {VOS: VOS, VOS2: VOS2}, /* e.g. {VOS = .NT, VOS2 = .WINDOWS32} */
+	dwFileType:         VFT, /* e.g. VFT.DRV */
+	dwFileSubtype:		struct #raw_union { DRV: VFT2_WINDOWS_DRV, FONT: VFT2_WINDOWS_FONT, VXD: DWORD },
+	dwFileDate:         [2]DWORD,
 }
 
 MINIDUMP_MODULE_CALLBACK :: struct {

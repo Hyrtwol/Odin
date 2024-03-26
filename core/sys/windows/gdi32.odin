@@ -5,92 +5,61 @@ import "core:math/fixed"
 
 foreign import gdi32 "system:Gdi32.lib"
 
-@(default_calling_convention="system")
+@(default_calling_convention = "system")
 foreign gdi32 {
-	GetStockObject :: proc(i: c_int) -> HGDIOBJ ---
-	SelectObject :: proc(hdc: HDC, h: HGDIOBJ) -> HGDIOBJ ---
-	DeleteObject :: proc(ho: HGDIOBJ) -> BOOL ---
-	SetBkColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
-
 	CreateCompatibleDC :: proc(hdc: HDC) -> HDC ---
 	DeleteDC :: proc(hdc: HDC) -> BOOL ---
 
+	SaveDC :: proc(hdc: HDC) -> INT ---
+	RestoreDC :: proc(hdc: HDC, nSavedDC: INT) -> BOOL ---
+
+	GetStockObject :: proc(i: INT) -> HGDIOBJ ---
+	SelectObject :: proc(hdc: HDC, h: HGDIOBJ) -> HGDIOBJ ---
+	DeleteObject :: proc(ho: HGDIOBJ) -> BOOL ---
+
 	CreateDIBPatternBrush :: proc(h: HGLOBAL, iUsage: UINT) -> HBRUSH ---
+	CreateDIBitmap :: proc(hdc: HDC, pbmih: ^BITMAPINFOHEADER, flInit: DWORD, pjBits: VOID, pbmi: ^BITMAPINFO, iUsage: UINT) -> HBITMAP ---
+	CreateDIBSection :: proc(hdc: HDC, pbmi: ^BITMAPINFO, usage: UINT, ppvBits: VOID, hSection: HANDLE, offset: DWORD) -> HBITMAP ---
+	SetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start: UINT, cLines: UINT, lpBits: VOID, lpbmi: ^BITMAPINFO, ColorUse: UINT) -> INT ---
+	GetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start, cLines: UINT, lpvBits: LPVOID, lpbmi: ^BITMAPINFO, usage: UINT) -> INT ---
+	SetDIBColorTable :: proc(hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ^RGBQUAD) -> UINT ---
+	GetDIBColorTable :: proc(hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ^RGBQUAD) -> UINT ---
+	StretchDIBits :: proc(hdc: HDC, xDest: INT, yDest: INT, DestWidth: INT, DestHeight: INT, xSrc: INT, ySrc: INT, SrcWidth: INT, SrcHeight: INT, lpBits: VOID, lpbmi: ^BITMAPINFO, iUsage: UINT, rop: DWORD) -> INT ---
+	StretchBlt :: proc(hdcDest: HDC, xDest: INT, yDest: INT, wDest: INT, hDest: INT, hdcSrc: HDC, xSrc: INT, ySrc: INT, wSrc: INT, hSrc: INT, rop: DWORD) -> BOOL ---
 
-	CreateDIBitmap :: proc(
-		hdc: HDC,
-		pbmih: ^BITMAPINFOHEADER,
-		flInit: DWORD,
-		pjBits: VOID,
-		pbmi: ^BITMAPINFO,
-		iUsage: UINT,
-	) -> HBITMAP ---
+	SetPixelFormat :: proc(hdc: HDC, format: INT, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
+	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
+	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: INT, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
 
-	CreateDIBSection :: proc(
-		hdc: HDC,
-		pbmi: ^BITMAPINFO,
-		usage: UINT,
-		ppvBits: VOID,
-		hSection: HANDLE,
-		offset: DWORD,
-	) -> HBITMAP ---
+	SwapBuffers :: proc(hdc: HDC) -> BOOL ---
+	PatBlt :: proc(hdc: HDC, x, y, w, h: INT, rop: DWORD) -> BOOL ---
+	Rectangle :: proc(hdc: HDC, left, top, right, bottom: INT) -> BOOL ---
 
-	StretchDIBits :: proc(
-		hdc: HDC,
-		xDest: c_int,
-		yDest: c_int,
-		DestWidth: c_int,
-		DestHeight: c_int,
-		xSrc: c_int,
-		ySrc: c_int,
-		SrcWidth: c_int,
-		SrcHeight: c_int,
-		lpBits: VOID,
-		lpbmi: ^BITMAPINFO,
-		iUsage: UINT,
-		rop: DWORD,
-	) -> c_int ---
+	SetBkMode :: proc(hdc: HDC, mode: BKMODE) -> INT ---
+	SetBkColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 
-	StretchBlt :: proc(
-		hdcDest: HDC,
-		xDest: c_int,
-		yDest: c_int,
-		wDest: c_int,
-		hDest: c_int,
-		hdcSrc: HDC,
-		xSrc: c_int,
-		ySrc: c_int,
-		wSrc: c_int,
-		hSrc: c_int,
-		rop: DWORD,
-	) -> BOOL ---
-
-	SetPixelFormat :: proc(hdc: HDC, format: c_int, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
-	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> c_int ---
-	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: c_int, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> c_int ---
-	SwapBuffers :: proc(HDC) -> BOOL ---
-
-	SetDCBrushColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
-	GetDCBrushColor :: proc(hdc: HDC) -> COLORREF ---
-	PatBlt :: proc(hdc: HDC, x, y, w, h: c_int, rop: DWORD) -> BOOL ---
-	Rectangle :: proc(hdc: HDC, left, top, right, bottom: c_int) -> BOOL ---
-
-	CreateFontW :: proc(
-		cHeight, cWidth, cEscapement, cOrientation, cWeight: c_int,
-		bItalic, bUnderline, bStrikeOut, iCharSet, iOutPrecision: DWORD,
-		iClipPrecision, iQuality, iPitchAndFamily: DWORD,
-		pszFaceName: LPCWSTR,
-	) -> HFONT ---
-	TextOutW :: proc(hdc: HDC, x, y: c_int, lpString: LPCWSTR, c: c_int) -> BOOL ---
-	GetTextExtentPoint32W :: proc(hdc: HDC, lpString: LPCWSTR, c: c_int, psizl: LPSIZE) -> BOOL ---
+	CreateFontW :: proc(cHeight, cWidth, cEscapement, cOrientation, cWeight: INT, bItalic, bUnderline, bStrikeOut, iCharSet, iOutPrecision: DWORD, iClipPrecision, iQuality, iPitchAndFamily: DWORD, pszFaceName: LPCWSTR) -> HFONT ---
+	TextOutW :: proc(hdc: HDC, x, y: INT, lpString: LPCWSTR, c: INT) -> BOOL ---
+	SetTextColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
+	GetTextExtentPoint32W :: proc(hdc: HDC, lpString: LPCWSTR, c: INT, psizl: LPSIZE) -> BOOL ---
 	GetTextMetricsW :: proc(hdc: HDC, lptm: LPTEXTMETRICW) -> BOOL ---
 
 	CreateSolidBrush :: proc(color: COLORREF) -> HBRUSH ---
+	SetDCBrushColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
+	GetDCBrushColor :: proc(hdc: HDC) -> COLORREF ---
+	SetDCPenColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
+	GetDCPenColor :: proc(hdc: HDC) -> COLORREF ---
 
-	GetObjectW :: proc(h: HANDLE, c: c_int, pv: LPVOID) -> int ---
-	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: c_int) -> HBITMAP ---
-	BitBlt :: proc(hdc: HDC, x, y, cx, cy: c_int, hdcSrc: HDC, x1, y1: c_int, rop: DWORD) -> BOOL ---
-	GetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start, cLines: UINT, lpvBits: LPVOID, lpbmi: ^BITMAPINFO, usage: UINT) -> int ---
+	GetObjectW :: proc(h: HANDLE, c: INT, pv: LPVOID) -> int ---
+	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: INT) -> HBITMAP ---
+	BitBlt :: proc(hdc: HDC, x, y, cx, cy: INT, hdcSrc: HDC, x1, y1: INT, rop: DWORD) -> BOOL ---
+
+	CreatePalette :: proc(plpal: ^LOGPALETTE) -> HPALETTE ---
+	SelectPalette :: proc(hdc: HDC, hPal: HPALETTE, bForceBkgd: BOOL) -> HPALETTE ---
+	RealizePalette :: proc(hdc: HDC) -> UINT ---
+
+	RoundRect :: proc(hdc: HDC, left: INT, top: INT, right: INT, bottom: INT, width: INT, height: INT) -> BOOL ---
+	SetPixel :: proc(hdc: HDC, x: INT, y: INT, color: COLORREF) -> COLORREF ---
 }
 
 RGB :: #force_inline proc "contextless" (r, g, b: u8) -> COLORREF {
@@ -138,3 +107,33 @@ BITMAPV5HEADER :: struct {
 	bV5ProfileSize:   DWORD,
 	bV5Reserved:      DWORD,
 }
+
+PALETTEENTRY :: struct {
+	peRed:   BYTE,
+	peGreen: BYTE,
+	peBlue:  BYTE,
+	peFlags: BYTE,
+}
+
+LOGPALETTE :: struct {
+	palVersion:    WORD,
+	palNumEntries: WORD,
+	palPalEntry:   []PALETTEENTRY,
+}
+
+BKMODE :: enum {
+	TRANSPARENT = 1,
+	OPAQUE      = 2,
+}
+
+ICONINFOEXW :: struct {
+	cbSize: DWORD,
+	fIcon: BOOL,
+	Hotspot: [2]DWORD,
+	hbmMask: HBITMAP,
+	hbmColor: HBITMAP,
+	wResID: WORD,
+	szModName: [MAX_PATH]WCHAR,
+	szResName: [MAX_PATH]WCHAR,
+}
+PICONINFOEXW :: ^ICONINFOEXW
