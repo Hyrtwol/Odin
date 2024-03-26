@@ -1,5 +1,8 @@
 @echo off
 
+rem select code page with utf-8 support CP_UTF8
+chcp 65001 > NUL 2> NUL
+
 setlocal EnableDelayedExpansion
 
 where /Q cl.exe || (
@@ -22,9 +25,9 @@ if "%VSCMD_ARG_TGT_ARCH%" neq "x64" (
 for /f "usebackq tokens=1,2 delims=,=- " %%i in (`wmic os get LocalDateTime /value`) do @if %%i==LocalDateTime (
 	set CURR_DATE_TIME=%%j
 )
-
 set curr_year=%CURR_DATE_TIME:~0,4%
 set curr_month=%CURR_DATE_TIME:~4,2%
+set curr_day=%CURR_DATE_TIME:~6,2%
 
 :: Make sure this is a decent name and not generic
 set exe_name=odin.exe
@@ -50,18 +53,29 @@ set odin_version_raw="dev-%curr_year%-%curr_month%"
 set compiler_flags= -nologo -Oi -TP -fp:precise -Gm- -MP -FC -EHsc- -GR- -GF
 set compiler_defines= -DODIN_VERSION_RAW=\"%odin_version_raw%\"
 
+rem fileversion is defined as {Major,Minor,Build,Private: u16} so a bit limited
+set rc_flags= -nologo
+set rc_flags= %rc_flags% -DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly%
+set rc_flags= %rc_flags% -DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
+
 if not exist .git\ goto skip_git_hash
 for /f "tokens=1,2" %%i IN ('git show "--pretty=%%cd %%h" "--date=format:%%Y-%%m" --no-patch --no-notes HEAD') do (
 	set odin_version_raw=dev-%%i
 	set GIT_SHA=%%j
 )
-if %ERRORLEVEL% equ 0 set compiler_defines=%compiler_defines% -DGIT_SHA=\"%GIT_SHA%\"
+if %ERRORLEVEL% equ 0 (
+	set compiler_defines=%compiler_defines% -DGIT_SHA=\"%GIT_SHA%\"
+	set rc_flags= %rc_flags% -DGIT_SHA=%GIT_SHA% -DVP=%odin_version_raw%:%GIT_SHA%
+) else (
+	set rc_flags= %rc_flags% -DVP=%odin_version_raw%
+)
 :skip_git_hash
 
 if %nightly% equ 1 set compiler_defines=%compiler_defines% -DNIGHTLY
 
 if %release_mode% EQU 0 ( rem Debug
 	set compiler_flags=%compiler_flags% -Od -MDd -Z7
+	set rc_flags=%rc_flags% -D_DEBUG
 ) else ( rem Release
 	set compiler_flags=%compiler_flags% -O2 -MT -Z7
 	set compiler_defines=%compiler_defines% -DNO_ARRAY_BOUNDS_CHECK
@@ -79,6 +93,8 @@ set libs= ^
 	kernel32.lib ^
 	Synchronization.lib ^
 	bin\llvm\windows\LLVM-C.lib
+set res=misc\odin.res
+set odin_rc=misc\odin.rc
 
 rem DO NOT TOUCH!
 rem THIS TILDE STUFF IS FOR DEVELOPMENT ONLY!
@@ -94,25 +110,50 @@ set linker_flags= -incremental:no -opt:ref -subsystem:console
 
 if %release_mode% EQU 0 ( rem Debug
 	set linker_flags=%linker_flags% -debug /NATVIS:src\odin_compiler.natvis
+	set release_mode_str=Debug
 ) else ( rem Release
 	set linker_flags=%linker_flags% -debug
+	set release_mode_str=Release
 )
 
 set compiler_settings=%compiler_includes% %compiler_flags% %compiler_warnings% %compiler_defines%
-set linker_settings=%libs% %linker_flags%
+set linker_settings=%libs% %res% %linker_flags%
 
 del *.pdb > NUL 2> NUL
 del *.ilk > NUL 2> NUL
 
+echo Building %exe_name% (%release_mode_str%)
+
+rc %rc_flags% %odin_rc%
 cl %compiler_settings% "src\main.cpp" "src\libtommath.cpp" /link %linker_settings% -OUT:%exe_name%
 if %errorlevel% neq 0 goto end_of_build
+
+echo Building vendor
 
 call build_vendor.bat
 if %errorlevel% neq 0 goto end_of_build
 
+if %release_mode% neq 0 goto cleanup_build
+
+set demo_log=demo.log
+del %demo_log% > NUL 2> NUL
+
+echo Running demo output %demo_log%
 rem If the demo doesn't run for you and your CPU is more than a decade old, try -microarch:native
-if %release_mode% EQU 0 odin run examples/demo -- Hellope World
+@echo on
+odin run examples/demo -resource:examples/demo/demo.rc> %demo_log% -- Hellope World
+@echo off
+for %%A in (%demo_log%) do set demo_log_size=%%~zA
+echo demo_log_size %demo_log_size%
+
+echo Running setup
+@echo on
+odin run examples/setup -resource:examples/setup/setup.rc
+@echo off
+
+:cleanup_build
 
 del *.obj > NUL 2> NUL
 
 :end_of_build
+echo Done

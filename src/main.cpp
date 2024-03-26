@@ -2339,6 +2339,7 @@ gb_internal int strip_semicolons(Parser *parser) {
 gb_internal void init_terminal(void) {
 	TIME_SECTION("init terminal");
 	build_context.has_ansi_terminal_colours = false;
+	//build_context.terminal_code_page = CP_UTF8;
 
 	gbAllocator a = heap_allocator();
 
@@ -2381,6 +2382,13 @@ gb_internal void init_terminal(void) {
 			build_context.has_ansi_terminal_colours = true;
 		}
 	}
+#if defined(GB_SYSTEM_WINDOWS)
+	//DWORD current_code_page = GetConsoleOutputCP();
+	//DWORD code_page = build_context.terminal_code_page;
+	DWORD code_page = CP_UTF8;
+	SetConsoleCP(code_page);
+	SetConsoleOutputCP(code_page);
+#endif
 }
 
 int main(int arg_count, char const **arg_ptr) {

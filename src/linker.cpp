@@ -245,8 +245,9 @@ gb_internal i32 linker_stage(LinkerData *gen) {
 					defer (gb_free(heap_allocator(), rc_path.text));
 
 					result = system_exec_command_line_app("msvc-link",
-						"\"%.*src.exe\" /nologo /fo \"%.*s\" \"%.*s\"",
+						"\"%.*src.exe\" /nologo /dODIN_VERSION=%.*s /fo \"%.*s\" \"%.*s\"",
 						LIT(windows_sdk_bin_path),
+					    LIT(build_context.ODIN_VERSION),
 						LIT(res_path),
 						LIT(rc_path)
 					);

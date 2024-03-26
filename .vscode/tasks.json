@@ -1,0 +1,98 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"command": "make",
+			"group": {
+				"_id": "build",
+				"isDefault": false
+			}
+		},
+		{
+			"label": "build release",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat release"
+			},
+			"command": "make",
+			"group": {
+				"_id": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "test core",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/tests/core"
+			}
+		},
+		{
+			"label": "test sys/windows",
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"test",
+				".",
+				"-vet"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/tests/core/sys/windows"
+			}
+		},
+		{
+			"label": "run examples/setup",
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"run",
+				"examples/setup",
+				"-resource:examples/setup/setup.rc",
+				"-vet"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "format",
+			"type": "process",
+			"command": "D:\\dev\\odin\\ols\\odinfmt.exe",
+			"args": [
+				"-w",
+				"${workspaceFolder}\\${relativeFile}"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}\\${relativeFileDirname}"
+			}
+		}
+	]
+}

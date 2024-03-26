@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/src/gb",
+                "${workspaceFolder}/src"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "_WIN64",
+                "-nologo -Oi -TP -fp:precise -Gm- -MP -FC -EHsc- -GR- -GF",
+                "-Od -MDd -Z7",
+				"-W4 -WX -wd4100 -wd4101 -wd4127 -wd4146 -wd4505 -wd4456 -wd4457"
+            ],
+            "compilerPath": "cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64",
+            "forcedInclude": [
+                "${workspaceFolder}/src/gb/gb.h",
+                "${workspaceFolder}/src/common.cpp",
+                "${workspaceFolder}/src/array.cpp",
+                "${workspaceFolder}/src/string.cpp",
+                "${workspaceFolder}/src/tokenizer.cpp",
+                "${workspaceFolder}/src/path.cpp"
+            ],
+            "configurationProvider": "ms-vscode.cmake-tools",
+			"compilerArgs": ["src/main.cpp","src/libtommath.cpp" ]
+        }
+    ],
+    "version": 4
+}

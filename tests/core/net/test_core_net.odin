@@ -395,6 +395,7 @@ client_sends_server_data :: proc(t: ^testing.T) {
 			return
 		}
 
+		net.set_blocking(r.skt, true)
 		net.set_option(r.skt, .Send_Timeout, SEND_TIMEOUT)
 
 		_, r.err = net.send(r.skt, transmute([]byte)CONTENT)
@@ -422,6 +423,7 @@ client_sends_server_data :: proc(t: ^testing.T) {
 		}
 		defer net.close(client)
 
+		net.set_blocking(client, true)
 		net.set_option(client, .Receive_Timeout, RECV_TIMEOUT)
 
 		r.length, r.err = net.recv_tcp(client, r.data[:])
@@ -546,10 +548,10 @@ split_url_test :: proc(t: ^testing.T) {
 		expect(t, path == test.path, msg)
 		msg = fmt.tprintf("Expected `net.split_url` to return %d queries, got %d queries", len(test.queries), len(queries))
 		expect(t, len(queries) == len(test.queries), msg)
-		for k, v in queries {
-			expected := test.queries[k]
-			msg = fmt.tprintf("Expected `net.split_url` to return %s, got %s", expected, v)
-			expect(t, v == expected, msg)
+		for q in queries {
+			expected := test.queries[q[0]]
+			msg = fmt.tprintf("Expected `net.split_url` to return %s, got %s", expected, q[1])
+			expect(t, q[1] == expected, msg)
 		}
 	}
 }
