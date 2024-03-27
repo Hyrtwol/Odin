@@ -383,8 +383,9 @@ setup_windows :: proc() -> int {
 
 	show_string_file_info(info, codepage, langid)
 	show_code_pages()
-
 	show_system_defaults()
+	show_system_info()
+	show_module(odin_path)
 
 	// https://ss64.com/nt/syntax-ansi.html
 	// https://github.com/Microsoft/Terminal/tree/main/src/tools/ColorTool
@@ -392,10 +393,6 @@ setup_windows :: proc() -> int {
 	// "VirtualTerminalLevel"=dword:00000001
 
 	//changed = true
-
-	show_system_info()
-
-	show_module(odin_path)
 
 	//HICON hicon = LoadImage(NULL, "filename.ico", IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 

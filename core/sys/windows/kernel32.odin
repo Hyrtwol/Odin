@@ -410,13 +410,16 @@ foreign kernel32 {
 	GetFileAttributesExW :: proc(lpFileName: LPCWSTR, fInfoLevelId: GET_FILEEX_INFO_LEVELS, lpFileInformation: LPVOID) -> BOOL ---
 	GetSystemInfo :: proc(system_info: ^SYSTEM_INFO) ---
 	GetVersionExW :: proc(osvi: ^OSVERSIONINFOEXW) ---
-
+	GetSystemDirectoryW :: proc(lpBuffer: LPWSTR, uSize: UINT) -> UINT ---
+	GetWindowsDirectoryW :: proc(lpBuffer: LPWSTR, uSize: UINT) -> UINT ---
 	GetSystemDefaultLangID :: proc() -> LANGID ---
 	GetSystemDefaultLCID :: proc() -> LCID ---
 	GetSystemDefaultLocaleName :: proc(lpLocaleName: LPWSTR, cchLocaleName: INT) -> INT ---
 	LCIDToLocaleName :: proc(Locale: LCID, lpName: LPWSTR, cchName: INT, dwFlags: DWORD) -> INT ---
 	LocaleNameToLCID :: proc(lpName: LPCWSTR, dwFlags: DWORD) -> LCID ---
-
+	SetDllDirectoryW :: proc(lpPathName: LPCWSTR) -> BOOL ---
+	AddDllDirectory :: proc(NewDirectory: PCWSTR) -> rawptr ---
+	RemoveDllDirectory :: proc(Cookie: rawptr) -> BOOL ---
 	LoadLibraryW :: proc(c_str: LPCWSTR) -> HMODULE ---
 	LoadLibraryExW :: proc(c_str: LPCWSTR, hFile: HANDLE, dwFlags: LOAD_LIBRARY_FLAGS) -> HMODULE ---
 	FreeLibrary :: proc(h: HMODULE) -> BOOL ---

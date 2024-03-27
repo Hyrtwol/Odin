@@ -40,6 +40,9 @@ foreign user32 {
 
 	ShowWindow :: proc(hWnd: HWND, nCmdShow: INT) -> BOOL ---
 	IsWindow :: proc(hWnd: HWND) -> BOOL ---
+	IsWindowVisible :: proc(hwnd: HWND) -> BOOL ---
+	IsWindowEnabled :: proc(hwnd: HWND) -> BOOL ---
+	IsIconic :: proc(hwnd: HWND) -> BOOL ---
 	BringWindowToTop :: proc(hWnd: HWND) -> BOOL ---
 	GetTopWindow :: proc(hWnd: HWND) -> HWND ---
 	SetForegroundWindow :: proc(hWnd: HWND) -> BOOL ---
@@ -49,7 +52,12 @@ foreign user32 {
 	SetActiveWindow :: proc(hWnd: HWND) -> HWND ---
 	GetActiveWindow :: proc() -> HWND ---
 	RedrawWindow :: proc(hwnd: HWND, lprcUpdate: LPRECT, hrgnUpdate: HRGN, flags: RedrawWindowFlags) -> BOOL ---
-
+	SetParent :: proc(hWndChild: HWND, hWndNewParent: HWND) -> HWND ---
+	SetPropW :: proc(hWnd: HWND, lpString: LPCWSTR, hData: HANDLE) -> BOOL ---
+	GetPropW :: proc(hWnd: HWND, lpString: LPCWSTR) -> HANDLE ---
+	RemovePropW :: proc(hWnd: HWND, lpString: LPCWSTR) -> HANDLE ---
+	EnumPropsW :: proc(hWnd: HWND, lpEnumFunc: PROPENUMPROCW) -> INT ---
+	EnumPropsExW :: proc(hWnd: HWND, lpEnumFunc: PROPENUMPROCW, lParam: LPARAM) -> INT ---
 	GetMessageW :: proc(lpMsg: ^MSG, hWnd: HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT) -> BOOL ---
 
 	TranslateMessage :: proc(lpMsg: ^MSG) -> BOOL ---
@@ -599,3 +607,6 @@ USEROBJECTFLAGS :: struct  {
     fReserved: BOOL,
     dwFlags: DWORD,
 }
+
+PROPENUMPROCW :: #type proc(unnamedParam1: HWND, unnamedParam2: LPCWSTR, unnamedParam3: HANDLE) -> BOOL
+PROPENUMPROCEXW :: #type proc(unnamedParam1: HWND, unnamedParam2: LPCWSTR, unnamedParam3: HANDLE, unnamedParam4: ULONG_PTR) -> BOOL
