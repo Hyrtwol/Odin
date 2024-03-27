@@ -1097,6 +1097,15 @@ gb_internal void init_universal(void) {
 		scope_insert(intrinsics_pkg->scope, t_atomic_memory_order->Named.type_name);
 	}
 
+	{
+		int minimum_os_version = 0;
+		if (build_context.minimum_os_version_string != "") {
+			int major, minor, revision = 0;
+			sscanf(cast(const char *)(build_context.minimum_os_version_string.text), "%d.%d.%d", &major, &minor, &revision);
+			minimum_os_version = (major*10000)+(minor*100)+revision;
+		}
+		add_global_constant("ODIN_MINIMUM_OS_VERSION", t_untyped_integer, exact_value_i64(minimum_os_version));
+	}
 
 	add_global_bool_constant("ODIN_DEBUG",                      bc->ODIN_DEBUG);
 	add_global_bool_constant("ODIN_DISABLE_ASSERT",             bc->ODIN_DISABLE_ASSERT);
@@ -1227,9 +1236,9 @@ gb_internal void init_universal(void) {
 
 	// intrinsics types for objective-c stuff
 	{
-		t_objc_object   = add_global_type_name(intrinsics_pkg->scope, str_lit("objc_object"),   alloc_type_struct());
-		t_objc_selector = add_global_type_name(intrinsics_pkg->scope, str_lit("objc_selector"), alloc_type_struct());
-		t_objc_class    = add_global_type_name(intrinsics_pkg->scope, str_lit("objc_class"),    alloc_type_struct());
+		t_objc_object   = add_global_type_name(intrinsics_pkg->scope, str_lit("objc_object"),   alloc_type_struct_complete());
+		t_objc_selector = add_global_type_name(intrinsics_pkg->scope, str_lit("objc_selector"), alloc_type_struct_complete());
+		t_objc_class    = add_global_type_name(intrinsics_pkg->scope, str_lit("objc_class"),    alloc_type_struct_complete());
 
 		t_objc_id       = alloc_type_pointer(t_objc_object);
 		t_objc_SEL      = alloc_type_pointer(t_objc_selector);
@@ -1371,6 +1380,7 @@ gb_internal void init_checker(Checker *c) {
 	array_init(&c->nested_proc_lits, heap_allocator(), 0, 1<<20);
 
 	mpsc_init(&c->global_untyped_queue, a); // , 1<<20);
+	mpsc_init(&c->soa_types_to_complete, a); // , 1<<20);
 
 	c->builtin_ctx = make_checker_context(c);
 }
@@ -1383,6 +1393,7 @@ gb_internal void destroy_checker(Checker *c) {
 	array_free(&c->nested_proc_lits);
 	array_free(&c->procs_to_check);
 	mpsc_destroy(&c->global_untyped_queue);
+	mpsc_destroy(&c->soa_types_to_complete);
 }
 
 
@@ -1682,6 +1693,26 @@ gb_internal bool add_entity_with_name(CheckerContext *c, Scope *scope, Ast *iden
 	}
 	return true;
 }
+
+gb_internal bool add_entity_with_name(CheckerInfo *info, Scope *scope, Ast *identifier, Entity *entity, String name) {
+	if (scope == nullptr) {
+		return false;
+	}
+
+
+	if (!is_blank_ident(name)) {
+		Entity *ie = scope_insert(scope, entity);
+		if (ie != nullptr) {
+			return redeclaration_error(name, entity, ie);
+		}
+	}
+	if (identifier != nullptr) {
+		GB_ASSERT(entity->file != nullptr);
+		add_entity_definition(info, identifier, entity);
+	}
+	return true;
+}
+
 gb_internal bool add_entity(CheckerContext *c, Scope *scope, Ast *identifier, Entity *entity) {
 	return add_entity_with_name(c, scope, identifier, entity, entity->token.string);
 }
@@ -2006,6 +2037,8 @@ gb_internal void add_type_info_type_internal(CheckerContext *c, Type *t) {
 		break;
 
 	case Type_Struct:
+		if (bt->Struct.fields_wait_signal.futex.load() == 0)
+			return;
 		if (bt->Struct.scope != nullptr) {
 			for (auto const &entry : bt->Struct.scope->elements) {
 				Entity *e = entry.value;
@@ -2026,7 +2059,9 @@ gb_internal void add_type_info_type_internal(CheckerContext *c, Type *t) {
 		add_type_info_type_internal(c, bt->Struct.polymorphic_params);
 		for_array(i, bt->Struct.fields) {
 			Entity *f = bt->Struct.fields[i];
-			add_type_info_type_internal(c, f->type);
+			if (f && f->type) {
+				add_type_info_type_internal(c, f->type);
+			}
 		}
 		add_comparison_procedures_for_fields(c, bt);
 		break;
@@ -4440,6 +4475,10 @@ gb_internal void check_all_global_entities(Checker *c) {
 		DeclInfo *d = e->decl_info;
 		check_single_global_entity(c, e, d);
 		if (e->type != nullptr && is_type_typed(e->type)) {
+			for (Type *t = nullptr; mpsc_dequeue(&c->soa_types_to_complete, &t); /**/) {
+				complete_soa_type(c, t, false);
+			}
+
 			(void)type_size_of(e->type);
 			(void)type_align_of(e->type);
 		}
@@ -6108,6 +6147,9 @@ gb_internal void check_add_definitions_from_queues(Checker *c) {
 }
 
 gb_internal void check_merge_queues_into_arrays(Checker *c) {
+	for (Type *t = nullptr; mpsc_dequeue(&c->soa_types_to_complete, &t); /**/) {
+		complete_soa_type(c, t, false);
+	}
 	check_add_entities_from_queues(c);
 	check_add_definitions_from_queues(c);
 }
@@ -6317,6 +6359,8 @@ gb_internal void check_parsed_files(Checker *c) {
 
 	TIME_SECTION("check bodies have all been checked");
 	check_unchecked_bodies(c);
+
+	TIME_SECTION("check #soa types");
 
 	check_merge_queues_into_arrays(c);
 	thread_pool_wait();

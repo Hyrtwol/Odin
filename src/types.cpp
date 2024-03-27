@@ -145,6 +145,7 @@ struct TypeStruct {
 	i32             soa_count;
 	StructSoaKind   soa_kind;
 	Wait_Signal     fields_wait_signal;
+	BlockingMutex   soa_mutex;
 	BlockingMutex   offset_mutex; // for settings offsets
 
 	bool            is_polymorphic;
@@ -1059,6 +1060,13 @@ gb_internal Type *alloc_type_struct() {
 	Type *t = alloc_type(Type_Struct);
 	return t;
 }
+
+gb_internal Type *alloc_type_struct_complete() {
+	Type *t = alloc_type(Type_Struct);
+	wait_signal_set(&t->Struct.fields_wait_signal);
+	return t;
+}
+
 
 gb_internal Type *alloc_type_union() {
 	Type *t = alloc_type(Type_Union);
@@ -3770,6 +3778,8 @@ gb_internal i64 type_align_of_internal(Type *t, TypePath *path) {
 		if (t->Struct.is_packed) {
 			return 1;
 		}
+
+		type_set_offsets(t);
 
 		i64 max = 1;
 		for_array(i, t->Struct.fields) {
