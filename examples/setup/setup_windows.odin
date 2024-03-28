@@ -327,6 +327,18 @@ show_icon :: proc(module: win32.HMODULE, icon_id: int) {
 	show_icon_info(icon);
 }
 
+get_module_filename :: proc(module: win32.HMODULE) -> string {
+	wname: [512]win32.WCHAR
+	cc := win32.GetModuleFileNameW(module, &wname[0], len(wname) - 1)
+	if cc != 0 {
+		name, err := wstring_to_utf8(&wname[0], int(cc))
+		if err == .None {
+			return name
+		}
+	}
+	return "na"
+}
+
 show_module :: proc(path: string) {
 	fmt.println("[Module]")
 	//module := win32.GetModuleHandleW(nil)
@@ -342,6 +354,9 @@ setup_windows :: proc() -> int {
 	changed := false
 
 	fmt.printfln("is_user_interactive: %v", is_user_interactive())
+
+	module := win32.GetModuleHandleW(nil)
+	print_key_value("Module Filename", get_module_filename(module))
 
 	odin_path := filepath.join({ODIN_ROOT, "odin.exe"}, allocator = context.temp_allocator)
 	odin_path_w := utf8_to_wstring(odin_path)
