@@ -195,6 +195,9 @@ verify_gdi32 :: proc(t: ^testing.T) {
 	expect_value(t, win32.RGB(12,34,56), 0x0038220C)
 	expect_value(t, win32.PALETTERGB(12,34,56), 0x0238220C)
 	expect_value(t, win32.PALETTEINDEX(123), 0x0100007B)
+	expect_value(t, win32.GRADIENT_FILL_RECT_H, 0x00000000)
+	expect_value(t, win32.GRADIENT_FILL_RECT_V, 0x00000001)
+	expect_value(t, win32.GRADIENT_FILL_TRIANGLE, 0x00000002)
 }
 
 @(test)

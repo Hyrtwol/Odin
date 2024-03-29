@@ -338,6 +338,9 @@ void verify_gdi32(ofstream& out) {
 	expect_value(RGB(12,34,56));
 	expect_value(PALETTERGB(12,34,56));
 	expect_value(PALETTEINDEX(123));
+	expect_value(GRADIENT_FILL_RECT_H);
+	expect_value(GRADIENT_FILL_RECT_V);
+	expect_value(GRADIENT_FILL_TRIANGLE);
 	test_proc_end();
 }
 
