@@ -71,8 +71,20 @@ foreign gdi32 {
 
 }
 
-RGB :: #force_inline proc "contextless" (r, g, b: u8) -> COLORREF {
-	return transmute(COLORREF)[4]u8{r, g, b, 0}
+// RGB :: #force_inline proc "contextless" (r, g, b: u8) -> COLORREF {
+// 	return transmute(COLORREF)[4]u8{BYTE(r), BYTE(g), BYTE(b), 0}
+// }
+
+RGB :: #force_inline proc "contextless" (#any_int r,g,b: int) -> COLORREF {
+	return COLORREF(DWORD(BYTE(r)) | (DWORD(BYTE(g)) << 8) | (DWORD(BYTE(b)) << 16))
+}
+
+PALETTERGB :: #force_inline proc "contextless" (#any_int r,g,b: int) -> COLORREF {
+	return (0x02000000 | RGB(r,g,b))
+}
+
+PALETTEINDEX :: #force_inline proc "contextless" (#any_int i: int) -> COLORREF {
+	return COLORREF(DWORD(0x01000000) | DWORD(WORD(i)))
 }
 
 FXPT2DOT30 :: distinct fixed.Fixed(i32, 30)
@@ -171,7 +183,6 @@ GRADIENT_RECT :: struct
     UpperLeft, LowerRight: ULONG,
 }
 PGRADIENT_RECT :: ^GRADIENT_RECT
-
 
 BLENDFUNCTION :: struct  {
 	BlendOp, BlendFlags, SourceConstantAlpha, AlphaFormat: BYTE

@@ -335,6 +335,9 @@ void verify_gdi32(ofstream& out) {
 	expect_size(BLENDFUNCTION);
 	expect_value(AC_SRC_OVER);
 	expect_value(AC_SRC_ALPHA);
+	expect_value(RGB(12,34,56));
+	expect_value(PALETTERGB(12,34,56));
+	expect_value(PALETTEINDEX(123));
 	test_proc_end();
 }
 

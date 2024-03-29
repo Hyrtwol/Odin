@@ -192,6 +192,9 @@ verify_gdi32 :: proc(t: ^testing.T) {
 	expect_size(t, win32.BLENDFUNCTION, 4)
 	expect_value(t, win32.AC_SRC_OVER, 0x00000000)
 	expect_value(t, win32.AC_SRC_ALPHA, 0x00000001)
+	expect_value(t, win32.RGB(12,34,56), 0x0038220C)
+	expect_value(t, win32.PALETTERGB(12,34,56), 0x0238220C)
+	expect_value(t, win32.PALETTEINDEX(123), 0x0100007B)
 }
 
 @(test)
