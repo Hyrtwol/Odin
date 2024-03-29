@@ -328,7 +328,13 @@ void verify_gdi32(ofstream& out) {
 	// expect_size(LOGPALETTE);
 	expect_size(PALETTEENTRY);
 	expect_size(LAYERPLANEDESCRIPTOR);
-	expect_size(GLYPHMETRICSFLOAT);
+	expect_size(COLOR16);
+	expect_size(TRIVERTEX);
+	expect_size(GRADIENT_TRIANGLE);
+	expect_size(GRADIENT_RECT);
+	expect_size(BLENDFUNCTION);
+	expect_value(AC_SRC_OVER);
+	expect_value(AC_SRC_ALPHA);
 	test_proc_end();
 }
 

@@ -185,7 +185,13 @@ verify_gdi32 :: proc(t: ^testing.T) {
 	expect_size(t, win32.GLYPHMETRICSFLOAT, 24)
 	expect_size(t, win32.PALETTEENTRY, 4)
 	expect_size(t, win32.LAYERPLANEDESCRIPTOR, 32)
-	expect_size(t, win32.GLYPHMETRICSFLOAT, 24)
+	expect_size(t, win32.COLOR16, 2)
+	expect_size(t, win32.TRIVERTEX, 16)
+	expect_size(t, win32.GRADIENT_TRIANGLE, 12)
+	expect_size(t, win32.GRADIENT_RECT, 8)
+	expect_size(t, win32.BLENDFUNCTION, 4)
+	expect_value(t, win32.AC_SRC_OVER, 0x00000000)
+	expect_value(t, win32.AC_SRC_ALPHA, 0x00000001)
 }
 
 @(test)

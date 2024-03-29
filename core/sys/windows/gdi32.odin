@@ -9,6 +9,7 @@ foreign import gdi32 "system:Gdi32.lib"
 foreign gdi32 {
 	CreateCompatibleDC :: proc(hdc: HDC) -> HDC ---
 	DeleteDC :: proc(hdc: HDC) -> BOOL ---
+	CancelDC :: proc(hdc: HDC) -> BOOL ---
 
 	SaveDC :: proc(hdc: HDC) -> INT ---
 	RestoreDC :: proc(hdc: HDC, nSavedDC: INT) -> BOOL ---
@@ -60,6 +61,14 @@ foreign gdi32 {
 
 	RoundRect :: proc(hdc: HDC, left: INT, top: INT, right: INT, bottom: INT, width: INT, height: INT) -> BOOL ---
 	SetPixel :: proc(hdc: HDC, x: INT, y: INT, color: COLORREF) -> COLORREF ---
+
+	// same as msimg32.TransparentBlt
+	GdiTransparentBlt :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, crTransparent: UINT) -> BOOL ---
+	// same as msimg32.GradientFill
+	GdiGradientFill :: proc(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nCount: ULONG, ulMode: ULONG) -> BOOL ---
+	// same as msimg32.AlphaBlend
+	GdiAlphaBlend :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, ftn: BLENDFUNCTION) -> BOOL ---
+
 }
 
 RGB :: #force_inline proc "contextless" (r, g, b: u8) -> COLORREF {
@@ -137,3 +146,33 @@ ICONINFOEXW :: struct {
 	szResName: [MAX_PATH]WCHAR,
 }
 PICONINFOEXW :: ^ICONINFOEXW
+
+AC_SRC_OVER :: 0x00
+AC_SRC_ALPHA :: 0x01
+
+TransparentBlt :: GdiTransparentBlt
+GradientFill :: GdiGradientFill
+AlphaBlend :: GdiAlphaBlend
+
+COLOR16 :: USHORT
+TRIVERTEX :: struct {
+	x, y: LONG,
+	Red, Green, Blue, Alpha: COLOR16,
+  }
+PTRIVERTEX :: ^TRIVERTEX
+
+GRADIENT_TRIANGLE :: struct {
+	Vertex1, Vertex2, Vertex3: ULONG,
+}
+PGRADIENT_TRIANGLE :: ^GRADIENT_TRIANGLE
+
+GRADIENT_RECT :: struct
+{
+    UpperLeft, LowerRight: ULONG,
+}
+PGRADIENT_RECT :: ^GRADIENT_RECT
+
+
+BLENDFUNCTION :: struct  {
+	BlendOp, BlendFlags, SourceConstantAlpha, AlphaFormat: BYTE
+}
