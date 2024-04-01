@@ -9,7 +9,13 @@ print_key_value :: proc(key: string, value: any) {
 }
 
 main :: proc() {
-	fmt.printfln("Setup %v %v %v %v \"%v\"", ODIN_VENDOR, ODIN_VERSION, ODIN_OS, ODIN_ARCH, ODIN_ROOT)
+	fmt.println("[Odin Setup]")
+	print_key_value("ODIN_VENDOR", ODIN_VENDOR)
+	print_key_value("ODIN_VERSION", ODIN_VERSION)
+	print_key_value("ODIN_OS", ODIN_OS)
+	print_key_value("ODIN_ARCH", ODIN_ARCH)
+	print_key_value("ODIN_ROOT", ODIN_ROOT)
+
 	exit_code: int = 0
 	when ODIN_OS == .Windows {
 		exit_code = setup_windows()
@@ -17,6 +23,5 @@ main :: proc() {
 		fmt.printfln("Sorry this tool don't do anything good on %v for now.", ODIN_OS)
 		exit_code = 1
 	}
-	fmt.printfln("Done (%d)", exit_code)
 	os.exit(exit_code)
 }

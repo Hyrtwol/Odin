@@ -156,4 +156,4 @@ odin run examples/setup -resource:examples/setup/setup.rc
 del *.obj > NUL 2> NUL
 
 :end_of_build
-echo Done
+echo Build Done

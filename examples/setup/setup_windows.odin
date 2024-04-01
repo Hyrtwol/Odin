@@ -353,7 +353,7 @@ show_module :: proc(path: string) {
 setup_windows :: proc() -> int {
 	changed := false
 
-	fmt.printfln("is_user_interactive: %v", is_user_interactive())
+	print_key_value("Is User Interactive", is_user_interactive())
 
 	module := win32.GetModuleHandleW(nil)
 	print_key_value("Module Filename", get_module_filename(module))
