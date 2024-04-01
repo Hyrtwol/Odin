@@ -1479,6 +1479,7 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 	auto vals = array_make<Type *>(temporary_allocator(), 0, 2);
 	auto entities = array_make<Entity *>(temporary_allocator(), 0, 2);
 	bool is_map = false;
+	bool is_bit_set = false;
 	bool use_by_reference_for_value = false;
 	bool is_soa = false;
 	bool is_reverse = rs->reverse;
@@ -1524,6 +1525,9 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 				array_add(&vals, operand.type);
 				array_add(&vals, t_int);
 				add_type_info_type(ctx, operand.type);
+				if (build_context.no_rtti) {
+					error(node, "Iteration over an enum type is not allowed runtime type information (RTTI) has been disallowed");
+				}
 				goto skip_expr_range_stmt;
 			}
 		} else if (operand.mode != Addressing_Invalid) {
@@ -1551,6 +1555,17 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 					} else {
 						add_package_dependency(ctx, "runtime", "string_decode_rune");
 					}
+				}
+				break;
+
+			case Type_BitSet:
+				array_add(&vals, t->BitSet.elem);
+				max_val_count = 1;
+				is_bit_set = true;
+				is_possibly_addressable = false;
+				add_type_info_type(ctx, operand.type);
+				if (build_context.no_rtti && is_type_enum(t->BitSet.elem)) {
+					error(node, "Iteration over a bit_set of an enum is not allowed runtime type information (RTTI) has been disallowed");
 				}
 				break;
 
@@ -1709,7 +1724,7 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 					if (is_possibly_addressable && i == addressable_index) {
 						entity->flags &= ~EntityFlag_Value;
 					} else {
-						char const *idx_name = is_map ? "key" : "index";
+						char const *idx_name = is_map ? "key" : is_bit_set ? "element" : "index";
 						error(token, "The %s variable '%.*s' cannot be made addressable", idx_name, LIT(str));
 					}
 				} else if (i == addressable_index && use_by_reference_for_value) {
