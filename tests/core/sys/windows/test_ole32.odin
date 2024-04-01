@@ -1,7 +1,6 @@
 //+build windows
 package test_core_sys_windows
 
-//import "core:fmt"
 import "core:intrinsics"
 import win32 "core:sys/windows"
 import "core:testing"
@@ -52,6 +51,14 @@ iid_from_string :: proc(t: ^testing.T) {
 	testing.expectf(t, win32.SUCCEEDED(hr), "%x (should be: %x)", u32(hr), 0)
 	exp := win32.FOLDERID_NetworkFolder
 	testing.expectf(t, iid == exp, "%v (should be: %v)", iid, exp)
+}
+
+@(test)
+verify_coinit :: proc(t: ^testing.T) {
+	expect_value(t, win32.COINIT.MULTITHREADED, 0x00000000)
+	expect_value(t, win32.COINIT.APARTMENTTHREADED, 0x00000002)
+	expect_value(t, win32.COINIT.DISABLE_OLE1DDE, 0x00000004)
+	expect_value(t, win32.COINIT.SPEED_OVER_MEMORY, 0x00000008)
 }
 
 // hr := CoInitializeEx(nil, .MULTITHREADED);

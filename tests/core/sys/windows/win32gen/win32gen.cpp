@@ -148,7 +148,8 @@ void verify_win32_type_sizes(ofstream& out) {
 	// expect_size(HTASK);
 	// expect_size(HWINSTA);
 	// expect_size(HKL);
-	// expect_size(HFILE);
+
+	//expect_size(HFILE);
 
 	test_proc_comment("windef.h");
 	expect_size(HWND);
@@ -157,6 +158,7 @@ void verify_win32_type_sizes(ofstream& out) {
 	expect_size(HBITMAP);
 	expect_size(HPALETTE);
 	expect_size(HBRUSH);
+	expect_size(HPEN);
 	expect_size(HFONT);
 	expect_size(HICON);
 	expect_size(HMENU);
@@ -205,6 +207,11 @@ void verify_win32_type_sizes(ofstream& out) {
 	// SHCreateLibrary
 	test_proc_comment("wtypesbase.h");
 	expect_size(OLECHAR);
+	//test_proc_comment("objbase.h");
+	//expect_value(COINIT_MULTITHREADED);
+	//expect_value(COINIT_APARTMENTTHREADED);
+	//expect_value(COINIT_DISABLE_OLE1DDE);
+	//expect_value(COINIT_SPEED_OVER_MEMORY);
 	test_proc_end();
 }
 
@@ -335,12 +342,132 @@ void verify_gdi32(ofstream& out) {
 	expect_size(BLENDFUNCTION);
 	expect_value(AC_SRC_OVER);
 	expect_value(AC_SRC_ALPHA);
-	expect_value(RGB(12,34,56));
-	expect_value(PALETTERGB(12,34,56));
+	expect_value(RGB(12, 34, 56));
+	expect_value(PALETTERGB(12, 34, 56));
 	expect_value(PALETTEINDEX(123));
 	expect_value(GRADIENT_FILL_RECT_H);
 	expect_value(GRADIENT_FILL_RECT_V);
 	expect_value(GRADIENT_FILL_TRIANGLE);
+
+	expect_value(BS_SOLID);
+	expect_value(BS_NULL);
+	expect_value(BS_HOLLOW);
+	expect_value(BS_HATCHED);
+	expect_value(BS_PATTERN);
+	expect_value(BS_INDEXED);
+	expect_value(BS_DIBPATTERN);
+	expect_value(BS_DIBPATTERNPT);
+	expect_value(BS_PATTERN8X8);
+	expect_value(BS_DIBPATTERN8X8);
+	expect_value(BS_MONOPATTERN);
+
+	expect_value(HS_HORIZONTAL);
+	expect_value(HS_VERTICAL);
+	expect_value(HS_FDIAGONAL);
+	expect_value(HS_BDIAGONAL);
+	expect_value(HS_CROSS);
+	expect_value(HS_DIAGCROSS);
+	expect_value(HS_API_MAX);
+
+	expect_value(PS_SOLID);
+	expect_value(PS_DASH);
+	expect_value(PS_DOT);
+	expect_value(PS_DASHDOT);
+	expect_value(PS_DASHDOTDOT);
+	expect_value(PS_NULL);
+	expect_value(PS_INSIDEFRAME);
+	expect_value(PS_USERSTYLE);
+	expect_value(PS_ALTERNATE);
+	expect_value(PS_STYLE_MASK);
+
+	expect_value(PS_ENDCAP_ROUND);
+	expect_value(PS_ENDCAP_SQUARE);
+	expect_value(PS_ENDCAP_FLAT);
+	expect_value(PS_ENDCAP_MASK);
+
+	expect_value(PS_JOIN_ROUND);
+	expect_value(PS_JOIN_BEVEL);
+	expect_value(PS_JOIN_MITER);
+
+	expect_value(PS_COSMETIC);
+	expect_value(PS_GEOMETRIC);
+	expect_value(PS_TYPE_MASK);
+
+	test_proc_comment("Binary raster ops");
+	expect_value(R2_BLACK);
+	expect_value(R2_NOTMERGEPEN);
+	expect_value(R2_MASKNOTPEN);
+	expect_value(R2_NOTCOPYPEN);
+	expect_value(R2_MASKPENNOT);
+	expect_value(R2_NOT);
+	expect_value(R2_XORPEN);
+	expect_value(R2_NOTMASKPEN);
+	expect_value(R2_MASKPEN);
+	expect_value(R2_NOTXORPEN);
+	expect_value(R2_NOP);
+	expect_value(R2_MERGENOTPEN);
+	expect_value(R2_COPYPEN);
+	expect_value(R2_MERGEPENNOT);
+	expect_value(R2_MERGEPEN);
+	expect_value(R2_WHITE);
+	test_proc_comment("Ternary raster operations");
+	expect_value(SRCCOPY);
+	expect_value(SRCPAINT);
+	expect_value(SRCAND);
+	expect_value(SRCINVERT);
+	expect_value(SRCERASE);
+	expect_value(NOTSRCCOPY);
+	expect_value(NOTSRCERASE);
+	expect_value(MERGECOPY);
+	expect_value(MERGEPAINT);
+	expect_value(PATCOPY);
+	expect_value(PATPAINT);
+	expect_value(PATINVERT);
+	expect_value(DSTINVERT);
+	expect_value(BLACKNESS);
+	expect_value(WHITENESS);
+	expect_value(NOMIRRORBITMAP);
+	expect_value(CAPTUREBLT);
+	test_proc_comment("Region Flags");
+	expect_value(ERROR);
+	expect_value(NULLREGION);
+	expect_value(SIMPLEREGION);
+	expect_value(COMPLEXREGION);
+	expect_value(RGN_ERROR);
+	test_proc_comment("CombineRgn() Styles");
+	expect_value(RGN_AND);
+	expect_value(RGN_OR);
+	expect_value(RGN_XOR);
+	expect_value(RGN_DIFF);
+	expect_value(RGN_COPY);
+	test_proc_comment("StretchBlt() Modes");
+	expect_value(BLACKONWHITE);
+	expect_value(WHITEONBLACK);
+	expect_value(COLORONCOLOR);
+	expect_value(HALFTONE);
+	//expect_value(STRETCH_ANDSCANS);
+	//expect_value(STRETCH_ORSCANS);
+	//expect_value(STRETCH_DELETESCANS);
+	//expect_value(STRETCH_HALFTONE);
+	test_proc_comment("PolyFill() Modes");
+	expect_value(ALTERNATE);
+	expect_value(WINDING);
+	test_proc_comment("Layout Orientation Options");
+	expect_value(LAYOUT_RTL);
+	expect_value(LAYOUT_BTT);
+	expect_value(LAYOUT_VBH);
+	expect_value(LAYOUT_ORIENTATIONMASK);
+	test_proc_comment("Text Alignment Options");
+	expect_value(TA_NOUPDATECP);
+	expect_value(TA_UPDATECP);
+	expect_value(TA_LEFT);
+	expect_value(TA_RIGHT);
+	expect_value(TA_CENTER);
+	expect_value(TA_TOP);
+	expect_value(TA_BOTTOM);
+	expect_value(TA_BASELINE);
+	expect_value(TA_RTLREADING);
+	expect_value(TA_MASK);
 	test_proc_end();
 }
 

@@ -48,8 +48,12 @@ foreign gdi32 {
 	CreateSolidBrush :: proc(color: COLORREF) -> HBRUSH ---
 	SetDCBrushColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 	GetDCBrushColor :: proc(hdc: HDC) -> COLORREF ---
+
+	CreatePen :: proc(iStyle, cWidth: INT, color: COLORREF) -> HPEN ---
+	ExtCreatePen :: proc(iPenStyle, cWidth: DWORD, plbrush: ^LOGBRUSH, cStyle: DWORD, pstyle: ^DWORD) -> HPEN ---
 	SetDCPenColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 	GetDCPenColor :: proc(hdc: HDC) -> COLORREF ---
+
 
 	GetObjectW :: proc(h: HANDLE, c: INT, pv: LPVOID) -> int ---
 	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: INT) -> HBITMAP ---
@@ -71,16 +75,12 @@ foreign gdi32 {
 
 }
 
-// RGB :: #force_inline proc "contextless" (r, g, b: u8) -> COLORREF {
-// 	return transmute(COLORREF)[4]u8{BYTE(r), BYTE(g), BYTE(b), 0}
-// }
-
-RGB :: #force_inline proc "contextless" (#any_int r,g,b: int) -> COLORREF {
+RGB :: #force_inline proc "contextless" (#any_int r, g, b: int) -> COLORREF {
 	return COLORREF(DWORD(BYTE(r)) | (DWORD(BYTE(g)) << 8) | (DWORD(BYTE(b)) << 16))
 }
 
-PALETTERGB :: #force_inline proc "contextless" (#any_int r,g,b: int) -> COLORREF {
-	return (0x02000000 | RGB(r,g,b))
+PALETTERGB :: #force_inline proc "contextless" (#any_int r, g, b: int) -> COLORREF {
+	return 0x02000000 | RGB(r, g, b)
 }
 
 PALETTEINDEX :: #force_inline proc "contextless" (#any_int i: int) -> COLORREF {
@@ -148,12 +148,12 @@ BKMODE :: enum {
 }
 
 ICONINFOEXW :: struct {
-	cbSize: DWORD,
-	fIcon: BOOL,
-	Hotspot: [2]DWORD,
-	hbmMask: HBITMAP,
-	hbmColor: HBITMAP,
-	wResID: WORD,
+	cbSize:    DWORD,
+	fIcon:     BOOL,
+	Hotspot:   [2]DWORD,
+	hbmMask:   HBITMAP,
+	hbmColor:  HBITMAP,
+	wResID:    WORD,
 	szModName: [MAX_PATH]WCHAR,
 	szResName: [MAX_PATH]WCHAR,
 }
@@ -168,9 +168,9 @@ AlphaBlend :: GdiAlphaBlend
 
 COLOR16 :: USHORT
 TRIVERTEX :: struct {
-	x, y: LONG,
+	x, y:                    LONG,
 	Red, Green, Blue, Alpha: COLOR16,
-  }
+}
 PTRIVERTEX :: ^TRIVERTEX
 
 GRADIENT_TRIANGLE :: struct {
@@ -178,17 +178,105 @@ GRADIENT_TRIANGLE :: struct {
 }
 PGRADIENT_TRIANGLE :: ^GRADIENT_TRIANGLE
 
-GRADIENT_RECT :: struct
-{
-    UpperLeft, LowerRight: ULONG,
+GRADIENT_RECT :: struct {
+	UpperLeft, LowerRight: ULONG,
 }
 PGRADIENT_RECT :: ^GRADIENT_RECT
 
-BLENDFUNCTION :: struct  {
-	BlendOp, BlendFlags, SourceConstantAlpha, AlphaFormat: BYTE
+BLENDFUNCTION :: struct {
+	BlendOp, BlendFlags, SourceConstantAlpha, AlphaFormat: BYTE,
 }
 
 GRADIENT_FILL_RECT_H    : ULONG : 0x00000000
 GRADIENT_FILL_RECT_V    : ULONG : 0x00000001
 GRADIENT_FILL_TRIANGLE  : ULONG : 0x00000002
 GRADIENT_FILL_OP_FLAG   : ULONG : 0x000000ff
+
+/* Brush Styles */
+BS_SOLID         :: 0
+BS_NULL          :: 1
+BS_HOLLOW        :: BS_NULL
+BS_HATCHED       :: 2
+BS_PATTERN       :: 3
+BS_INDEXED       :: 4
+BS_DIBPATTERN    :: 5
+BS_DIBPATTERNPT  :: 6
+BS_PATTERN8X8    :: 7
+BS_DIBPATTERN8X8 :: 8
+BS_MONOPATTERN   :: 9
+
+/* Hatch Styles */
+HS_HORIZONTAL    :: 0       /* ----- */
+HS_VERTICAL      :: 1       /* ||||| */
+HS_FDIAGONAL     :: 2       /* \\\\\ */
+HS_BDIAGONAL     :: 3       /* ///// */
+HS_CROSS         :: 4       /* +++++ */
+HS_DIAGCROSS     :: 5       /* xxxxx */
+HS_API_MAX       :: 12
+
+/* Pen Styles */
+PS_SOLID         ::  0
+PS_DASH          ::  1      /* ------- */
+PS_DOT           ::  2      /* ....... */
+PS_DASHDOT       ::  3      /* _._._._ */
+PS_DASHDOTDOT    ::  4      /* _.._.._ */
+PS_NULL          ::  5
+PS_INSIDEFRAME   ::  6
+PS_USERSTYLE     ::  7
+PS_ALTERNATE     ::  8
+PS_STYLE_MASK    ::  0x0000000F
+PS_ENDCAP_ROUND  ::  0x00000000
+PS_ENDCAP_SQUARE ::  0x00000100
+PS_ENDCAP_FLAT   ::  0x00000200
+PS_ENDCAP_MASK   ::  0x00000F00
+PS_JOIN_ROUND    ::  0x00000000
+PS_JOIN_BEVEL    ::  0x00001000
+PS_JOIN_MITER    ::  0x00002000
+PS_JOIN_MASK     ::  0x0000F000
+PS_COSMETIC      ::  0x00000000
+PS_GEOMETRIC     ::  0x00010000
+PS_TYPE_MASK     ::  0x000F0000
+
+LOGBRUSH :: struct {
+	lbStyle: UINT,
+	lbColor: COLORREF,
+	lbHatch: ULONG_PTR,
+}
+PLOGBRUSH :: ^LOGBRUSH
+
+/* CombineRgn() Styles */
+RGN_AND  :: 1
+RGN_OR   :: 2
+RGN_XOR  :: 3
+RGN_DIFF :: 4
+RGN_COPY :: 5
+
+/* StretchBlt() Modes */
+// BLACKONWHITE :: 1
+// WHITEONBLACK :: 2
+// COLORONCOLOR :: 3
+// HALFTONE     :: 4
+
+/* PolyFill() Modes */
+ALTERNATE :: 1
+WINDING   :: 2
+
+/* Layout Orientation Options */
+LAYOUT_RTL             :: 0x00000001 // Right to left
+LAYOUT_BTT             :: 0x00000002 // Bottom to top
+LAYOUT_VBH             :: 0x00000004 // Vertical before horizontal
+LAYOUT_ORIENTATIONMASK :: (LAYOUT_RTL | LAYOUT_BTT | LAYOUT_VBH)
+
+/* Text Alignment Options */
+TA_NOUPDATECP :: 0
+TA_UPDATECP   :: 1
+
+TA_LEFT       :: 0
+TA_RIGHT      :: 2
+TA_CENTER     :: 6
+
+TA_TOP        :: 0
+TA_BOTTOM     :: 8
+TA_BASELINE   :: 24
+TA_RTLREADING :: 256
+TA_MASK       :: (TA_BASELINE+TA_CENTER+TA_UPDATECP+TA_RTLREADING)

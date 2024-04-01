@@ -39,7 +39,8 @@ LPUNKNOWN :: ^IUnknown
 @(default_calling_convention="system")
 foreign Ole32 {
 	// CoInitialize(NULL) same as CoInitializeEx(NULL, COINIT_APARTMENTTHREADED)
-	CoInitializeEx :: proc(reserved: rawptr, co_init: COINIT) -> HRESULT ---
+	CoInitialize :: proc(reserved: rawptr = nil) -> HRESULT ---
+	CoInitializeEx :: proc(reserved: rawptr = nil, co_init: COINIT = .APARTMENTTHREADED) -> HRESULT ---
 	CoUninitialize :: proc() ---
 
 	CoCreateInstance :: proc(

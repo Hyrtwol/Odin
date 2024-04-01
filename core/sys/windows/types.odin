@@ -30,6 +30,7 @@ HICON :: distinct HANDLE
 HCURSOR :: distinct HANDLE
 HMENU :: distinct HANDLE
 HBRUSH :: distinct HANDLE
+HPEN :: distinct HANDLE
 HGDIOBJ :: distinct HANDLE
 HBITMAP :: distinct HANDLE
 HPALETTE :: distinct HANDLE
