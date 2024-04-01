@@ -2477,10 +2477,6 @@ gb_internal Type *get_map_cell_type(Type *type) {
 		return type;
 	}
 
-	if (is_power_of_two(len)) {
-		return type;
-	}
-
 	i64 padding = size - len*elem_size;
 	GB_ASSERT(padding > 0);
 
@@ -2526,18 +2522,16 @@ gb_internal void init_map_internal_types(Type *type) {
 
 	gb_unused(type_size_of(metadata_type));
 
-	// NOTE(bill): [0]^struct{key: Key, value: Value, hash: uintptr}
-	// This is a zero array to a pointer to keep the alignment to that of a pointer, and not effective the size of the final struct
-	metadata_type = alloc_type_array(alloc_type_pointer(metadata_type), 0);;
+	// NOTE(bill): ^struct{key: Key, value: Value, hash: uintptr}
+	metadata_type = alloc_type_pointer(metadata_type);
 
 
 	Scope *scope = create_scope(nullptr, nullptr);
 	Type *debug_type = alloc_type_struct();
-	debug_type->Struct.fields = slice_make<Entity *>(permanent_allocator(), 4);
-	debug_type->Struct.fields[0] = alloc_entity_field(scope, make_token_ident("data"),       t_uintptr,     false, 0, EntityState_Resolved);
+	debug_type->Struct.fields = slice_make<Entity *>(permanent_allocator(), 3);
+	debug_type->Struct.fields[0] = alloc_entity_field(scope, make_token_ident("data"),       metadata_type, false, 0, EntityState_Resolved);
 	debug_type->Struct.fields[1] = alloc_entity_field(scope, make_token_ident("len"),        t_int,         false, 1, EntityState_Resolved);
 	debug_type->Struct.fields[2] = alloc_entity_field(scope, make_token_ident("allocator"),  t_allocator,   false, 2, EntityState_Resolved);
-	debug_type->Struct.fields[3] = alloc_entity_field(scope, make_token_ident("__metadata"), metadata_type, false, 3, EntityState_Resolved);
 	debug_type->Struct.scope = scope;
 	debug_type->Struct.node = nullptr;
 	wait_signal_set(&debug_type->Struct.fields_wait_signal);
