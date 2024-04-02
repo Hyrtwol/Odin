@@ -1,8 +1,6 @@
 //+build windows
 package test_core_sys_windows
 
-//import "core:testing"
-//import win32 "core:sys/windows"
 import "core:intrinsics"
 import win32 "core:sys/windows"
 import "core:testing"

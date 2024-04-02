@@ -113,7 +113,7 @@ VS_FIXEDFILEINFO :: struct {
 	dwFileFlags:        VS_FILEFLAGS, /* e.g. VS_FF.DEBUG | VS_FF.PRERELEASE */
 	dwFileOS:           struct {VOS: VOS, VOS2: VOS2}, /* e.g. {VOS = .NT, VOS2 = .WINDOWS32} */
 	dwFileType:         VFT, /* e.g. VFT.DRV */
-	dwFileSubtype:		struct #raw_union { DRV: VFT2_WINDOWS_DRV, FONT: VFT2_WINDOWS_FONT, VXD: DWORD },
+	dwFileSubtype:      struct #raw_union { DRV: VFT2_WINDOWS_DRV, FONT: VFT2_WINDOWS_FONT, VXD: DWORD },
 	dwFileDate:         [2]DWORD,
 }
 

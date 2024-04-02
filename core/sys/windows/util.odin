@@ -27,12 +27,12 @@ HIWORD :: #force_inline proc "contextless" (#any_int x: int) -> WORD {
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/winmsg/lobyte
-LOBYTE :: #force_inline proc "contextless"(w: WORD) -> BYTE {
+LOBYTE :: #force_inline proc "contextless" (w: WORD) -> BYTE {
 	return BYTE((DWORD_PTR(w)) & 0xff)
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/winmsg/hibyte
-HIBYTE :: #force_inline proc "contextless"(w: WORD) -> BYTE {
+HIBYTE :: #force_inline proc "contextless" (w: WORD) -> BYTE {
 	return BYTE(((DWORD_PTR(w)) >> 8) & 0xff)
 }
 
@@ -63,7 +63,7 @@ GET_Y_LPARAM :: #force_inline proc "contextless" (lp: LPARAM) -> c_int {
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-makelcid
 MAKELCID :: #force_inline proc "contextless" (lgid, srtid: WORD) -> LCID {
-	return DWORD((DWORD(WORD(srtid)) << 16) | DWORD(WORD(lgid)))
+	return (DWORD(WORD(srtid)) << 16) | DWORD(WORD(lgid))
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-makelangid
@@ -78,7 +78,7 @@ LANGIDFROMLCID :: #force_inline proc "contextless" (lcid: LCID) -> LANGID {
 // this one gave me trouble as it do not mask the values.
 // the _ in the name is also off comparing to the c code
 // i can't find any usage in the odin repo
-@(deprecated="use MAKEWORD")
+@(deprecated = "use MAKEWORD")
 MAKE_WORD :: #force_inline proc "contextless" (x, y: WORD) -> WORD {
 	return x << 8 | y
 }

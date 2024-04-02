@@ -54,11 +54,6 @@ foreign gdi32 {
 	SetDCPenColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 	GetDCPenColor :: proc(hdc: HDC) -> COLORREF ---
 
-
-	GetObjectW :: proc(h: HANDLE, c: INT, pv: LPVOID) -> int ---
-	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: INT) -> HBITMAP ---
-	BitBlt :: proc(hdc: HDC, x, y, cx, cy: INT, hdcSrc: HDC, x1, y1: INT, rop: DWORD) -> BOOL ---
-
 	CreatePalette :: proc(plpal: ^LOGPALETTE) -> HPALETTE ---
 	SelectPalette :: proc(hdc: HDC, hPal: HPALETTE, bForceBkgd: BOOL) -> HPALETTE ---
 	RealizePalette :: proc(hdc: HDC) -> UINT ---
@@ -73,6 +68,9 @@ foreign gdi32 {
 	// same as msimg32.AlphaBlend
 	GdiAlphaBlend :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, ftn: BLENDFUNCTION) -> BOOL ---
 
+	GetObjectW :: proc(h: HANDLE, c: INT, pv: LPVOID) -> int ---
+	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: INT) -> HBITMAP ---
+	BitBlt :: proc(hdc: HDC, x, y, cx, cy: INT, hdcSrc: HDC, x1, y1: INT, rop: DWORD) -> BOOL ---
 }
 
 RGB :: #force_inline proc "contextless" (#any_int r, g, b: int) -> COLORREF {
