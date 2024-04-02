@@ -62,8 +62,8 @@ expect_value_64 :: proc(t: ^testing.T, #any_int act: u64, #any_int exp: u64, loc
 expect_value_str :: proc(t: ^testing.T, wact, wexp: win32.wstring, loc := #caller_location) {
 	act, aerr := win32.wstring_to_utf8(wact, 16)
 	exp, eerr := win32.wstring_to_utf8(wexp, 16)
-	expect(t, aerr == .None)
-	expect(t, eerr == .None)
+	expectf(t, aerr == .None, "0x%8X (should be: 0x%8X)", aerr, 0, loc=loc)
+	expectf(t, eerr == .None, "0x%8X (should be: 0x%8X)", eerr, 0, loc=loc)
 	expectf(t, act == exp, "0x%8X (should be: 0x%8X)", act, exp, loc=loc)
 }
 
