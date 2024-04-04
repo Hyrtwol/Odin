@@ -126,15 +126,6 @@ core_clr_host :: struct {
 	Returns:
 		HRESULT indicating status of the operation. S_OK if the assembly was successfully executed
 	*/
-	/*
-	CORECLR_HOSTING_API(coreclr_execute_assembly,
-		void* hostHandle,
-		unsigned int domainId,
-		int argc,
-		const char** argv,
-		const char* managedAssemblyPath,
-		unsigned int* exitCode);
-	*/
 	coreclr_execute_assembly: proc "c" (
 		hostHandle: host_handle,
 		domainId: domain_id,
