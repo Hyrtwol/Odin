@@ -112,14 +112,43 @@ query_string_file_info :: proc(info: []u8, cplhex, key: string, allocator := con
 }
 
 show_file_info :: proc(info: []u8) -> int {
-	ffi: ^win32.VS_FIXEDFILEINFO
+	// Odinified struct of win32.VS_FIXEDFILEINFO for easier decoding
+	VS_FIXEDFILEINFO :: struct {
+		/* e.g. 0xFEEF04BD */
+		dwSignature:      win32.DWORD,
+		/* note need to swizzle with .yx */
+		dwStrucVersion:   [2]win32.WORD,
+		/* note need to swizzle with .yxwz */
+		dwFileVersion:    [4]win32.WORD,
+		/* note need to swizzle with .yxwz */
+		dwProductVersion: [4]win32.WORD,
+		/* e.g. 0x3F for version "0.42" */
+		dwFileFlagsMask:  win32.VS_FILEFLAGS,
+		/* e.g. VS_FF.DEBUG | VS_FF.PRERELEASE */
+		dwFileFlags:      win32.VS_FILEFLAGS,
+		/* e.g. {VOS = .NT, VOS2 = .WINDOWS32} */
+		dwFileOS:         struct {
+			VOS:  win32.VOS,
+			VOS2: win32.VOS2,
+		},
+		/* e.g. VFT.DRV */
+		dwFileType:       win32.VFT,
+		dwFileSubtype:    struct #raw_union {
+			DRV:  win32.VFT2_WINDOWS_DRV,
+			FONT: win32.VFT2_WINDOWS_FONT,
+			VXD:  win32.DWORD,
+		},
+		dwFileDate:       [2]win32.DWORD,
+	}
+	assert(size_of(VS_FIXEDFILEINFO) == size_of(win32.VS_FIXEDFILEINFO))
+	ffi: ^VS_FIXEDFILEINFO
 	len: win32.UINT
 	if !win32.VerQueryValueW(&info[0], L("\\"), (^rawptr)(&ffi), &len) {
 		show_last_error("VerQueryValue")
 		return -5
 	}
-	if len < size_of(win32.VS_FIXEDFILEINFO) {
-		fmt.eprintfln("Too small %d < %d", len, size_of(win32.VS_FIXEDFILEINFO))
+	if len < size_of(VS_FIXEDFILEINFO) {
+		fmt.eprintfln("Too small %d < %d", len, size_of(VS_FIXEDFILEINFO))
 		return -6
 	}
 	fmt.println("[Version Info]")
@@ -324,7 +353,7 @@ show_icon :: proc(module: win32.HMODULE, icon_id: int) {
 	icon := win32.LoadIconW(win32.HINSTANCE(module), win32.MAKEINTRESOURCEW(icon_id))
 	print_key_value("Icon", icon)
 	if icon == nil {return}
-	show_icon_info(icon);
+	show_icon_info(icon)
 }
 
 get_module_filename :: proc(module: win32.HMODULE) -> string {
@@ -436,6 +465,8 @@ init_console :: proc() {
 	win32.SetConsoleCP(code_page)
 	win32.SetConsoleOutputCP(code_page)
 }
+
+
 
 // odinfmt: disable
 
