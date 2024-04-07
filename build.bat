@@ -54,9 +54,9 @@ set compiler_flags= -nologo -Oi -TP -fp:precise -Gm- -MP -FC -EHsc- -GR- -GF
 set compiler_defines= -DODIN_VERSION_RAW=\"%odin_version_raw%\"
 
 rem fileversion is defined as {Major,Minor,Build,Private: u16} so a bit limited
-set rc_flags= -nologo
-set rc_flags= %rc_flags% -DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly%
-set rc_flags= %rc_flags% -DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
+set rc_flags=-nologo
+set rc_flags=%rc_flags% -DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly%
+set rc_flags=%rc_flags% -DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
 
 if not exist .git\ goto skip_git_hash
 for /f "tokens=1,2" %%i IN ('git show "--pretty=%%cd %%h" "--date=format:%%Y-%%m" --no-patch --no-notes HEAD') do (
@@ -65,9 +65,9 @@ for /f "tokens=1,2" %%i IN ('git show "--pretty=%%cd %%h" "--date=format:%%Y-%%m
 )
 if %ERRORLEVEL% equ 0 (
 	set compiler_defines=%compiler_defines% -DGIT_SHA=\"%GIT_SHA%\"
-	set rc_flags= %rc_flags% -DGIT_SHA=%GIT_SHA% -DVP=%odin_version_raw%:%GIT_SHA%
+	set rc_flags=%rc_flags% -DGIT_SHA=%GIT_SHA% -DVP=%odin_version_raw%:%GIT_SHA%
 ) else (
-	set rc_flags= %rc_flags% -DVP=%odin_version_raw%
+	set rc_flags=%rc_flags% -DVP=%odin_version_raw%
 )
 :skip_git_hash
 
@@ -148,7 +148,7 @@ echo demo_log_size %demo_log_size%
 
 echo Running setup
 @echo on
-odin run examples/setup -resource:examples/setup/setup.rc
+odin run examples/setup -resource:examples/setup/setup.rc -- %rc_flags%
 @echo off
 
 :cleanup_build

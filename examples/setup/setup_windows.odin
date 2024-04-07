@@ -5,9 +5,9 @@ package main
 import "core:fmt"
 import "core:runtime"
 //import "core:strings"
-import "core:path/filepath"
-//import "core:os"
 import "base:intrinsics"
+import "core:os"
+import "core:path/filepath"
 import win32 "core:sys/windows"
 
 L :: intrinsics.constant_utf16_cstring
@@ -26,6 +26,39 @@ IDI_ICON1 :: 1 // TODO 101
 // MAX_VALUE_NAME :: 16383
 
 show_small_icons := true
+
+command_flag :: enum {
+	si,
+	mi,
+	vi,
+	ci,
+	icon,
+	lc,
+}
+commands :: bit_set[command_flag]
+cmds: commands = {.icon}
+add_args_to_commands :: proc() {
+	for arg in os.args {
+		if len(arg) > 1 && arg[0] == '-' {
+			cmd := arg[1:]
+			switch cmd {
+			case "si":
+				cmds += {.si}
+			case "mi":
+				cmds += {.mi}
+			case "vi":
+				cmds += {.vi}
+			case "ci":
+				cmds += {.ci}
+			case "icon":
+				cmds += {.icon}
+			case "lc":
+				cmds += {.lc}
+			}
+		}
+	}
+}
+
 
 is_user_interactive :: proc() -> bool {
 	isUserNonInteractive := false
@@ -297,53 +330,56 @@ show_icon_info :: proc(icon: win32.HICON) {
 			if icon_info.hbmMask != nil {win32.DeleteObject(win32.HGDIOBJ(icon_info.hbmMask))}
 			if icon_info.hbmColor != nil {win32.DeleteObject(win32.HGDIOBJ(icon_info.hbmColor))}
 		}
-		print_key_value("Icon", icon_info.fIcon)
-		print_key_value("Hotspot", icon_info.Hotspot)
-		print_key_value("Mask", icon_info.hbmMask)
-		print_key_value("Color", icon_info.hbmColor)
-		print_key_value("ResID", icon_info.wResID)
-		// print_key_value("ModName", icon_info.szModName)
-		// print_key_value("ResName", icon_info.szResName)
-		fmt.printfln("  %-20s: \"%s\"", "ModName", wstring(&icon_info.szModName))
-		fmt.printfln("  %-20s: \"%s\"", "ResName", wstring(&icon_info.szResName))
+		if .ci in cmds {
+			print_key_value("Icon", icon_info.fIcon)
+			print_key_value("Hotspot", icon_info.Hotspot)
+			print_key_value("Mask", icon_info.hbmMask)
+			print_key_value("Color", icon_info.hbmColor)
+			print_key_value("ResID", icon_info.wResID)
+			// print_key_value("ModName", icon_info.szModName)
+			// print_key_value("ResName", icon_info.szResName)
+			fmt.printfln("  %-20s: \"%s\"", "ModName", wstring(&icon_info.szModName))
+			fmt.printfln("  %-20s: \"%s\"", "ResName", wstring(&icon_info.szResName))
+		}
+		if .icon in cmds {
+			pixels: []rgba = nil
 
-		pixels: []rgba = nil
+			if icon_info.hbmColor != nil {
+				dc := win32.CreateCompatibleDC(nil)
+				defer win32.DeleteDC(dc)
+				//std::memset(&Info, 0, sizeof(BITMAPINFO)); //not necessary really..
+				old_gdi_obj := win32.SelectObject(dc, win32.HGDIOBJ(icon_info.hbmColor))
+				defer win32.SelectObject(dc, old_gdi_obj)
 
-		if icon_info.hbmColor != nil {
-			dc := win32.CreateCompatibleDC(nil)
-			defer win32.DeleteDC(dc)
-			//std::memset(&Info, 0, sizeof(BITMAPINFO)); //not necessary really..
-			old_gdi_obj := win32.SelectObject(dc, win32.HGDIOBJ(icon_info.hbmColor))
-			defer win32.SelectObject(dc, old_gdi_obj)
+				bmp: win32.BITMAP
+				win32.GetObjectW(win32.HANDLE(icon_info.hbmColor), size_of(bmp), &bmp)
+				width, height := bmp.bmWidth, bmp.bmHeight
 
-			bmp: win32.BITMAP
-			win32.GetObjectW(win32.HANDLE(icon_info.hbmColor), size_of(bmp), &bmp)
-			width, height := bmp.bmWidth, bmp.bmHeight
-
-			bmi: win32.BITMAPINFO = {
-				bmiHeader =  {
-					biSize = size_of(win32.BITMAPINFOHEADER),
-					biWidth = width,
-					biHeight = -height,
-					biPlanes = 1,
-					biBitCount = bmp.bmBitsPixel,
-					biCompression = win32.BI_RGB,
-					biSizeImage = ((u32(width) * u32(bmp.bmBitsPixel) + 31) / 32) * 4 * u32(width),
-				},
-			}
-			pixel_count := bmi.bmiHeader.biSizeImage / size_of(rgba)
-			pixels = make([]rgba, pixel_count, context.temp_allocator) // defer delete(pixels)
-			hr := win32.GetDIBits(dc, icon_info.hbmColor, 0, win32.UINT(height), &pixels[0], &bmi, win32.DIB_RGB_COLORS)
-			if win32.FAILED(hr) {
-				show_last_error("GetDIBits")
-			} else if has_ansi_terminal_colours {
-				if show_small_icons {
-					print_icon_small(pixels, width, height)
-				} else {
-					print_icon_big(pixels, width, height)
+				bmi: win32.BITMAPINFO = {
+					bmiHeader =  {
+						biSize = size_of(win32.BITMAPINFOHEADER),
+						biWidth = width,
+						biHeight = -height,
+						biPlanes = 1,
+						biBitCount = bmp.bmBitsPixel,
+						biCompression = win32.BI_RGB,
+						biSizeImage = ((u32(width) * u32(bmp.bmBitsPixel) + 31) / 32) * 4 * u32(width),
+					},
 				}
-			} else {
-				fmt.println("ENABLE_VIRTUAL_TERMINAL_PROCESSING not enabled")
+				pixel_count := bmi.bmiHeader.biSizeImage / size_of(rgba)
+				pixels = make([]rgba, pixel_count, context.temp_allocator) // defer delete(pixels)
+				hr := win32.GetDIBits(dc, icon_info.hbmColor, 0, win32.UINT(height), &pixels[0], &bmi, win32.DIB_RGB_COLORS)
+				if win32.FAILED(hr) {
+					show_last_error("GetDIBits")
+				} else if has_ansi_terminal_colours {
+					if show_small_icons {
+						print_icon_small(pixels, width, height)
+					} else {
+						print_icon_big(pixels, width, height)
+					}
+				} else {
+					fmt.println("ENABLE_VIRTUAL_TERMINAL_PROCESSING not enabled")
+				}
 			}
 		}
 	}
@@ -351,7 +387,9 @@ show_icon_info :: proc(icon: win32.HICON) {
 
 show_icon :: proc(module: win32.HMODULE, icon_id: int) {
 	icon := win32.LoadIconW(win32.HINSTANCE(module), win32.MAKEINTRESOURCEW(icon_id))
-	print_key_value("Icon", icon)
+	if .mi in cmds {
+		print_key_value("Icon", icon)
+	}
 	if icon == nil {return}
 	show_icon_info(icon)
 }
@@ -369,12 +407,14 @@ get_module_filename :: proc(module: win32.HMODULE) -> string {
 }
 
 show_module :: proc(path: string) {
-	fmt.println("[Module]")
 	//module := win32.GetModuleHandleW(nil)
 	module := win32.LoadLibraryExW(utf8_to_wstring(path), nil, .LOAD_LIBRARY_AS_DATAFILE)
 	if module == nil {show_last_error("LoadLibraryExW");return}
 	defer {if !win32.FreeLibrary(module) {fmt.eprintln("Unable to free library!")}}
-	print_key_value("Module Handle", module)
+	if .mi in cmds {
+		fmt.println("[Module]")
+		print_key_value("Module Handle", module)
+	}
 	show_icon(module, IDI_ICON1)
 }
 
@@ -382,53 +422,65 @@ show_module :: proc(path: string) {
 setup_windows :: proc() -> int {
 	changed := false
 
-	print_key_value("Is User Interactive", is_user_interactive())
+	add_args_to_commands()
 
-	module := win32.GetModuleHandleW(nil)
-	print_key_value("Module Filename", get_module_filename(module))
+	if .si in cmds {
+		print_key_value("Is User Interactive", is_user_interactive())
+	}
+
+	if .mi in cmds {
+		module := win32.GetModuleHandleW(nil)
+		print_key_value("Module Filename", get_module_filename(module))
+	}
 
 	odin_path := filepath.join({ODIN_ROOT, "odin.exe"}, allocator = context.temp_allocator)
-	odin_path_w := utf8_to_wstring(odin_path)
-	info_size := win32.GetFileVersionInfoSizeW(odin_path_w, nil)
-	if info_size == 0 {
-		fmt.eprintfln("Unable to get file information from %s (0x%X)", odin_path, win32.GetLastError())
-		return -1
-	}
-	info := make([]u8, info_size, allocator = context.temp_allocator)
-	if !win32.GetFileVersionInfoW(odin_path_w, 0, info_size, &info[0]) {
-		show_last_error("GetFileVersionInfoW")
-		return -2
-	}
-
-	if show_file_info(info) != 0 {
-		show_last_error("show_file_info")
-		return -3
-	}
-
-	codepage, langid, hr := get_codepage_and_language(info)
-	if hr != 0 {
-		fmt.eprintfln("get_codepage_and_language (0x%X) %d", win32.GetLastError(), hr)
-		return -7
-	}
-
-	fmt.printfln("  %-20s: %d (0x%X) %v", "Codepage", codepage, codepage, win32.CODEPAGE(codepage))
-	show_code_page(win32.CODEPAGE(codepage))
-
-	{
-		fmt.printf("  %-20s: %d (0x%X)", "Language", langid, langid)
-		lname, err := get_language_name(u32(langid), allocator = context.temp_allocator)
-		if err == 0 {
-			fmt.printf(" \"%s\"", lname)
-		} else {
-			fmt.printf(" language not found: 0x%X %v", langid, err)
+	if .vi in cmds {
+		odin_path_w := utf8_to_wstring(odin_path)
+		info_size := win32.GetFileVersionInfoSizeW(odin_path_w, nil)
+		if info_size == 0 {
+			fmt.eprintfln("Unable to get file information from %s (0x%X)", odin_path, win32.GetLastError())
+			return -1
 		}
-		fmt.printfln(" \"%s\"", lcid_to_local_name(u32(langid)))
-	}
+		info := make([]u8, info_size, allocator = context.temp_allocator)
+		if !win32.GetFileVersionInfoW(odin_path_w, 0, info_size, &info[0]) {
+			show_last_error("GetFileVersionInfoW")
+			return -2
+		}
 
-	show_string_file_info(info, codepage, langid)
-	show_code_pages()
-	show_system_defaults()
-	show_system_info()
+		if show_file_info(info) != 0 {
+			show_last_error("show_file_info")
+			return -3
+		}
+
+		codepage, langid, hr := get_codepage_and_language(info)
+		if hr != 0 {
+			fmt.eprintfln("get_codepage_and_language (0x%X) %d", win32.GetLastError(), hr)
+			return -7
+		}
+
+		fmt.printfln("  %-20s: %d (0x%X) %v", "Codepage", codepage, codepage, win32.CODEPAGE(codepage))
+		show_code_page(win32.CODEPAGE(codepage))
+
+		{
+			fmt.printf("  %-20s: %d (0x%X)", "Language", langid, langid)
+			lname, err := get_language_name(u32(langid), allocator = context.temp_allocator)
+			if err == 0 {
+				fmt.printf(" \"%s\"", lname)
+			} else {
+				fmt.printf(" language not found: 0x%X %v", langid, err)
+			}
+			fmt.printfln(" \"%s\"", lcid_to_local_name(u32(langid)))
+		}
+
+		if .lc in cmds {
+			show_string_file_info(info, codepage, langid)
+			show_code_pages()
+			show_system_defaults()
+		}
+		if .si in cmds {
+			show_system_info()
+		}
+	}
 	show_module(odin_path)
 
 	// https://ss64.com/nt/syntax-ansi.html
