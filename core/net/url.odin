@@ -38,12 +38,12 @@ split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host,
 			queries_parts := strings.split(query_str, "&")
 			defer delete(queries_parts)
 			queries = make([][2]string, len(queries_parts), allocator)
-			for q, i in queries_parts {
+			for q, j in queries_parts {
 				parts := strings.split(q, "=")
 				defer delete(parts)
 				switch len(parts) {
-				case 1:  queries[i] = {parts[0], ""}        // NOTE(tetra): Query not set to anything, was but present.
-				case 2:  queries[i] = {parts[0], parts[1]}  // NOTE(tetra): Query set to something.
+				case 1:  queries[j] = {parts[0], ""}        // NOTE(tetra): Query not set to anything, was but present.
+				case 2:  queries[j] = {parts[0], parts[1]}  // NOTE(tetra): Query set to something.
 				case:    break
 				}
 			}
