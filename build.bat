@@ -1,7 +1,7 @@
 @echo off
 
-rem select code page with utf-8 support CP_UTF8
-chcp 65001 > NUL 2> NUL
+@rem select code page with utf-8 support CP_UTF8
+@rem chcp 65001 > NUL 2> NUL
 
 setlocal EnableDelayedExpansion
 
@@ -106,7 +106,7 @@ if %tilde_backend% EQU 1 (
 rem DO NOT TOUCH!
 
 
-set linker_flags= -incremental:no -opt:ref -subsystem:console
+set linker_flags= -incremental:no -opt:ref -subsystem:console -MANIFEST:EMBED
 
 if %release_mode% EQU 0 ( rem Debug
 	set linker_flags=%linker_flags% -debug /NATVIS:src\odin_compiler.natvis
@@ -124,8 +124,11 @@ del *.ilk > NUL 2> NUL
 
 echo Building %exe_name% (%release_mode_str%)
 
+@echo on
 rc %rc_flags% %odin_rc%
 cl %compiler_settings% "src\main.cpp" "src\libtommath.cpp" /link %linker_settings% -OUT:%exe_name%
+mt -inputresource:%exe_name%;#1 -manifest misc\odin.manifest -outputresource:%exe_name%;#1 -validate_manifest -identity:"odin, processorArchitecture=amd64, version=%curr_year%.%curr_month%.%curr_day%.%nightly%, type=win32"
+@echo off
 if %errorlevel% neq 0 goto end_of_build
 
 echo Building vendor

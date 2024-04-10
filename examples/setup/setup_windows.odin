@@ -59,7 +59,6 @@ add_args_to_commands :: proc() {
 	}
 }
 
-
 is_user_interactive :: proc() -> bool {
 	isUserNonInteractive := false
 	process_window_station := win32.GetProcessWindowStation()
@@ -514,8 +513,15 @@ init_console :: proc() {
 		}
 	}
 
-	win32.SetConsoleCP(code_page)
-	win32.SetConsoleOutputCP(code_page)
+	cpi, cpo := win32.GetConsoleCP(), win32.GetConsoleOutputCP()
+	if cpi != code_page {
+		fmt.printfln("SetConsoleCP(%d)", code_page)
+		win32.SetConsoleCP(code_page)
+	}
+	if cpo != code_page {
+		fmt.printfln("SetConsoleOutputCP(%d)", code_page)
+		win32.SetConsoleOutputCP(code_page)
+	}
 }
 
 
