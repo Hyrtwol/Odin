@@ -8,6 +8,7 @@
 #include <shobjidl.h>
 #include <shlobj.h>
 #include <shlwapi.h>
+#include <wincrypt.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -487,9 +488,8 @@ void verify_winmm(ofstream& out) {
 
 void verify_advapi32(ofstream& out) {
 	test_proc_begin();
-	test_proc_comment("winnls.h");
-	// expect_size(HCRYPTPROV);
-	// CreateServiceW
+	test_proc_comment("wincrypt.h");
+	expect_size(HCRYPTPROV);
 	test_proc_end();
 }
 
@@ -690,7 +690,7 @@ void test_core_sys_windows(ofstream& out) {
 	verify_winuser(out);
 	verify_gdi32(out);
 	verify_winmm(out);
-	// verify_advapi32_struct_sizes(out);
+	verify_advapi32(out);
 	verify_winnls(out);
 	verify_winreg(out);
 	verify_verrsrc(out);

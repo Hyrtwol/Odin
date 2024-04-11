@@ -324,6 +324,12 @@ verify_winmm :: proc(t: ^testing.T) {
 }
 
 @(test)
+verify_advapi32 :: proc(t: ^testing.T) {
+	// wincrypt.h
+	expect_size(t, win32.HCRYPTPROV, 8)
+}
+
+@(test)
 verify_winnls :: proc(t: ^testing.T) {
 	// winnls.h
 	expect_value(t, win32.CP_ACP, 0x00000000)

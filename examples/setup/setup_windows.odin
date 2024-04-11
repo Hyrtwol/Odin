@@ -2,17 +2,24 @@
 //+build windows
 package main
 
-import "core:fmt"
-import "core:runtime"
 import "base:intrinsics"
+import "core:fmt"
 import "core:os"
 import "core:path/filepath"
+import "core:runtime"
+import "core:strings"
 import win32 "core:sys/windows"
 
 L :: intrinsics.constant_utf16_cstring
 wstring :: win32.wstring
 wstring_to_utf8 :: win32.wstring_to_utf8
 utf8_to_wstring :: win32.utf8_to_wstring
+LSTATUS :: win32.LSTATUS
+LSUCCESS :: LSTATUS(win32.ERROR_SUCCESS)
+
+// https://learn.microsoft.com/en-us/windows/win32/sysinfo/enumerating-registry-subkeys
+MAX_KEY_LENGTH: win32.DWORD : 255
+MAX_VALUE_NAME: win32.DWORD : 16383
 
 // https://learn.microsoft.com/en-us/windows/win32/shell/app-registration#registering-applications
 // https://learn.microsoft.com/en-us/windows/win32/shell/how-to-assign-a-custom-icon-to-a-file-type
@@ -21,6 +28,9 @@ utf8_to_wstring :: win32.utf8_to_wstring
 
 IDI_ICON1 :: 1 // TODO 101
 IDI_ICON2 :: 2 // TODO 102
+
+has_ansi_terminal_colours := false
+code_page := win32.CODEPAGE.UTF8
 
 show_small_icons := true
 
@@ -34,7 +44,7 @@ command_flag :: enum u8 {
 }
 commands :: bit_set[command_flag]
 cmds: commands = {.icon}
-all : u8 = 0xFF
+all: u8 = 0xFF
 
 add_args_to_commands :: proc() {
 	for arg in os.args {
@@ -150,7 +160,7 @@ show_file_info :: proc(info: []u8) -> int {
 		/* e.g. 0xFEEF04BD */
 		dwSignature:      win32.DWORD,
 		/* note need to swizzle with .yx */
-		dwStructVersion:   [2]win32.WORD,
+		dwStructVersion:  [2]win32.WORD,
 		/* note need to swizzle with .yxwz */
 		dwFileVersion:    [4]win32.WORD,
 		/* note need to swizzle with .yxwz */
@@ -417,11 +427,254 @@ show_module :: proc(path: string) {
 	show_icon(module, IDI_ICON1)
 }
 
+query_key :: proc(hKey: win32.HKEY) {
+	err: LSTATUS = 0
+
+	rq: reg_query
+	err = reg_query_info_key(hKey, &rq)
+	if err != 0 {return}
+
+	// Enumerate the subkeys, until RegEnumKeyEx fails.
+	if rq.cSubKeys > 0 {
+		fmt.printf("\nNumber of subkeys: %d\n", rq.cSubKeys)
+
+		wchKey: [MAX_KEY_LENGTH]win32.WCHAR // buffer for subkey name
+
+		for i in 0 ..< rq.cSubKeys {
+			cbName := MAX_VALUE_NAME
+			ftLastWriteTime: win32.FILETIME
+			err = win32.RegEnumKeyExW(hKey, i, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
+			if (err == 0) {
+				name, err := wstring_to_utf8(&wchKey[0], int(cbName))
+				if err == .None {
+					fmt.printfln("(%d) Key '%s' ????", i + 1, name)
+				}
+			}
+		}
+	}
+
+	// Enumerate the key values.
+	if rq.cValues > 0 {
+		fmt.printf("\nNumber of values: %d\n", rq.cValues)
+
+		wchValue: [MAX_VALUE_NAME]win32.WCHAR
+		cchValue := MAX_VALUE_NAME
+
+		for i in 0 ..< rq.cValues {
+			cchValue := MAX_VALUE_NAME
+			err = win32.RegEnumValueW(hKey, i, &wchValue[0], &cchValue, nil, nil, nil, nil)
+
+			if (err == 0) {
+				if cchValue != 0 {
+					name, err := wstring_to_utf8(&wchValue[0], int(cchValue))
+					if err == .None {
+						fmt.printfln("(%d) '%s'", i + 1, name)
+					}
+				}
+			}
+		}
+	}
+}
+
+reg_open_key :: proc(hkey: win32.HKEY, sub_key: string, options: win32.DWORD = 0, sam_desired: win32.REGSAM = win32.KEY_READ) -> (hkey_result: win32.HKEY, err: i32) {
+	w_sub_key := utf8_to_wstring(sub_key)
+	err = win32.RegOpenKeyExW(hkey, w_sub_key, options, sam_desired, &hkey_result)
+	if err != 0 {show_last_error(fmt.tprintf("RegOpenKeyExW %d", err))}
+	return
+}
+
+reg_query :: struct {
+	cbName:               win32.DWORD, // size of name string
+	achClass:             [win32.MAX_PATH]win32.WCHAR, // buffer for class name
+	cchClassName:         win32.DWORD, // size of class string (win32.MAX_PATH)
+	cSubKeys:             win32.DWORD, // number of subkeys
+	cbMaxSubKey:          win32.DWORD, // longest subkey size
+	cchMaxClass:          win32.DWORD, // longest class string
+	cValues:              win32.DWORD, // number of values for key
+	cchMaxValue:          win32.DWORD, // longest value name
+	cbMaxValueData:       win32.DWORD, // longest value data
+	cbSecurityDescriptor: win32.DWORD, // size of security descriptor
+	ftLastWriteTime:      win32.FILETIME, // last write time
+}
+
+reg_query_info_key :: proc(hKey: win32.HKEY, rq: ^reg_query) -> i32 {
+	rq.cchClassName = u32(win32.MAX_PATH)
+	err := win32.RegQueryInfoKeyW(
+		hKey, // key handle
+		&rq.achClass[0], // buffer for class name
+		&rq.cchClassName, // size of class string
+		nil, // reserved
+		&rq.cSubKeys, // number of subkeys
+		&rq.cbMaxSubKey, // longest subkey size
+		&rq.cchMaxClass, // longest class string
+		&rq.cValues, // number of values for this key
+		&rq.cchMaxValue, // longest value name
+		&rq.cbMaxValueData, // longest value data
+		&rq.cbSecurityDescriptor, // security descriptor
+		&rq.ftLastWriteTime, // last write time
+	)
+	if err != 0 {show_last_error("reg_query_info_key")}
+	return err
+}
+
+reg_enum_key :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := context.temp_allocator) -> (name: string, err: i32) {
+	wchKey: [MAX_VALUE_NAME]win32.WCHAR // buffer for subkey name
+	cbName := MAX_VALUE_NAME
+	ftLastWriteTime: win32.FILETIME
+	err = win32.RegEnumKeyExW(hKey, dwIndex, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
+	if (err == 0) {
+		name, aerr := wstring_to_utf8(&wchKey[0], int(cbName))
+		err = i32(aerr)
+	}
+	if err != 0 {show_last_error("reg_enum_key")}
+	return
+}
+
+ERROR_MORE_DATA :: i32(os.ERROR_MORE_DATA)
+
+reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := context.temp_allocator) -> (key, value: string, err: i32) {
+
+	wchValue: [MAX_VALUE_NAME]win32.WCHAR
+	cchValue := MAX_VALUE_NAME
+	type: win32.DWORD = 0
+	//data: win32.LPBYTE
+	cbData: win32.DWORD = 0
+
+	// err = win32.RegEnumValueW(hKey, dwIndex, &wchValue[0], &cchValue, nil, &type, nil, &cbData)
+	// fmt.printfln("cbData=%d type=%d", cbData, type)
+	// if err != 0 {show_last_error("RegEnumValueW");return}
+
+	cbData = 1000
+	data := make([]win32.BYTE, cbData)
+	defer delete(data)
+	//data: [cbData]win32.BYTE
+	err = win32.RegEnumValueW(hKey, dwIndex, &wchValue[0], &cchValue, nil, &type, &data[0], &cbData)
+	//fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
+	//if err != 0 {show_last_error("RegEnumValueW");return}
+
+	if (err == 0) {
+		if cchValue > 0 {
+			aerr: runtime.Allocator_Error
+			key, aerr = wstring_to_utf8(&wchValue[0], int(cchValue), allocator = allocator)
+			err = i32(aerr)
+		}
+		if cbData > 0 {
+			switch type {
+			case win32.REG_SZ:
+				aerr: runtime.Allocator_Error
+				value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
+				err = i32(aerr)
+			case win32.REG_DWORD:
+				assert(cbData == size_of(win32.DWORD))
+				value = fmt.tprintf("DWORD: %#X", data[0])
+			case:
+				fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
+			}
+		}
+	} else {
+		fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
+		//show_last_error("reg_enum_value")
+	}
+	return
+}
+
+/*
+[HKEY_CURRENT_USER\Console]
+"VirtualTerminalLevel"=dword:00000001
+*/
+check_virtual_terminal_level :: proc() {
+	hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Console", 0, win32.KEY_READ)
+	if err != 0 {return}
+	defer win32.RegCloseKey(hKey)
+
+	rq: reg_query
+	err = reg_query_info_key(hKey, &rq)
+	if err != 0 {return}
+
+	// Enumerate the key values.
+	virtual_terminal_level: string
+	if rq.cValues > 0 {
+		wchValue: [MAX_VALUE_NAME]win32.WCHAR
+		cchValue := MAX_VALUE_NAME
+		for i in 0 ..< rq.cValues {
+			key, value: string
+			key, value, err = reg_enum_value(hKey, i)
+			if (err == 0) {
+				if key == "VirtualTerminalLevel" {
+					virtual_terminal_level = value
+					break
+				}
+			}
+		}
+	}
+
+	if virtual_terminal_level == "DWORD: 0x1" {
+		fmt.println("Found HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001 👍")
+	} else {
+		// fmt.println("Adding HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001")
+		fmt.printfln("virtual_terminal_level=%s", virtual_terminal_level)
+
+	}
+}
+
+check_acp :: proc() {
+	acp := win32.GetACP()
+	if acp == code_page {
+		fmt.printfln("Current Active Codepage %v 😃", code_page)
+		return
+	}
+
+	fmt.printfln("Current Active Codepage %v is not %v to make life easier you can enable", acp, code_page)
+	fmt.printfln("Beta: Use Unicode UTF-8 for worldwide language support")
+	fmt.printfln("https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page")
+	fmt.printfln(
+		strings.join({"\tWin+R -> intl.cpl", "\tAdministrative tab", "\tClick the Change system locale button.", "\tEnable Beta: Use Unicode UTF-8 for worldwide language support", "\tReboot"}, "\n"),
+	)
+
+	ACP, OEMCP, MACCP: string
+
+	// note: the app needs to be elevated to write to HKEY_LOCAL_MACHINE, otherwise ERROR_ACCESS_DENIED is returned
+	hKey, err := reg_open_key(win32.HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Nls\\CodePage", 0, win32.KEY_READ)
+	if err != 0 {return}
+	defer win32.RegCloseKey(hKey)
+
+	rq: reg_query
+	err = reg_query_info_key(hKey, &rq)
+	if err != 0 {return}
+
+	if rq.cValues > 0 {
+
+		wchValue: [MAX_VALUE_NAME]win32.WCHAR
+		cchValue := MAX_VALUE_NAME
+
+		for i in 0 ..< rq.cValues {
+			key, value: string
+			key, value, err = reg_enum_value(hKey, i)
+			if err == 0 {
+				//fmt.printfln("(%d) %s= '%s'", i + 1, key, value)
+				switch key {
+				case "ACP":
+					ACP = value
+				case "OEMCP":
+					OEMCP = value
+				case "MACCP":
+					MACCP = value
+				}
+			}
+		}
+	}
+
+	fmt.println("Found:", ACP, OEMCP, MACCP)
+}
+
 @(private = "package")
 setup_windows :: proc() -> int {
 	changed := false
 
 	add_args_to_commands()
+
+	check_virtual_terminal_level()
+	check_acp()
 
 	if .si in cmds {
 		print_key_value("Is User Interactive", is_user_interactive())
@@ -484,12 +737,28 @@ setup_windows :: proc() -> int {
 
 	// https://ss64.com/nt/syntax-ansi.html
 	// https://github.com/Microsoft/Terminal/tree/main/src/tools/ColorTool
-	// [HKEY_CURRENT_USER\Console]
-	// "VirtualTerminalLevel"=dword:00000001
+
 
 	//changed = true
 
 	//HICON hicon = LoadImage(NULL, "filename.ico", IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+
+	/*{
+		hTestKey: win32.HKEY = nil
+		err := win32.RegOpenKeyExW(win32.HKEY_CURRENT_USER, L("Console"), 0, win32.KEY_READ, &hTestKey)
+		if err == LSTATUS(win32.ERROR_SUCCESS) {
+			defer win32.RegCloseKey(hTestKey)
+			query_key(hTestKey)
+		}
+	}*/
+	/*{
+		hTestKey : win32.HKEY = nil
+		err := win32.RegOpenKeyExW(win32.HKEY_CURRENT_USER, L("SOFTWARE\\Microsoft"), 0, win32.KEY_READ, &hTestKey)
+		if err == LSTATUS(win32.ERROR_SUCCESS) {
+			defer win32.RegCloseKey(hTestKey);
+			query_key(hTestKey);
+		}
+	}*/
 
 	if changed {
 		fmt.println("Notify windows to reload icons...")
@@ -498,9 +767,6 @@ setup_windows :: proc() -> int {
 
 	return 0
 }
-
-has_ansi_terminal_colours := false
-code_page := win32.CODEPAGE.UTF8
 
 @(init)
 init_console :: proc() {
@@ -522,7 +788,7 @@ init_console :: proc() {
 		fmt.printfln("SetConsoleOutputCP(%d)", code_page)
 		win32.SetConsoleOutputCP(code_page)
 	}
-	fmt.printfln("GetACP(%d)", win32.GetACP())
+	//fmt.printfln("GetACP(%d)", win32.GetACP())
 }
 
 
