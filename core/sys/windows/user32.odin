@@ -6,8 +6,8 @@ foreign import user32 "system:User32.lib"
 
 @(default_calling_convention="system")
 foreign user32 {
-	GetClassInfoW :: proc(hInstance: HINSTANCE, lpClassNAme: LPCWSTR, lpWndClass: ^WNDCLASSW) -> BOOL ---
-	GetClassInfoExW :: proc(hInsatnce: HINSTANCE, lpszClass: LPCWSTR, lpwcx: ^WNDCLASSEXW) -> BOOL ---
+	GetClassInfoW :: proc(hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: ^WNDCLASSW) -> BOOL ---
+	GetClassInfoExW :: proc(hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: ^WNDCLASSEXW) -> BOOL ---
 
 	GetClassLongW :: proc(hWnd: HWND, nIndex: INT) -> DWORD ---
 	SetClassLongW :: proc(hWnd: HWND, nIndex: INT, dwNewLong: LONG) -> DWORD ---
