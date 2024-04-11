@@ -3,25 +3,17 @@
 	"editor.rulers": [
 		120
 	],
-	"cSpell.language": "en-GB",
-	"cSpell.words": [
-		"coreclr",
-		"dylib",
-		"elif",
-		"ifdef",
-		"ilasm",
-		"ildasm",
-		"isize",
-		"levenstein",
-		"libcoreclr",
-		"metaprogramming",
-		"microarch",
-		"microarchitecture",
-		"netcore",
-		"nupkg",
-		"runtimes",
-		"struct",
-		"subtarget"
+	"cSpell.language": "en",
+    "cSpell.customDictionaries": {
+        "custom-dictionary-user": {
+            "name": "odin-dictionary",
+            "path": "misc/odin-dictionary.txt",
+            "addWords": true,
+            "scope": "user"
+        }
+    },
+	"cSpell.enableFiletypes": [
+		"odin"
 	],
 	"markdownlint.config": {
 		"no-hard-tabs": false,
