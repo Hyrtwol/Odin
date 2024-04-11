@@ -4,7 +4,6 @@ package main
 
 import "core:fmt"
 import "core:runtime"
-//import "core:strings"
 import "base:intrinsics"
 import "core:os"
 import "core:path/filepath"
@@ -21,13 +20,11 @@ utf8_to_wstring :: win32.utf8_to_wstring
 // https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page
 
 IDI_ICON1 :: 1 // TODO 101
-
-// MAX_KEY_LENGTH :: 255
-// MAX_VALUE_NAME :: 16383
+IDI_ICON2 :: 2 // TODO 102
 
 show_small_icons := true
 
-command_flag :: enum {
+command_flag :: enum u8 {
 	si,
 	mi,
 	vi,
@@ -37,6 +34,8 @@ command_flag :: enum {
 }
 commands :: bit_set[command_flag]
 cmds: commands = {.icon}
+all : u8 = 0xFF
+
 add_args_to_commands :: proc() {
 	for arg in os.args {
 		if len(arg) > 1 && arg[0] == '-' {
@@ -54,6 +53,8 @@ add_args_to_commands :: proc() {
 				cmds += {.icon}
 			case "lc":
 				cmds += {.lc}
+			case "all":
+				cmds = transmute(commands)all
 			}
 		}
 	}
@@ -91,10 +92,10 @@ show_last_error :: proc(caption: string, loc := #caller_location) {
 }
 
 lcid_to_local_name :: proc(lcid: win32.LCID) -> string {
-	wname: [512]win32.WCHAR
-	cc := win32.LCIDToLocaleName(lcid, &wname[0], len(wname) - 1, 0)
+	wc: [512]win32.WCHAR
+	cc := win32.LCIDToLocaleName(lcid, &wc[0], len(wc) - 1, 0)
 	if cc != 0 {
-		name, err := wstring_to_utf8(&wname[0], int(cc))
+		name, err := wstring_to_utf8(&wc[0], int(cc))
 		if err == .None {
 			return name
 		}
@@ -149,7 +150,7 @@ show_file_info :: proc(info: []u8) -> int {
 		/* e.g. 0xFEEF04BD */
 		dwSignature:      win32.DWORD,
 		/* note need to swizzle with .yx */
-		dwStrucVersion:   [2]win32.WORD,
+		dwStructVersion:   [2]win32.WORD,
 		/* note need to swizzle with .yxwz */
 		dwFileVersion:    [4]win32.WORD,
 		/* note need to swizzle with .yxwz */
@@ -185,7 +186,7 @@ show_file_info :: proc(info: []u8) -> int {
 	}
 	fmt.println("[Version Info]")
 	fmt.printfln("  %-20s: 0x%X (%s)", "Signature", ffi.dwSignature, "OK" if ffi.dwSignature == win32.VS_FFI_SIGNATURE else "Mismatch")
-	fmt.printfln("  %-20s: %v", "Struc Version", ffi.dwStrucVersion.yx)
+	fmt.printfln("  %-20s: %v", "Struct Version", ffi.dwStructVersion.yx)
 	fmt.printfln("  %-20s: %v", "File Version", ffi.dwFileVersion.yxwz)
 	fmt.printfln("  %-20s: %v", "Product Version", ffi.dwProductVersion.yxwz)
 	fmt.printf("  %-20s:", "File Flags Mask")
@@ -250,9 +251,9 @@ show_system_defaults :: proc() {
 	fmt.println("[System Default]")
 	fmt.printfln("  %-20s: %d", "LangID", win32.GetSystemDefaultLangID())
 	fmt.printfln("  %-20s: %d", "LCID", win32.GetSystemDefaultLCID())
-	wlocale_name: [512]win32.WCHAR
-	cch := win32.GetSystemDefaultLocaleName(wstring(&wlocale_name), len(wlocale_name))
-	locale_name, err := wstring_to_utf8(wstring(&wlocale_name), int(cch))
+	w: [512]win32.WCHAR
+	cch := win32.GetSystemDefaultLocaleName(wstring(&w), len(w))
+	locale_name, err := wstring_to_utf8(wstring(&w), int(cch))
 	if err != .None {show_last_error("wstring_to_utf8");return}
 	fmt.printfln("  %-20s: \"%s\"", "Locale Name", locale_name)
 }
@@ -288,7 +289,7 @@ vt_restore_color :: proc() {
 }
 
 print_icon_big :: proc(pixels: []rgba, width, height: i32) {
-	block :: "\u2588\u2588" // 2 x full blobk
+	block :: "\u2588\u2588" // 2 x full block
 	i: i32
 	for y in 0 ..< height {
 		i = y * width
@@ -346,7 +347,6 @@ show_icon_info :: proc(icon: win32.HICON) {
 			if icon_info.hbmColor != nil {
 				dc := win32.CreateCompatibleDC(nil)
 				defer win32.DeleteDC(dc)
-				//std::memset(&Info, 0, sizeof(BITMAPINFO)); //not necessary really..
 				old_gdi_obj := win32.SelectObject(dc, win32.HGDIOBJ(icon_info.hbmColor))
 				defer win32.SelectObject(dc, old_gdi_obj)
 
@@ -394,10 +394,10 @@ show_icon :: proc(module: win32.HMODULE, icon_id: int) {
 }
 
 get_module_filename :: proc(module: win32.HMODULE) -> string {
-	wname: [512]win32.WCHAR
-	cc := win32.GetModuleFileNameW(module, &wname[0], len(wname) - 1)
+	w: [512]win32.WCHAR
+	cc := win32.GetModuleFileNameW(module, &w[0], len(w) - 1)
 	if cc != 0 {
-		name, err := wstring_to_utf8(&wname[0], int(cc))
+		name, err := wstring_to_utf8(&w[0], int(cc))
 		if err == .None {
 			return name
 		}
@@ -522,6 +522,7 @@ init_console :: proc() {
 		fmt.printfln("SetConsoleOutputCP(%d)", code_page)
 		win32.SetConsoleOutputCP(code_page)
 	}
+	fmt.printfln("GetACP(%d)", win32.GetACP())
 }
 
 
