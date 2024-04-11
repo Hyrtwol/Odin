@@ -268,7 +268,7 @@ foreign user32 {
 	IsValidLocaleName :: proc(lpLocaleName: LPCWSTR) -> BOOL ---
 	ResolveLocaleName :: proc(lpNameToResolve: LPCWSTR, lpLocaleName: LPWSTR, cchLocaleName: INT) -> INT ---
 	IsValidCodePage :: proc(CodePage: UINT) -> BOOL ---
-	GetACP :: proc() -> UINT ---
+	GetACP :: proc() -> CODEPAGE ---
 	GetCPInfoExW :: proc(CodePage: CODEPAGE, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXW) -> BOOL ---
 
 	GetProcessWindowStation :: proc() -> HWINSTA ---
