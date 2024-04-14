@@ -458,7 +458,7 @@ query_key :: proc(hKey: win32.HKEY) {
 		fmt.printf("\nNumber of values: %d\n", rq.cValues)
 
 		wchValue: [MAX_VALUE_NAME]win32.WCHAR
-		cchValue : win32.DWORD
+		cchValue: win32.DWORD
 
 		for i in 0 ..< rq.cValues {
 			cchValue = MAX_VALUE_NAME
