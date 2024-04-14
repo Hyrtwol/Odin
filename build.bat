@@ -151,7 +151,7 @@ echo demo_log_size %demo_log_size%
 
 echo Running setup
 @echo on
-odin run examples/setup -resource:examples/setup/setup.rc -- %rc_flags%
+call examples\setup\build.bat %rc_flags%
 @echo off
 
 :cleanup_build

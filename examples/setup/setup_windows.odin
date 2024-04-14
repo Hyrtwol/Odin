@@ -458,10 +458,10 @@ query_key :: proc(hKey: win32.HKEY) {
 		fmt.printf("\nNumber of values: %d\n", rq.cValues)
 
 		wchValue: [MAX_VALUE_NAME]win32.WCHAR
-		cchValue := MAX_VALUE_NAME
+		cchValue : win32.DWORD
 
 		for i in 0 ..< rq.cValues {
-			cchValue := MAX_VALUE_NAME
+			cchValue = MAX_VALUE_NAME
 			err = win32.RegEnumValueW(hKey, i, &wchValue[0], &cchValue, nil, nil, nil, nil)
 
 			if (err == 0) {
@@ -523,7 +523,8 @@ reg_enum_key :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := contex
 	ftLastWriteTime: win32.FILETIME
 	err = win32.RegEnumKeyExW(hKey, dwIndex, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
 	if (err == 0) {
-		name, aerr := wstring_to_utf8(&wchKey[0], int(cbName))
+		aerr: runtime.Allocator_Error
+		name, aerr = wstring_to_utf8(&wchKey[0], int(cbName))
 		err = i32(aerr)
 	}
 	if err != 0 {show_last_error("reg_enum_key")}
@@ -594,8 +595,8 @@ check_virtual_terminal_level :: proc() {
 	// Enumerate the key values.
 	virtual_terminal_level: string
 	if rq.cValues > 0 {
-		wchValue: [MAX_VALUE_NAME]win32.WCHAR
-		cchValue := MAX_VALUE_NAME
+		// wchValue: [MAX_VALUE_NAME]win32.WCHAR
+		// cchValue := MAX_VALUE_NAME
 		for i in 0 ..< rq.cValues {
 			key, value: string
 			key, value, err = reg_enum_value(hKey, i)
@@ -643,10 +644,6 @@ check_acp :: proc() {
 	if err != 0 {return}
 
 	if rq.cValues > 0 {
-
-		wchValue: [MAX_VALUE_NAME]win32.WCHAR
-		cchValue := MAX_VALUE_NAME
-
 		for i in 0 ..< rq.cValues {
 			key, value: string
 			key, value, err = reg_enum_value(hKey, i)

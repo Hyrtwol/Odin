@@ -60,21 +60,30 @@
 		},
 		{
 			"label": "run examples/setup",
-			"type": "process",
-			"command": "odin",
-			"args": [
-				"run",
-				"examples/setup",
-				"-resource:examples/setup/setup.rc",
-				"-vet"
-			],
+			"type": "shell",
+			"command": "call examples/setup/build.bat",
 			"problemMatcher": [],
 			"group": {
-				"kind": "test",
+				"kind": "none",
 				"isDefault": false
 			},
 			"options": {
 				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "build ols",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/shared/ols"
 			}
 		},
 		{
