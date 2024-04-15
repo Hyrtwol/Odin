@@ -44,6 +44,7 @@ memset
 microarch
 microui
 mipmaps
+nbsp
 odinfmt
 panicf
 pbyte

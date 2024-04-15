@@ -9,7 +9,7 @@
 			},
 			"command": "make",
 			"group": {
-				"_id": "build",
+				"kind": "build",
 				"isDefault": false
 			}
 		},
@@ -21,7 +21,7 @@
 			},
 			"command": "make",
 			"group": {
-				"_id": "build",
+				"kind": "build",
 				"isDefault": true
 			}
 		},
