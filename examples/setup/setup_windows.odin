@@ -76,7 +76,7 @@ is_user_interactive :: proc() -> bool {
 	if process_window_station != nil {
 		length_needed: win32.DWORD = 0
 		user_object_flags: win32.USEROBJECTFLAGS
-		if (win32.GetUserObjectInformationW(win32.HANDLE(process_window_station), .UOI_FLAGS, &user_object_flags, size_of(win32.USEROBJECTFLAGS), &length_needed)) {
+		if win32.GetUserObjectInformationW(win32.HANDLE(process_window_station), .UOI_FLAGS, &user_object_flags, size_of(win32.USEROBJECTFLAGS), &length_needed) {
 			assert(length_needed == size_of(win32.USEROBJECTFLAGS))
 			isUserNonInteractive = (user_object_flags.dwFlags & 1) == 0
 		}
@@ -92,7 +92,7 @@ show_last_error :: proc(caption: string, loc := #caller_location) {
 
 	error_wstring := wstring(&error_text[0])
 	cch := win32.FormatMessageW(win32.FORMAT_MESSAGE_FROM_SYSTEM | win32.FORMAT_MESSAGE_IGNORE_INSERTS, nil, last_error, win32.LANGID_NEUTRAL, error_wstring, len(error_text) - 1, nil)
-	if (cch != 0) {return}
+	if cch != 0 {return}
 	error_string, err := wstring_to_utf8(&error_wstring[0], int(cch))
 	if err == .None {
 		fmt.eprintln(error_string)
@@ -444,7 +444,7 @@ query_key :: proc(hKey: win32.HKEY) {
 			cbName := MAX_VALUE_NAME
 			ftLastWriteTime: win32.FILETIME
 			err = win32.RegEnumKeyExW(hKey, i, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
-			if (err == 0) {
+			if err == 0 {
 				name, err := wstring_to_utf8(&wchKey[0], int(cbName))
 				if err == .None {
 					fmt.printfln("(%d) Key '%s' ????", i + 1, name)
@@ -464,7 +464,7 @@ query_key :: proc(hKey: win32.HKEY) {
 			cchValue = MAX_VALUE_NAME
 			err = win32.RegEnumValueW(hKey, i, &wchValue[0], &cchValue, nil, nil, nil, nil)
 
-			if (err == 0) {
+			if err == 0 {
 				if cchValue != 0 {
 					name, err := wstring_to_utf8(&wchValue[0], int(cchValue))
 					if err == .None {
@@ -477,9 +477,8 @@ query_key :: proc(hKey: win32.HKEY) {
 }
 
 reg_open_key :: proc(hkey: win32.HKEY, sub_key: string, options: win32.DWORD = 0, sam_desired: win32.REGSAM = win32.KEY_READ) -> (hkey_result: win32.HKEY, err: i32) {
-	w_sub_key := utf8_to_wstring(sub_key)
-	err = win32.RegOpenKeyExW(hkey, w_sub_key, options, sam_desired, &hkey_result)
-	if err != 0 {show_last_error(fmt.tprintf("RegOpenKeyExW %d", err))}
+	err = win32.RegOpenKeyExW(hkey, utf8_to_wstring(sub_key), options, sam_desired, &hkey_result)
+	if err != 0 {show_last_error(fmt.tprintf("RegOpenKeyExW %s %d", sub_key, err))}
 	return
 }
 
@@ -522,7 +521,7 @@ reg_enum_key :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := contex
 	cbName := MAX_VALUE_NAME
 	ftLastWriteTime: win32.FILETIME
 	err = win32.RegEnumKeyExW(hKey, dwIndex, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
-	if (err == 0) {
+	if err == 0 {
 		aerr: runtime.Allocator_Error
 		name, aerr = wstring_to_utf8(&wchKey[0], int(cbName))
 		err = i32(aerr)
@@ -553,7 +552,7 @@ reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := cont
 	//fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
 	//if err != 0 {show_last_error("RegEnumValueW");return}
 
-	if (err == 0) {
+	if err == 0 {
 		if cchValue > 0 {
 			aerr: runtime.Allocator_Error
 			key, aerr = wstring_to_utf8(&wchValue[0], int(cchValue), allocator = allocator)
@@ -595,12 +594,10 @@ check_virtual_terminal_level :: proc() {
 	// Enumerate the key values.
 	virtual_terminal_level: string
 	if rq.cValues > 0 {
-		// wchValue: [MAX_VALUE_NAME]win32.WCHAR
-		// cchValue := MAX_VALUE_NAME
 		for i in 0 ..< rq.cValues {
 			key, value: string
 			key, value, err = reg_enum_value(hKey, i)
-			if (err == 0) {
+			if err == 0 {
 				if key == "VirtualTerminalLevel" {
 					virtual_terminal_level = value
 					break
@@ -809,20 +806,22 @@ struct IconDirectoryEntry {
     DWORD dwImageOffset;
 };
 */
-TIconFileHeader :: struct #packed { // (6 bytes)
-	Reserved: win32.WORD, // Reserved (2 bytes), always 0
-	IconType: win32.WORD, // IconType (2 bytes), if the image is an icon it�s 1, for cursors the value is 2.
+TIconFileHeader :: struct #packed {
+	// (6 bytes)
+	Reserved:  win32.WORD, // Reserved (2 bytes), always 0
+	IconType:  win32.WORD, // IconType (2 bytes), if the image is an icon it�s 1, for cursors the value is 2.
 	IconCount: win32.WORD, // IconCount (2 bytes), number of icons in this file.
 }
 
-TIconInfo :: struct #packed {// (16 bytes)
-	Width: win32.BYTE, // (1 byte), Width of Icon (1 to 255)
-	Height: win32.BYTE, // Height (1 byte), Height of Icon (1 to 255)
-	ColorCount: win32.BYTE, // ColorCount (1 byte), Number of colors, either 0 for 24 bit or higher, 2 for monochrome or 16 for 16 color images.
-	Reserved: win32.BYTE, // Reserved (1 byte), Not used (always 0)
-	Planes: win32.WORD, // Planes (2 bytes), always 1
-	BitCount: win32.WORD, // BitCount (2 bytes), number of bits per pixel (1 for monochrome, 4 for 16 colors, 8 for 256 colors, 24 for true colors, 32 for true colors + alpha channel)
-	ImageSize: win32.DWORD, // ImageSize (4 bytes), Length of resource in bytes
+TIconInfo :: struct #packed {
+	// (16 bytes)
+	Width:       win32.BYTE, // (1 byte), Width of Icon (1 to 255)
+	Height:      win32.BYTE, // Height (1 byte), Height of Icon (1 to 255)
+	ColorCount:  win32.BYTE, // ColorCount (1 byte), Number of colors, either 0 for 24 bit or higher, 2 for monochrome or 16 for 16 color images.
+	Reserved:    win32.BYTE, // Reserved (1 byte), Not used (always 0)
+	Planes:      win32.WORD, // Planes (2 bytes), always 1
+	BitCount:    win32.WORD, // BitCount (2 bytes), number of bits per pixel (1 for monochrome, 4 for 16 colors, 8 for 256 colors, 24 for true colors, 32 for true colors + alpha channel)
+	ImageSize:   win32.DWORD, // ImageSize (4 bytes), Length of resource in bytes
 	ImageOffset: win32.DWORD, // ImageOffset (4 bytes), start of the image in the file.
 }
 
@@ -875,7 +874,7 @@ dump_icon :: proc() {
 	iis := make([]TIconInfo, ifh.IconCount)
 	defer delete(iis)
 
-	for i in 0..<ifh.IconCount {
+	for i in 0 ..< ifh.IconCount {
 		n, err = os.read_ptr(fd, &iis[i], size_of(TIconInfo))
 		assert(err == 0)
 		assert(n == size_of(TIconInfo))
@@ -885,7 +884,7 @@ dump_icon :: proc() {
 	}
 
 	ii: ^TIconInfo = nil
-	for i in 0..<ifh.IconCount {
+	for i in 0 ..< ifh.IconCount {
 		if ii == nil {ii = &iis[i]}
 		//fmt.printfln("ii: %#v", &iis[i])
 	}
@@ -897,7 +896,7 @@ dump_icon :: proc() {
 
 		os.seek(fd, i64(ii.ImageOffset), 0)
 
-	    bih: win32.BITMAPINFOHEADER // (40 bytes)
+		bih: win32.BITMAPINFOHEADER // (40 bytes)
 
 		n, err = os.read_ptr(fd, &bih, size_of(win32.BITMAPINFOHEADER))
 		assert(err == 0)
@@ -909,7 +908,7 @@ dump_icon :: proc() {
 
 		rgba: win32.RGBQUAD
 		palette: [256][4]u8
-		for i in 0..<256 {
+		for i in 0 ..< 256 {
 			n, err = os.read_ptr(fd, &rgba, size_of(win32.RGBQUAD))
 			assert(err == 0)
 			assert(n == 4)
@@ -924,7 +923,7 @@ dump_icon :: proc() {
 		biSizeImage := abs(bih.biHeight) * stride
 		fmt.printfln("biSizeImage: %d %d", stride, biSizeImage)
 
-		bytes:= make([]u8, biSizeImage)
+		bytes := make([]u8, biSizeImage)
 		defer delete(bytes)
 
 		n, err = os.read(fd, bytes)
@@ -938,6 +937,7 @@ dump_icon :: proc() {
 	*/
 	//bih: win32.BITMAPINFOHEADER // (40 bytes)
 }
+
 
 // odinfmt: disable
 
