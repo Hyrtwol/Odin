@@ -178,6 +178,10 @@ void verify_win32_type_sizes(ofstream& out) {
 	test_proc_comment("fileapi.h");
 	expect_size(WIN32_FILE_ATTRIBUTE_DATA);
 
+	test_proc_comment("libloaderapi.h");
+	expect_size(ENUMRESNAMEPROCW);
+	expect_size(ENUMRESTYPEPROCW);
+
 	test_proc_comment("minwinbase.h");
 	expect_size(SYSTEMTIME);
 	expect_size(WIN32_FIND_DATAW);

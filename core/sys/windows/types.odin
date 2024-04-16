@@ -4223,3 +4223,7 @@ SOCKADDR :: struct {
 	sa_family: ADDRESS_FAMILY,
 	sa_data:   [14]CHAR,
 }
+
+ENUMRESNAMEPROCW :: #type proc (hModule: HMODULE, lpType: LPCWSTR, lpName: LPWSTR, lParam: LONG_PTR)-> BOOL
+ENUMRESTYPEPROCW :: #type proc (hModule: HMODULE, lpType: LPCWSTR, lParam: LONG_PTR)-> BOOL
+ENUMRESLANGPROCW :: #type proc (hModule: HMODULE, lpType: LPCWSTR, lpName: LPWSTR, wIDLanguage: LANGID, lParam: LONG_PTR)-> BOOL

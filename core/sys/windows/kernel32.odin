@@ -428,9 +428,14 @@ foreign kernel32 {
 
 	LoadResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
 	FreeResource :: proc(hResData: HGLOBAL) -> BOOL ---
+	LockResource :: proc(hResData: HGLOBAL) -> LPVOID ---
 	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
 	FindResourceW :: proc(hModule: HMODULE, lpName: LPCWSTR, lpType: LPCWSTR) -> HRSRC ---
-	//EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
+	FindResourceExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, wLanguage: LANGID) -> HRSRC ---
+	EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
+	EnumResourceNamesExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	EnumResourceTypesExW :: proc(hModule: HMODULE, lpEnumFunc: ENUMRESTYPEPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	EnumResourceLanguagesExW :: proc( hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, lpEnumFunc: ENUMRESLANGPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
 
 	GetFullPathNameW  :: proc(filename: LPCWSTR, buffer_length: DWORD, buffer: LPCWSTR, file_part: ^LPCWSTR) -> DWORD ---
 	GetLongPathNameW  :: proc(short, long: LPCWSTR, len: DWORD) -> DWORD ---

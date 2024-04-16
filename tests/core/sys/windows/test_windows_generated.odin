@@ -65,6 +65,8 @@ verify_win32_type_sizes :: proc(t: ^testing.T) {
 	expect_size(t, win32.DECIMAL, 16)
 	// fileapi.h
 	expect_size(t, win32.WIN32_FILE_ATTRIBUTE_DATA, 36)
+	// libloaderapi.h
+	expect_size(t, win32.ENUMRESNAMEPROCW, 8)
 	// minwinbase.h
 	expect_size(t, win32.SYSTEMTIME, 16)
 	expect_size(t, win32.WIN32_FIND_DATAW, 592)
