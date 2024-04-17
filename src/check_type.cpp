@@ -29,10 +29,11 @@ gb_internal void populate_using_array_index(CheckerContext *ctx, Ast *node, AstF
 	}
 }
 
-gb_internal void populate_using_entity_scope(CheckerContext *ctx, Ast *node, AstField *field, Type *t) {
+gb_internal void populate_using_entity_scope(CheckerContext *ctx, Ast *node, AstField *field, Type *t, isize level) {
 	if (t == nullptr) {
 		return;
 	}
+	Type *original_type = t;
 	t = base_type(type_deref(t));
 	gbString str = nullptr;
 	defer (gb_string_free(str));
@@ -46,16 +47,18 @@ gb_internal void populate_using_entity_scope(CheckerContext *ctx, Ast *node, Ast
 			String name = f->token.string;
 			Entity *e = scope_lookup_current(ctx->scope, name);
 			if (e != nullptr && name != "_") {
+				gbString ot = type_to_string(original_type);
 				// TODO(bill): Better type error
 				if (str != nullptr) {
-					error(e->token, "'%.*s' is already declared in '%s'", LIT(name), str);
+					error(e->token, "'%.*s' is already declared in '%s', through 'using' from '%s'", LIT(name), str, ot);
 				} else {
-					error(e->token, "'%.*s' is already declared", LIT(name));
+					error(e->token, "'%.*s' is already declared, through 'using' from '%s'", LIT(name), ot);
 				}
+				gb_string_free(ot);
 			} else {
 				add_entity(ctx, ctx->scope, nullptr, f);
 				if (f->flags & EntityFlag_Using) {
-					populate_using_entity_scope(ctx, node, field, f->type);
+					populate_using_entity_scope(ctx, node, field, f->type, level+1);
 				}
 			}
 		}
@@ -200,7 +203,7 @@ gb_internal void check_struct_fields(CheckerContext *ctx, Ast *node, Slice<Entit
 				continue;
 			}
 
-			populate_using_entity_scope(ctx, node, p, type);
+			populate_using_entity_scope(ctx, node, p, type, 1);
 		}
 
 		if (is_subtype && p->names.count > 0) {
@@ -2495,17 +2498,15 @@ gb_internal Type *get_map_cell_type(Type *type) {
 	return s;
 }
 
-gb_internal void init_map_internal_types(Type *type) {
+gb_internal void init_map_internal_debug_types(Type *type) {
 	GB_ASSERT(type->kind == Type_Map);
 	GB_ASSERT(t_allocator != nullptr);
-	if (type->Map.lookup_result_type != nullptr) return;
+	if (type->Map.debug_metadata_type != nullptr) return;
 
 	Type *key   = type->Map.key;
 	Type *value = type->Map.value;
 	GB_ASSERT(key != nullptr);
 	GB_ASSERT(value != nullptr);
-
-
 
 	Type *key_cell   = get_map_cell_type(key);
 	Type *value_cell = get_map_cell_type(value);
@@ -2541,6 +2542,18 @@ gb_internal void init_map_internal_types(Type *type) {
 	gb_unused(type_size_of(debug_type));
 
 	type->Map.debug_metadata_type = debug_type;
+}
+
+
+gb_internal void init_map_internal_types(Type *type) {
+	GB_ASSERT(type->kind == Type_Map);
+	GB_ASSERT(t_allocator != nullptr);
+	if (type->Map.lookup_result_type != nullptr) return;
+
+	Type *key   = type->Map.key;
+	Type *value = type->Map.value;
+	GB_ASSERT(key != nullptr);
+	GB_ASSERT(value != nullptr);
 
 	type->Map.lookup_result_type = make_optional_ok_type(value);
 }
@@ -2613,8 +2626,6 @@ gb_internal void check_map_type(CheckerContext *ctx, Type *type, Ast *node) {
 
 	init_core_map_type(ctx->checker);
 	init_map_internal_types(type);
-
-	// error(node, "'map' types are not yet implemented");
 }
 
 gb_internal void check_matrix_type(CheckerContext *ctx, Type **type, Ast *node) {
