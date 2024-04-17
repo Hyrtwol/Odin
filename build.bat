@@ -1,7 +1,7 @@
 @echo off
 
 @rem select code page with utf-8 support CP_UTF8
-@rem chcp 65001 > NUL 2> NUL
+chcp 65001 > NUL 2> NUL
 
 setlocal EnableDelayedExpansion
 
