@@ -481,6 +481,7 @@ void verify_winmm(ofstream& out) {
 	test_proc_comment("timeapi.h");
 	expect_size(TIMECAPS);
 	test_proc_comment("mmsyscom.h");
+	expect_size(MMVERSION);
 	expect_size(MMTIME);
 	test_proc_comment("mmeapi.h");
 	expect_size(WAVEFORMATEX);
