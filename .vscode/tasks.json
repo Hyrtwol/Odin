@@ -10,7 +10,7 @@
 			"command": "make",
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			}
 		},
 		{
@@ -22,7 +22,7 @@
 			"command": "make",
 			"group": {
 				"kind": "build",
-				"isDefault": true
+				"isDefault": false
 			}
 		},
 		{
