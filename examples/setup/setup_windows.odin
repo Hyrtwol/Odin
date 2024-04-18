@@ -1,4 +1,4 @@
-//+private file
+//private file
 //+build windows
 package main
 
@@ -17,6 +17,13 @@ utf8_to_wstring :: win32.utf8_to_wstring
 LSTATUS :: win32.LSTATUS
 LSUCCESS :: LSTATUS(win32.ERROR_SUCCESS)
 
+BYTE :: win32.BYTE
+WORD :: win32.WORD
+DWORD :: win32.DWORD
+LONG :: win32.LONG
+RGBQUAD :: win32.RGBQUAD
+BITMAPINFOHEADER :: win32.BITMAPINFOHEADER
+
 // https://learn.microsoft.com/en-us/windows/win32/sysinfo/enumerating-registry-subkeys
 MAX_KEY_LENGTH: win32.DWORD : 255
 MAX_VALUE_NAME: win32.DWORD : 16383
@@ -30,7 +37,7 @@ IDI_ICON1 :: 1 // TODO 101
 IDI_ICON2 :: 2 // TODO 102
 
 has_ansi_terminal_colours := false
-code_page := win32.CODEPAGE.UTF8
+wanted_code_page := win32.CODEPAGE.UTF8
 
 show_small_icons := true
 
@@ -583,46 +590,64 @@ reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := cont
 "VirtualTerminalLevel"=dword:00000001
 */
 check_virtual_terminal_level :: proc() {
-	hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Console", 0, win32.KEY_READ)
-	if err != 0 {return}
-	defer win32.RegCloseKey(hKey)
 
-	rq: reg_query
-	err = reg_query_info_key(hKey, &rq)
-	if err != 0 {return}
+	fmt.println("Terminal Colors:", has_ansi_terminal_colours)
 
-	// Enumerate the key values.
 	virtual_terminal_level: string
-	if rq.cValues > 0 {
-		for i in 0 ..< rq.cValues {
-			key, value: string
-			key, value, err = reg_enum_value(hKey, i)
-			if err == 0 {
-				if key == "VirtualTerminalLevel" {
-					virtual_terminal_level = value
-					break
+	{
+		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Console", 0, win32.KEY_READ)
+		if err != 0 {return}
+		defer win32.RegCloseKey(hKey)
+
+		rq: reg_query
+		err = reg_query_info_key(hKey, &rq)
+		if err != 0 {return}
+
+		// Enumerate the key values.
+		if rq.cValues > 0 {
+			for i in 0 ..< rq.cValues {
+				key, value: string
+				key, value, err = reg_enum_value(hKey, i)
+				if err == 0 {
+					if key == "VirtualTerminalLevel" {
+						virtual_terminal_level = value
+						break
+					}
 				}
 			}
 		}
 	}
-
 	if virtual_terminal_level == "DWORD: 0x1" {
 		fmt.println("Found HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001 👍")
 	} else {
 		// fmt.println("Adding HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001")
-		fmt.printfln("virtual_terminal_level=%s", virtual_terminal_level)
+		fmt.println("VirtualTerminalLevel:", virtual_terminal_level)
 
+		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Console", 0, win32.KEY_WRITE)
+		if err != 0 {
+			fmt.eprint("reg_open_key:", err)
+			return
+		}
+		defer win32.RegCloseKey(hKey)
+		//v := (^win32.BYTE)(rawptr(uintptr(win32.DWORD(1))))
+		v : win32.DWORD = 1
+		status := win32.RegSetValueExW(hKey, L("VirtualTerminalLevel"), 0, win32.REG_DWORD, (^win32.BYTE)(&v), size_of(win32.DWORD))
+		if win32.FAILED(status) {
+			fmt.eprint("RegSetValueExW:", status)
+		} else {
+			fmt.println("Added HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001 👍")
+		}
 	}
 }
 
 check_acp :: proc() {
 	acp := win32.GetACP()
-	if acp == code_page {
-		fmt.printfln("Current Active Codepage %v 😃", code_page)
+	if acp == wanted_code_page {
+		fmt.printfln("Current Active Codepage %v 😃", acp)
 		return
 	}
 
-	fmt.printfln("Current Active Codepage %v is not %v to make life easier you can enable", acp, code_page)
+	fmt.printfln("Current Active Codepage %v is not %v to make life easier you can enable", acp, wanted_code_page)
 	fmt.printfln("Beta: Use Unicode UTF-8 for worldwide language support")
 	fmt.printfln("https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page")
 	fmt.printfln(
@@ -776,239 +801,12 @@ init_console :: proc() {
 	}
 
 	cpi, cpo := win32.GetConsoleCP(), win32.GetConsoleOutputCP()
-	if cpi != code_page {
-		fmt.printfln("SetConsoleCP(%d)", code_page)
-		win32.SetConsoleCP(code_page)
+	if cpi != wanted_code_page {
+		fmt.printfln("SetConsoleCP(%d)", wanted_code_page)
+		win32.SetConsoleCP(wanted_code_page)
 	}
-	if cpo != code_page {
-		fmt.printfln("SetConsoleOutputCP(%d)", code_page)
-		win32.SetConsoleOutputCP(code_page)
+	if cpo != wanted_code_page {
+		fmt.printfln("SetConsoleOutputCP(%d)", wanted_code_page)
+		win32.SetConsoleOutputCP(wanted_code_page)
 	}
-	//fmt.printfln("GetACP(%d)", win32.GetACP())
 }
-
-/*
-typedef struct ICONDIR {
-    WORD          idReserved;
-    WORD          idType;
-    WORD          idCount;
-    ICONDIRENTRY  idEntries[];
-} ICONHEADER;
-
-struct IconDirectoryEntry {
-    BYTE  bWidth;
-    BYTE  bHeight;
-    BYTE  bColorCount;
-    BYTE  bReserved;
-    WORD  wPlanes;
-    WORD  wBitCount;
-    DWORD dwBytesInRes;
-    DWORD dwImageOffset;
-};
-*/
-TIconFileHeader :: struct #packed {
-	// (6 bytes)
-	Reserved:  win32.WORD, // Reserved (2 bytes), always 0
-	IconType:  win32.WORD, // IconType (2 bytes), if the image is an icon it�s 1, for cursors the value is 2.
-	IconCount: win32.WORD, // IconCount (2 bytes), number of icons in this file.
-}
-
-TIconInfo :: struct #packed {
-	// (16 bytes)
-	Width:       win32.BYTE, // (1 byte), Width of Icon (1 to 255)
-	Height:      win32.BYTE, // Height (1 byte), Height of Icon (1 to 255)
-	ColorCount:  win32.BYTE, // ColorCount (1 byte), Number of colors, either 0 for 24 bit or higher, 2 for monochrome or 16 for 16 color images.
-	Reserved:    win32.BYTE, // Reserved (1 byte), Not used (always 0)
-	Planes:      win32.WORD, // Planes (2 bytes), always 1
-	BitCount:    win32.WORD, // BitCount (2 bytes), number of bits per pixel (1 for monochrome, 4 for 16 colors, 8 for 256 colors, 24 for true colors, 32 for true colors + alpha channel)
-	ImageSize:   win32.DWORD, // ImageSize (4 bytes), Length of resource in bytes
-	ImageOffset: win32.DWORD, // ImageOffset (4 bytes), start of the image in the file.
-}
-
-/*
-    src.ReadBuffer(IconFileHeader, SizeOf(TIconFileHeader));
-    WriteIconFileHeader(IconFileHeader);
-
-    src.ReadBuffer(IconInfo, SizeOf(TIconInfo));
-    WriteIconInfoHeader(IconInfo);
-
-    src.ReadBuffer(bmiHeader, SizeOf(TBitmapInfoHeader));
-    WriteBitmapInfoHeader(bmiHeader);
-
-    {Memo1.Lines.Add('TBitmapFileHeader');
-      Memo1.Lines.Add('Header.bfType: ' + IntToStr(BMP.Header.bfType));
-      Memo1.Lines.Add('Header.bfSize: ' + IntToStr(BMP.Header.bfSize));
-      Memo1.Lines.Add('Header.bfReserved1: ' + IntToStr(BMP.Header.bfReserved1));
-      Memo1.Lines.Add('Header.bfReserved2: ' + IntToStr(BMP.Header.bfReserved2));
-    Memo1.Lines.Add('Header.bfOffBits: ' + IntToStr(BMP.Header.bfOffBits));}
-
-    //Pal.palVersion := $300;
-    palNumEntries := 1 shl bmiHeader.biBitCount;
-    src.ReadBuffer(Pal, palNumEntries * 4);
-*/
-
-dump_icon :: proc() {
-	icon_path := filepath.clean("misc/emblem.ico")
-
-	//ii: TIconInfo
-
-	fd: os.Handle
-	err: os.Errno
-	n: int
-	po: i64
-
-	fd, err = os.open(icon_path, os.O_RDONLY, 0)
-	assert(err == 0)
-	if err != 0 {panic("os.open")}
-	defer os.close(fd)
-
-	ifh: TIconFileHeader
-	n, err = os.read_ptr(fd, &ifh, size_of(TIconFileHeader))
-	assert(err == 0)
-	assert(n == size_of(TIconFileHeader))
-	fmt.printfln("ifh: %#v", ifh)
-
-	po, err = os.seek(fd, 0, 1)
-	fmt.printfln("po: %d", po)
-
-	iis := make([]TIconInfo, ifh.IconCount)
-	defer delete(iis)
-
-	for i in 0 ..< ifh.IconCount {
-		n, err = os.read_ptr(fd, &iis[i], size_of(TIconInfo))
-		assert(err == 0)
-		assert(n == size_of(TIconInfo))
-		//fmt.printfln("ii: %#v", ii)
-		po, err = os.seek(fd, 0, 1)
-		fmt.printfln("po: %d", po)
-	}
-
-	ii: ^TIconInfo = nil
-	for i in 0 ..< ifh.IconCount {
-		if ii == nil {ii = &iis[i]}
-		//fmt.printfln("ii: %#v", &iis[i])
-	}
-	if ii != nil {
-		fmt.printfln("ii: %#v", ii)
-
-		// bytes:= make([]u8, ii.ImageSize)
-		// defer delete(bytes)
-
-		os.seek(fd, i64(ii.ImageOffset), 0)
-
-		bih: win32.BITMAPINFOHEADER // (40 bytes)
-
-		n, err = os.read_ptr(fd, &bih, size_of(win32.BITMAPINFOHEADER))
-		assert(err == 0)
-		assert(n == size_of(win32.BITMAPINFOHEADER))
-		fmt.printfln("read_ptr: %v %v", n, err)
-		fmt.printfln("bih: %#v", bih)
-		po, err = os.seek(fd, 0, 1)
-		fmt.printfln("po: %d", po)
-
-		rgba: win32.RGBQUAD
-		palette: [256][4]u8
-		for i in 0 ..< 256 {
-			n, err = os.read_ptr(fd, &rgba, size_of(win32.RGBQUAD))
-			assert(err == 0)
-			assert(n == 4)
-			palette[i] = {u8(rgba.rgbRed), u8(rgba.rgbGreen), u8(rgba.rgbBlue), u8(rgba.rgbReserved)}
-			//fmt.printfln("rgb[%3d]: %v", i, palette[i])
-		}
-
-		po, err = os.seek(fd, 0, 1)
-		fmt.printfln("po: %d", po)
-
-		stride := ((i32((i32(bih.biWidth) * i32(bih.biBitCount)) + 31) & ~i32(31)) >> 3)
-		biSizeImage := abs(bih.biHeight) * stride
-		fmt.printfln("biSizeImage: %d %d", stride, biSizeImage)
-
-		bytes := make([]u8, biSizeImage)
-		defer delete(bytes)
-
-		n, err = os.read(fd, bytes)
-		fmt.printfln("bytes: %v", bytes)
-
-		//fmt.printfln("bytes: %v", bytes)
-	}
-	/*
-	po, err = os.seek(fd, 0, 1)
-	fmt.printfln("po: %d", po)
-	*/
-	//bih: win32.BITMAPINFOHEADER // (40 bytes)
-}
-
-
-// odinfmt: disable
-
-_andMaskIcon32 := [?]u8 {
-	0xFF, 0xFF, 0xFF, 0xFF,   // line 1
-	0xFF, 0xFF, 0xC3, 0xFF,   // line 2
-	0xFF, 0xFF, 0x00, 0xFF,   // line 3
-	0xFF, 0xFE, 0x00, 0x7F,   // line 4
-	0xFF, 0xFC, 0x00, 0x1F,   // line 5
-	0xFF, 0xF8, 0x00, 0x0F,   // line 6
-	0xFF, 0xF8, 0x00, 0x0F,   // line 7
-	0xFF, 0xF0, 0x00, 0x07,   // line 8
-	0xFF, 0xF0, 0x00, 0x03,   // line 9
-	0xFF, 0xE0, 0x00, 0x03,   // line 10
-	0xFF, 0xE0, 0x00, 0x01,   // line 11
-	0xFF, 0xE0, 0x00, 0x01,   // line 12
-	0xFF, 0xF0, 0x00, 0x01,   // line 13
-	0xFF, 0xF0, 0x00, 0x00,   // line 14
-	0xFF, 0xF8, 0x00, 0x00,   // line 15
-	0xFF, 0xFC, 0x00, 0x00,   // line 16
-	0xFF, 0xFF, 0x00, 0x00,   // line 17
-	0xFF, 0xFF, 0x80, 0x00,   // line 18
-	0xFF, 0xFF, 0xE0, 0x00,   // line 19
-	0xFF, 0xFF, 0xE0, 0x01,   // line 20
-	0xFF, 0xFF, 0xF0, 0x01,   // line 21
-	0xFF, 0xFF, 0xF0, 0x01,   // line 22
-	0xFF, 0xFF, 0xF0, 0x03,   // line 23
-	0xFF, 0xFF, 0xE0, 0x03,   // line 24
-	0xFF, 0xFF, 0xE0, 0x07,   // line 25
-	0xFF, 0xFF, 0xC0, 0x0F,   // line 26
-	0xFF, 0xFF, 0xC0, 0x0F,   // line 27
-	0xFF, 0xFF, 0x80, 0x1F,   // line 28
-	0xFF, 0xFF, 0x00, 0x7F,   // line 29
-	0xFF, 0xFC, 0x00, 0xFF,   // line 30
-	0xFF, 0xF8, 0x03, 0xFF,   // line 31
-	0xFF, 0xFC, 0x3F, 0xFF,   // line 32
-}
-
-_xorMaskIcon32 := [?]u8 {
-	0x00, 0x00, 0x00, 0x00,   // line 1
-	0x00, 0x00, 0x00, 0x00,   // line 2
-	0x00, 0x00, 0x00, 0x00,   // line 3
-	0x00, 0x00, 0x00, 0x00,   // line 4
-	0x00, 0x00, 0x00, 0x00,   // line 5
-	0x00, 0x00, 0x00, 0x00,   // line 6
-	0x00, 0x00, 0x00, 0x00,   // line 7
-	0x00, 0x00, 0x38, 0x00,   // line 8
-	0x00, 0x00, 0x7C, 0x00,   // line 9
-	0x00, 0x00, 0x7C, 0x00,   // line 10
-	0x00, 0x00, 0x7C, 0x00,   // line 11
-	0x00, 0x00, 0x38, 0x00,   // line 12
-	0x00, 0x00, 0x00, 0x00,   // line 13
-	0x00, 0x00, 0x00, 0x00,   // line 14
-	0x00, 0x00, 0x00, 0x00,   // line 15
-	0x00, 0x00, 0x00, 0x00,   // line 16
-	0x00, 0x00, 0x00, 0x00,   // line 17
-	0x00, 0x00, 0x00, 0x00,   // line 18
-	0x00, 0x00, 0x00, 0x00,   // line 19
-	0x00, 0x00, 0x00, 0x00,   // line 20
-	0x00, 0x00, 0x00, 0x00,   // line 21
-	0x00, 0x00, 0x00, 0x00,   // line 22
-	0x00, 0x00, 0x00, 0x00,   // line 23
-	0x00, 0x00, 0x00, 0x00,   // line 24
-	0x00, 0x00, 0x00, 0x00,   // line 25
-	0x00, 0x00, 0x00, 0x00,   // line 26
-	0x00, 0x00, 0x00, 0x00,   // line 27
-	0x00, 0x00, 0x00, 0x00,   // line 28
-	0x00, 0x00, 0x00, 0x00,   // line 29
-	0x00, 0x00, 0x00, 0x00,   // line 30
-	0x00, 0x00, 0x00, 0x00,   // line 31
-	0x00, 0x00, 0x00, 0x00,   // line 32
-}
-
-// odinfmt: enable

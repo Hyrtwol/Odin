@@ -23,5 +23,6 @@ main :: proc() {
 		fmt.printfln("Sorry this tool don't do anything good on %v for now.", ODIN_OS)
 		exit_code = 1
 	}
+	//dump_icon()
 	os.exit(exit_code)
 }

@@ -1,8 +1,40 @@
-//+private file
-//+build linux
+//private file
+//build linux
 package main
 
 import "core:fmt"
 import "core:runtime"
 import "core:path/filepath"
 import "base:intrinsics"
+
+BYTE :: u8
+WORD :: u16
+DWORD :: u32
+LONG :: i32
+
+RGBQUAD :: struct {
+	rgbBlue: BYTE,
+	rgbGreen: BYTE,
+	rgbRed: BYTE,
+	rgbReserved: BYTE,
+}
+
+BITMAPINFOHEADER :: struct {
+	biSize: DWORD,
+	biWidth: LONG,
+	biHeight: LONG,
+	biPlanes: WORD,
+	biBitCount: WORD,
+	biCompression: DWORD,
+	biSizeImage: DWORD,
+	biXPelsPerMeter: LONG,
+	biYPelsPerMeter: LONG,
+	biClrUsed: DWORD,
+	biClrImportant: DWORD,
+}
+
+@(private = "package")
+setup_linux :: proc() -> int {
+	//dump_icon()
+	return 0
+}
