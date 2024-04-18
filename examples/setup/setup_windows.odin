@@ -24,9 +24,9 @@ LONG :: win32.LONG
 RGBQUAD :: win32.RGBQUAD
 BITMAPINFOHEADER :: win32.BITMAPINFOHEADER
 
-_Path_Separator          :: '\\'
-_Path_Separator_Str      :: "\\"
-_Path_List_Separator     :: ';'
+_Path_Separator :: '\\'
+_Path_Separator_Str :: "\\"
+_Path_List_Separator :: ';'
 _Path_List_Separator_Str :: ";"
 
 // https://learn.microsoft.com/en-us/windows/win32/sysinfo/enumerating-registry-subkeys
@@ -41,7 +41,12 @@ MAX_VALUE_NAME: win32.DWORD : 16383
 IDI_ICON1 :: 1 // TODO 101
 IDI_ICON2 :: 2 // TODO 102
 
-has_ansi_terminal_colours := false
+terminal_colour_flag :: enum {
+	STD_OUTPUT,
+	STD_ERROR,
+}
+terminal_colours :: bit_set[terminal_colour_flag]
+has_terminal_colours: terminal_colours = {}
 wanted_code_page := win32.CODEPAGE.UTF8
 
 show_small_icons := true
@@ -392,7 +397,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 				hr := win32.GetDIBits(dc, icon_info.hbmColor, 0, win32.UINT(height), &pixels[0], &bmi, win32.DIB_RGB_COLORS)
 				if win32.FAILED(hr) {
 					show_last_error("GetDIBits")
-				} else if has_ansi_terminal_colours {
+				} else if .STD_OUTPUT in has_terminal_colours {
 					if show_small_icons {
 						print_icon_small(pixels, width, height)
 					} else {
@@ -600,11 +605,16 @@ reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := cont
 */
 check_virtual_terminal_level :: proc() {
 
-	fmt.println("Terminal Colors:", has_ansi_terminal_colours)
+	sub_key :: "Console"
+	key_name :: "VirtualTerminalLevel"
+
+	fmt.print("Terminal Colors:")
+	for tc in has_terminal_colours {fmt.printf(" %s", tc)}
+	fmt.println()
 
 	virtual_terminal_level: string
 	{
-		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Console", 0, win32.KEY_READ)
+		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, sub_key, 0, win32.KEY_READ)
 		if err != 0 {return}
 		defer win32.RegCloseKey(hKey)
 
@@ -618,7 +628,7 @@ check_virtual_terminal_level :: proc() {
 				key, value: string
 				key, value, err = reg_enum_value(hKey, i)
 				if err == 0 {
-					if key == "VirtualTerminalLevel" {
+					if key == key_name {
 						virtual_terminal_level = value
 						break
 					}
@@ -627,24 +637,23 @@ check_virtual_terminal_level :: proc() {
 		}
 	}
 	if virtual_terminal_level == "DWORD: 0x1" {
-		fmt.println("Found HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001 👍")
+		fmt.println("Found HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001 👍")
 	} else {
-		// fmt.println("Adding HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001")
-		fmt.println("VirtualTerminalLevel:", virtual_terminal_level)
+		// fmt.println("Adding HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001")
+		fmt.println(key_name + ":", virtual_terminal_level)
 
-		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Console", 0, win32.KEY_WRITE)
+		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, sub_key, 0, win32.KEY_WRITE)
 		if err != 0 {
 			fmt.eprint("reg_open_key:", err)
 			return
 		}
 		defer win32.RegCloseKey(hKey)
-		//v := (^win32.BYTE)(rawptr(uintptr(win32.DWORD(1))))
-		v : win32.DWORD = 1
-		status := win32.RegSetValueExW(hKey, L("VirtualTerminalLevel"), 0, win32.REG_DWORD, (^win32.BYTE)(&v), size_of(win32.DWORD))
+		value: win32.DWORD = 1
+		status := win32.RegSetValueExW(hKey, L(key_name), 0, win32.REG_DWORD, (^win32.BYTE)(&value), size_of(win32.DWORD))
 		if win32.FAILED(status) {
 			fmt.eprint("RegSetValueExW:", status)
 		} else {
-			fmt.println("Added HKEY_CURRENT_USER\\Console\\VirtualTerminalLevel=dword:00000001 👍")
+			fmt.println("Added HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001 👍")
 		}
 	}
 }
@@ -652,7 +661,7 @@ check_virtual_terminal_level :: proc() {
 check_environment_variables :: proc() {
 
 	odin_root := strings.trim_right(ODIN_ROOT, _Path_Separator_Str)
-	fmt.println("odin_root:", odin_root)
+	//fmt.println("odin_root:", odin_root)
 
 	found_odin_root := ""
 	found_path := ""
@@ -677,17 +686,17 @@ check_environment_variables :: proc() {
 				key, value, err = reg_enum_value(hKey, i)
 				if err == 0 {
 					switch key {
-						case  "ODIN_ROOT":
-							found_odin_root = value
-						case  "Path":
-							found_path = value
+					case "ODIN_ROOT":
+						found_odin_root = value
+					case "Path":
+						found_path = value
 					}
 					//fmt.println("Value:", i, key, value)
 				}
 			}
 		}
 	}
-	fmt.println("found_odin_root:", found_odin_root)
+	fmt.println("Found environment variable ODIN_ROOT:", found_odin_root)
 	if odin_root != found_odin_root {
 
 		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Environment", 0, win32.KEY_WRITE)
@@ -697,7 +706,7 @@ check_environment_variables :: proc() {
 		}
 		defer win32.RegCloseKey(hKey)
 		v := utf8_to_wstring(odin_root)
-		status := win32.RegSetValueExW(hKey, L("ODIN_ROOT"), 0, win32.REG_SZ, (^win32.BYTE)(v), u32(len(odin_root)*size_of(win32.WCHAR)))
+		status := win32.RegSetValueExW(hKey, L("ODIN_ROOT"), 0, win32.REG_SZ, (^win32.BYTE)(v), u32(len(odin_root) * size_of(win32.WCHAR)))
 		if win32.FAILED(status) {
 			fmt.eprintln("RegSetValueExW:", status)
 		} else {
@@ -706,18 +715,19 @@ check_environment_variables :: proc() {
 	}
 
 	if found_path != "" {
-		fmt.println("Path:", found_path)
+		odin_root_path :: "%ODIN_ROOT%"
+		//fmt.println("Path:", found_path)
 		parts := strings.split(found_path, _Path_List_Separator_Str)
 		found := false
 		for p in parts {
-			if p == "%ODIN_ROOT%" {
+			if p == odin_root_path {
 				found = true
 			}
 		}
 		if !found {
-			fmt.eprintln("ODIN_ROOT is not added to the PATH")
+			fmt.eprintln(odin_root_path + " is not added to the PATH")
 		} else {
-			fmt.printfln("ODIN_ROOT found in the PATH 👍")
+			fmt.println(odin_root_path + " found in the PATH 👍")
 		}
 	}
 }
@@ -868,13 +878,22 @@ setup_windows :: proc() -> int {
 
 @(init)
 init_console :: proc() {
-
-	hnd := win32.GetStdHandle(win32.STD_OUTPUT_HANDLE)
-	mode: win32.DWORD = 0
-	if win32.GetConsoleMode(hnd, &mode) {
-		if win32.SetConsoleMode(hnd, mode | win32.ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
-			has_ansi_terminal_colours = true
+	enable_virtual_terminal_processing :: proc(which: win32.DWORD) -> bool {
+		hnd := win32.GetStdHandle(which)
+		mode: win32.DWORD = 0
+		if win32.GetConsoleMode(hnd, &mode) {
+			if win32.SetConsoleMode(hnd, mode | win32.ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
+				return true
+			}
 		}
+		return false
+	}
+	has_terminal_colours = {}
+	if enable_virtual_terminal_processing(win32.STD_OUTPUT_HANDLE) {
+		has_terminal_colours |= {.STD_OUTPUT}
+	}
+	if enable_virtual_terminal_processing(win32.STD_ERROR_HANDLE) {
+		has_terminal_colours |= {.STD_ERROR}
 	}
 
 	cpi, cpo := win32.GetConsoleCP(), win32.GetConsoleOutputCP()
