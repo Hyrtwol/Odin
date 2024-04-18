@@ -1,5 +1,5 @@
 //private file
-//build linux
+//+build linux
 package main
 
 import "core:fmt"
@@ -32,6 +32,11 @@ BITMAPINFOHEADER :: struct {
 	biClrUsed: DWORD,
 	biClrImportant: DWORD,
 }
+
+_Path_Separator          :: '/'
+_Path_Separator_Str      :: "/"
+_Path_List_Separator     :: ':'
+_Path_List_Separator_Str :: ":"
 
 @(private = "package")
 setup_linux :: proc() -> int {

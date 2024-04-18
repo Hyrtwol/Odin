@@ -24,6 +24,11 @@ LONG :: win32.LONG
 RGBQUAD :: win32.RGBQUAD
 BITMAPINFOHEADER :: win32.BITMAPINFOHEADER
 
+_Path_Separator          :: '\\'
+_Path_Separator_Str      :: "\\"
+_Path_List_Separator     :: ';'
+_Path_List_Separator_Str :: ";"
+
 // https://learn.microsoft.com/en-us/windows/win32/sysinfo/enumerating-registry-subkeys
 MAX_KEY_LENGTH: win32.DWORD : 255
 MAX_VALUE_NAME: win32.DWORD : 16383
@@ -571,6 +576,10 @@ reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := cont
 				aerr: runtime.Allocator_Error
 				value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
 				err = i32(aerr)
+			case win32.REG_EXPAND_SZ:
+				aerr: runtime.Allocator_Error
+				value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
+				err = i32(aerr)
 			case win32.REG_DWORD:
 				assert(cbData == size_of(win32.DWORD))
 				value = fmt.tprintf("DWORD: %#X", data[0])
@@ -640,6 +649,79 @@ check_virtual_terminal_level :: proc() {
 	}
 }
 
+check_environment_variables :: proc() {
+
+	odin_root := strings.trim_right(ODIN_ROOT, _Path_Separator_Str)
+	fmt.println("odin_root:", odin_root)
+
+	found_odin_root := ""
+	found_path := ""
+	{
+		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Environment", 0, win32.KEY_READ)
+		if err != 0 {
+			fmt.eprint("reg_open_key:", err)
+			return
+		}
+		defer win32.RegCloseKey(hKey)
+
+		rq: reg_query
+		err = reg_query_info_key(hKey, &rq)
+		if err != 0 {
+			fmt.eprint("reg_query_info_key:", hKey, err)
+			return
+		}
+
+		if rq.cValues > 0 {
+			for i in 0 ..< rq.cValues {
+				key, value: string
+				key, value, err = reg_enum_value(hKey, i)
+				if err == 0 {
+					switch key {
+						case  "ODIN_ROOT":
+							found_odin_root = value
+						case  "Path":
+							found_path = value
+					}
+					//fmt.println("Value:", i, key, value)
+				}
+			}
+		}
+	}
+	fmt.println("found_odin_root:", found_odin_root)
+	if odin_root != found_odin_root {
+
+		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Environment", 0, win32.KEY_WRITE)
+		if err != 0 {
+			fmt.eprint("reg_open_key:", err)
+			return
+		}
+		defer win32.RegCloseKey(hKey)
+		v := utf8_to_wstring(odin_root)
+		status := win32.RegSetValueExW(hKey, L("ODIN_ROOT"), 0, win32.REG_SZ, (^win32.BYTE)(v), u32(len(odin_root)*size_of(win32.WCHAR)))
+		if win32.FAILED(status) {
+			fmt.eprintln("RegSetValueExW:", status)
+		} else {
+			fmt.printfln("Added HKEY_CURRENT_USER\\Environment\\ODIN_ROOT=%s 👍", v)
+		}
+	}
+
+	if found_path != "" {
+		fmt.println("Path:", found_path)
+		parts := strings.split(found_path, _Path_List_Separator_Str)
+		found := false
+		for p in parts {
+			if p == "%ODIN_ROOT%" {
+				found = true
+			}
+		}
+		if !found {
+			fmt.eprintln("ODIN_ROOT is not added to the PATH")
+		} else {
+			fmt.printfln("ODIN_ROOT found in the PATH 👍")
+		}
+	}
+}
+
 check_acp :: proc() {
 	acp := win32.GetACP()
 	if acp == wanted_code_page {
@@ -693,6 +775,7 @@ setup_windows :: proc() -> int {
 	add_args_to_commands()
 
 	check_virtual_terminal_level()
+	check_environment_variables()
 	check_acp()
 
 	if .si in cmds {
@@ -734,9 +817,9 @@ setup_windows :: proc() -> int {
 
 		{
 			fmt.printf("  %-20s: %d (0x%X)", "Language", langid, langid)
-			lname, err := get_language_name(u32(langid), allocator = context.temp_allocator)
+			language_name, err := get_language_name(u32(langid), allocator = context.temp_allocator)
 			if err == 0 {
-				fmt.printf(" \"%s\"", lname)
+				fmt.printf(" \"%s\"", language_name)
 			} else {
 				fmt.printf(" language not found: 0x%X %v", langid, err)
 			}
@@ -753,10 +836,6 @@ setup_windows :: proc() -> int {
 		}
 	}
 	show_module(odin_path)
-
-	// https://ss64.com/nt/syntax-ansi.html
-	// https://github.com/Microsoft/Terminal/tree/main/src/tools/ColorTool
-
 
 	//changed = true
 
@@ -784,15 +863,13 @@ setup_windows :: proc() -> int {
 		win32.SHChangeNotify(win32.SHCNE_ASSOCCHANGED, win32.SHCNF_IDLIST, nil, nil)
 	}
 
-	//dump_icon()
-
 	return 0
 }
 
 @(init)
 init_console :: proc() {
 
-	hnd := win32.GetStdHandle(win32.STD_ERROR_HANDLE)
+	hnd := win32.GetStdHandle(win32.STD_OUTPUT_HANDLE)
 	mode: win32.DWORD = 0
 	if win32.GetConsoleMode(hnd, &mode) {
 		if win32.SetConsoleMode(hnd, mode | win32.ENABLE_VIRTUAL_TERMINAL_PROCESSING) {

@@ -8,6 +8,7 @@ devmodew
 dword
 dxgi
 dynlib
+eprint
 eprintfln
 eprintln
 erasebkgnd
