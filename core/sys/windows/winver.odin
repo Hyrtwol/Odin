@@ -15,8 +15,6 @@ foreign version {
 	VerQueryValueW :: proc(pBlock: LPCVOID, lpSubBlock: LPCWSTR, lplpBuffer: ^LPVOID, puLen: PUINT) -> BOOL ---
 }
 
-RT_VERSION :: 16 // MAKEINTRESOURCE(16) //TODO move to WinUser.h
-
 FILE_VER_GET :: enum DWORD {LOCALISED, NEUTRAL, PREFETCHED}
 FILE_VER_GET_FLAGS :: bit_set[FILE_VER_GET; DWORD]
 

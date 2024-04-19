@@ -23,6 +23,14 @@
 using namespace std;
 using namespace std::filesystem;
 
+static std::string ConvertLPCWSTRToString(const LPCWSTR lpcwszStr)
+{
+	int strLength = WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, nullptr, 0, nullptr, nullptr) - 1;
+	string str(strLength, 0);
+	WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, &str[0], strLength, nullptr, nullptr);
+	return std::string(str);
+}
+
 #define test_proc_begin() out \
 	<< endl \
 	<< "@(test)" << endl \
@@ -51,39 +59,16 @@ using namespace std::filesystem;
 
 #define expect_value_64(s) out \
 	<< '\t' << "expect_value_64(t, u64(win32." << #s << "), " \
-	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << (ULONGLONG)(ULONG_PTR)(s) << ")" << endl
 
-////std::string trim(std::u16string u16) {
-//std::string trim(const LPCWSTR lpName) {
-//
-////std::u16string u16 = std::u16string((char16_t*)*lpName);
-////void* p = lpName;
-//std::u16string u16 = std::u16string(reinterpret_cast<char16_t*>(lpName));
-//
-//// UTF-16/char16_t to UTF-8
-//std::string u8_conv = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16);
-//return u8_conv;
-///*
-//std::cout << "\nUTF-16 to UTF-8 conversion produced "
-//<< std::dec << u8_conv.size() << " bytes:\n" << std::hex;
-//for (char c : u8_conv)
-//std::cout << +static_cast<unsigned char>(c) << ' ';
-//std::cout << '\n';
-//*/
-//}
-
-std::string ConvertLPCWSTRToString(const LPCWSTR lpcwszStr)
-{
-	int strLength = WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, nullptr, 0, nullptr, nullptr) - 1;
-	string str(strLength, 0);
-	WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, &str[0], strLength, nullptr, nullptr);
-	return std::string(str);
-}
+#define expect_value_uintptr(s) out \
+	<< '\t' << "expect_value_64(t, uintptr(win32." << #s << "), " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << (ULONG_PTR)(s) << ")" << endl
 
 #define expect_value_str(s) out \
 	<< '\t' << "expect_value_str(t, win32." << #s << ", L(\"" << ConvertLPCWSTRToString(s) << "\"))" << endl
 
-void verify_win32_type_sizes(ofstream& out) {
+static void verify_win32_type_sizes(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("minwindef.h");
 	expect_size(ULONG);	  // unsigned long
@@ -220,7 +205,7 @@ void verify_win32_type_sizes(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_macros(ofstream& out) {
+static void verify_macros(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("minwindef.h");
 	expect_value(MAKEWORD(1, 2));
@@ -247,7 +232,7 @@ void verify_macros(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_winnt(ofstream& out) {
+static void verify_winnt(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winnt.h");
 	expect_size(CHAR);
@@ -280,7 +265,7 @@ void verify_winnt(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_winuser(ofstream& out) {
+static void verify_winuser(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winuser.h");
 	//expect_value(UOI_FLAGS);
@@ -318,10 +303,42 @@ void verify_winuser(ofstream& out) {
 	expect_value_64(HWND_BROADCAST);
 	expect_value_64(HWND_MESSAGE);
 
+	expect_value_uintptr(MAKEINTRESOURCEW(1));
+	expect_value_uintptr(MAKEINTRESOURCEW(0x12345678));
+
+	expect_value_uintptr(RT_CURSOR);
+	expect_value_uintptr(RT_BITMAP);
+	expect_value_uintptr(RT_ICON);
+	expect_value_uintptr(RT_MENU);
+	expect_value_uintptr(RT_DIALOG);
+	expect_value_uintptr(RT_STRING);
+	expect_value_uintptr(RT_FONTDIR);
+	expect_value_uintptr(RT_FONT);
+	expect_value_uintptr(RT_ACCELERATOR);
+	expect_value_uintptr(RT_RCDATA);
+	expect_value_uintptr(RT_MESSAGETABLE);
+	expect_value_uintptr(RT_GROUP_CURSOR);
+	expect_value_uintptr(RT_GROUP_ICON);
+	expect_value_uintptr(RT_VERSION);
+	expect_value_uintptr(RT_DLGINCLUDE);
+	expect_value_uintptr(RT_PLUGPLAY);
+	expect_value_uintptr(RT_VXD);
+	expect_value_uintptr(RT_ANICURSOR);
+	expect_value_uintptr(RT_ANIICON);
+	expect_value_uintptr(RT_MANIFEST);
+
+	expect_value_uintptr(CREATEPROCESS_MANIFEST_RESOURCE_ID);
+	expect_value_uintptr(ISOLATIONAWARE_MANIFEST_RESOURCE_ID);
+	expect_value_uintptr(ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID);
+	expect_value_uintptr(ISOLATIONPOLICY_MANIFEST_RESOURCE_ID);
+	expect_value_uintptr(ISOLATIONPOLICY_BROWSER_MANIFEST_RESOURCE_ID);
+	expect_value_uintptr(MINIMUM_RESERVED_MANIFEST_RESOURCE_ID);
+	expect_value_uintptr(MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID);
+
 	test_proc_end();
 }
 
-void verify_gdi32(ofstream& out) {
+static void verify_gdi32(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("wingdi.h");
 	expect_size(DEVMODEW);
@@ -476,7 +493,7 @@ void verify_gdi32(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_winmm(ofstream& out) {
+static void verify_winmm(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("timeapi.h");
 	expect_size(TIMECAPS);
@@ -491,14 +508,14 @@ void verify_winmm(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_advapi32(ofstream& out) {
+static void verify_advapi32(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("wincrypt.h");
 	expect_size(HCRYPTPROV);
 	test_proc_end();
 }
 
-void verify_winnls(ofstream& out) {
+static void verify_winnls(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winnls.h");
 	expect_value(CP_ACP);
@@ -519,7 +536,7 @@ void verify_winnls(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_winreg(ofstream& out) {
+static void verify_winreg(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winreg.h");
 
@@ -572,7 +589,7 @@ void verify_winreg(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_verrsrc(ofstream& out) {
+static void verify_verrsrc(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("verrsrc.h");
 	//expect_value_64(VS_FILE_INFO);
@@ -589,7 +606,7 @@ void verify_verrsrc(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_error_codes(ofstream& out) {
+static void verify_error_codes(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winerror.h");
 
@@ -656,7 +673,7 @@ void verify_error_codes(ofstream& out) {
 	test_proc_end();
 }
 
-void verify_error_helpers(ofstream& out) {
+static void verify_error_helpers(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winerror.h");
 
@@ -682,7 +699,7 @@ void verify_error_helpers(ofstream& out) {
 	test_proc_end();
 }
 
-void test_core_sys_windows(ofstream& out) {
+static void test_core_sys_windows(ofstream& out) {
 	out << "//+build windows" << endl
 		<< "package " << __func__
 		<< " // generated by " << path(__FILE__).filename().replace_extension("").string() << endl
