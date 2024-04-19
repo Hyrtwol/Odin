@@ -405,7 +405,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 				} else if .STD_OUTPUT in has_terminal_colors {
 					if .show_small_icons in options {
 						print_icon_small(pixels, width, height)
-					} else if .show_big_icons in options{
+					} else if .show_big_icons in options {
 						print_icon_big(pixels, width, height)
 					}
 				} else {
@@ -417,10 +417,39 @@ show_icon_info :: proc(icon: win32.HICON) {
 }
 
 show_icon :: proc(module: win32.HMODULE, icon_id: int) {
-	icon := win32.LoadIconW(win32.HINSTANCE(module), win32.MAKEINTRESOURCEW(icon_id))
+	hResource := win32.FindResourceW(module, win32.MAKEINTRESOURCEW(icon_id), win32.RT_GROUP_ICON)
+	if hResource == nil {
+		show_last_error("FindResource")
+		return
+	}
+	print_key_value("Resource", hResource)
+
+	hMem := win32.LoadResource(module, hResource)
+	lpResource := win32.LockResource(hMem)
+
+	//cx, cy : i32 = win32.SM_CXICON, win32.SM_CXICON
+	icon_size: i32 = 16
+
+	nID := win32.LookupIconIdFromDirectoryEx(win32.PBYTE(lpResource), true, icon_size, icon_size, win32.LR_DEFAULTCOLOR)
+	print_key_value("nID", nID)
+
+
+	hResource = win32.FindResourceW(module, win32.MAKEINTRESOURCEW(nID), win32.MAKEINTRESOURCEW(uintptr(win32.RT_ICON)))
+	if hResource == nil {
+		show_last_error("FindResource")
+		return
+	}
+	print_key_value("Resource", hResource)
+
+	hMem = win32.LoadResource(module, hResource)
+	lpResource = win32.LockResource(hMem)
+
+	icon := win32.CreateIconFromResourceEx(win32.PBYTE(lpResource), win32.SizeofResource(module, hResource), true, 0x00030000, icon_size, icon_size, win32.LR_DEFAULTCOLOR)
+	//icon := win32.LoadIconW(win32.HINSTANCE(module), win32.MAKEINTRESOURCEW(icon_id))
 	if .module_info in options {
 		print_key_value("Icon", icon)
 	}
+
 	if icon == nil {return}
 	show_icon_info(icon)
 }
@@ -732,7 +761,7 @@ check_environment_variables :: proc() {
 	}
 
 	if .environment_variables in options {
-		fmt.println("Environment Variables")
+		fmt.println("[Environment Variables]")
 		envVarStrings: []wstring = {
 			L("OS         = %OS%"),
 			//L("PATH       = %PATH%"),
@@ -746,13 +775,13 @@ check_environment_variables :: proc() {
 		for evs in envVarStrings {
 			bufCharCount := win32.ExpandEnvironmentStringsW(evs, &infoBuf[0], INFO_BUFFER_SIZE)
 			if (bufCharCount > INFO_BUFFER_SIZE) {
-				fmt.printfln("\t(Buffer too small to expand: \"%s\")", evs)
+				fmt.printfln("  (Buffer too small to expand: \"%s\")", evs)
 			} else if bufCharCount == 0 {
-				fmt.eprintln("ExpandEnvironmentStrings")
+				fmt.eprintln("  ExpandEnvironmentStrings")
 			} else {
 				val, err := wstring_to_utf8(&infoBuf[0], int(bufCharCount))
 				if err == nil {
-					fmt.printfln("\t%s", val)
+					fmt.printfln("  %s", val)
 				}
 			}
 		}
