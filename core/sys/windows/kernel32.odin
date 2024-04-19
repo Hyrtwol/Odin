@@ -227,6 +227,7 @@ foreign kernel32 {
 	SetEnvironmentVariableW :: proc(n: LPCWSTR, v: LPCWSTR) -> BOOL ---
 	GetEnvironmentStringsW :: proc() -> LPWCH ---
 	FreeEnvironmentStringsW :: proc(env_ptr: LPWCH) -> BOOL ---
+	ExpandEnvironmentStringsW :: proc(lpSrc: LPCWSTR, lpDst: LPWSTR, nSize: DWORD) -> DWORD ---
 	GetModuleFileNameW :: proc(hModule: HMODULE, lpFilename: LPWSTR, nSize: DWORD) -> DWORD ---
 	CreateDirectoryW :: proc(
 		lpPathName: LPCWSTR,
