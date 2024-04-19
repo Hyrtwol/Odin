@@ -376,6 +376,15 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(GLYPHMETRICSFLOAT);
 	// expect_size(LOGPALETTE);
 	expect_size(PALETTEENTRY);
+	expect_size(DESIGNVECTOR);
+	expect_value(LF_FACESIZE);
+	expect_value(LF_FULLFACESIZE);
+	expect_size(LOGFONTW);
+	expect_size(ENUMLOGFONTW);
+	expect_size(ENUMLOGFONTEXW);
+	expect_size(ENUMLOGFONTEXDVW);
+	expect_size(NEWTEXTMETRICW);
+
 	expect_size(LAYERPLANEDESCRIPTOR);
 	expect_size(COLOR16);
 	expect_size(TRIVERTEX);
