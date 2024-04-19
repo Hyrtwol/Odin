@@ -416,41 +416,22 @@ show_icon_info :: proc(icon: win32.HICON) {
 	}
 }
 
-show_icon :: proc(module: win32.HMODULE, icon_id: int) {
+show_icon :: proc(module: win32.HMODULE, icon_id: int, icon_size: i32 = 16) {
 	hResource := win32.FindResourceW(module, win32.MAKEINTRESOURCEW(icon_id), win32.RT_GROUP_ICON)
-	if hResource == nil {
-		show_last_error("FindResource")
-		return
-	}
-	print_key_value("Resource", hResource)
-
+	if hResource == nil {show_last_error("FindResource");return}
 	hMem := win32.LoadResource(module, hResource)
 	lpResource := win32.LockResource(hMem)
-
-	//cx, cy : i32 = win32.SM_CXICON, win32.SM_CXICON
-	icon_size: i32 = 16
-
 	nID := win32.LookupIconIdFromDirectoryEx(win32.PBYTE(lpResource), true, icon_size, icon_size, win32.LR_DEFAULTCOLOR)
-	print_key_value("nID", nID)
-
-
 	hResource = win32.FindResourceW(module, win32.MAKEINTRESOURCEW(nID), win32.MAKEINTRESOURCEW(uintptr(win32.RT_ICON)))
-	if hResource == nil {
-		show_last_error("FindResource")
-		return
-	}
-	print_key_value("Resource", hResource)
-
+	if hResource == nil {show_last_error("FindResource");return}
 	hMem = win32.LoadResource(module, hResource)
 	lpResource = win32.LockResource(hMem)
-
 	icon := win32.CreateIconFromResourceEx(win32.PBYTE(lpResource), win32.SizeofResource(module, hResource), true, 0x00030000, icon_size, icon_size, win32.LR_DEFAULTCOLOR)
-	//icon := win32.LoadIconW(win32.HINSTANCE(module), win32.MAKEINTRESOURCEW(icon_id))
+	if icon == nil {show_last_error("CreateIconFromResourceEx");return}
+
 	if .module_info in options {
 		print_key_value("Icon", icon)
 	}
-
-	if icon == nil {return}
 	show_icon_info(icon)
 }
 
@@ -833,6 +814,8 @@ check_acp :: proc() {
 
 	fmt.println("Found:", ACP, OEMCP, MACCP)
 }
+
+// HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\App Paths
 
 @(private = "package")
 setup_windows :: proc() -> int {
