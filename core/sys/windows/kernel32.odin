@@ -436,7 +436,10 @@ foreign kernel32 {
 	EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
 	EnumResourceNamesExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
 	EnumResourceTypesExW :: proc(hModule: HMODULE, lpEnumFunc: ENUMRESTYPEPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
-	EnumResourceLanguagesExW :: proc( hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, lpEnumFunc: ENUMRESLANGPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	EnumResourceLanguagesExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, lpEnumFunc: ENUMRESLANGPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	LookupIconIdFromDirectory :: proc(presbits: PBYTE, fIcon: BOOL) -> INT ---
+	LookupIconIdFromDirectoryEx :: proc(presbits: PBYTE, fIcon: BOOL, cxDesired: INT, cyDesired: INT, Flags: UINT) -> INT ---
+
 
 	GetFullPathNameW  :: proc(filename: LPCWSTR, buffer_length: DWORD, buffer: LPCWSTR, file_part: ^LPCWSTR) -> DWORD ---
 	GetLongPathNameW  :: proc(short, long: LPCWSTR, len: DWORD) -> DWORD ---

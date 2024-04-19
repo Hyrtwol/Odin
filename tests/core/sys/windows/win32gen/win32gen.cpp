@@ -272,7 +272,11 @@ static void verify_winuser(ofstream& out) {
 	expect_size(USEROBJECTFLAGS);
 	expect_size(MSG);
 	expect_size(WINDOWPOS);
+	expect_size(ACCEL);
 	expect_size(PAINTSTRUCT);
+	expect_size(CREATESTRUCTW);
+	expect_size(WINDOWPLACEMENT);
+
 	expect_size(MOUSEINPUT);
 	expect_size(KEYBDINPUT);
 	expect_size(HARDWAREINPUT);
@@ -294,7 +298,6 @@ static void verify_winuser(ofstream& out) {
 	expect_size(RID_DEVICE_INFO_MOUSE);
 	expect_size(RID_DEVICE_INFO);
 
-	expect_size(WINDOWPLACEMENT);
 	expect_size(WINDOWINFO);
 	expect_size(DRAWTEXTPARAMS);
 	expect_size(BSMINFO);

@@ -62,7 +62,7 @@ option_flag :: enum u8 {
 	show_big_icons,
 }
 option_flags :: bit_set[option_flag]
-options: option_flags = {.icon, .show_small_icons}
+options: option_flags = {.show_small_icons}
 all: u16 = max(u16)
 
 add_args_to_commands :: proc() {
@@ -552,9 +552,8 @@ reg_enum_key :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := contex
 	return
 }
 
-ERROR_MORE_DATA :: i32(os.ERROR_MORE_DATA)
-
 reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := context.temp_allocator) -> (key, value: string, err: i32) {
+	//ERROR_MORE_DATA :: i32(os.ERROR_MORE_DATA)
 
 	wchValue: [MAX_VALUE_NAME]win32.WCHAR
 	cchValue := MAX_VALUE_NAME
@@ -604,10 +603,6 @@ reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := cont
 	return
 }
 
-/*
-[HKEY_CURRENT_USER\Console]
-"VirtualTerminalLevel"=dword:00000001
-*/
 check_virtual_terminal_level :: proc() {
 
 	sub_key :: "Console"

@@ -126,11 +126,13 @@ foreign user32 {
 	GetDlgCtrlID :: proc(hWnd: HWND) -> INT ---
 	GetDlgItem :: proc(hDlg: HWND, nIDDlgItem: INT) -> HWND ---
 
-	CreatePopupMenu :: proc() -> HMENU ---
-	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
-	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
-	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x: int, y: int, nReserved: int, hWnd: HWND, prcRect: ^RECT) -> i32 ---
 	RegisterWindowMessageW :: proc(lpString: LPCWSTR) -> UINT ---
+
+	CreateAcceleratorTableW :: proc(paccel: LPACCEL, cAccel: INT) -> HACCEL ---
+	DestroyAcceleratorTable :: proc(hAccel: HACCEL) -> BOOL ---
+	LoadAcceleratorsW :: proc(hInstance: HINSTANCE, lpTableName: LPCWSTR) -> HACCEL ---
+	TranslateAcceleratorW :: proc(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG) -> INT ---
+	CopyAcceleratorTableW :: proc(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: INT) -> INT ---
 
 	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT = nil, bErase: BOOL = false) -> BOOL ---
 	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT = nil) -> BOOL ---
@@ -259,6 +261,15 @@ foreign user32 {
 
 	GetSystemMenu :: proc(hWnd: HWND, bRevert: BOOL) -> HMENU ---
 	EnableMenuItem :: proc(hMenu: HMENU, uIDEnableItem: UINT, uEnable: UINT) -> BOOL ---
+	MenuItemFromPoint :: proc(hWnd: HWND, hMenu: HMENU, ptScreen: POINT) -> INT ---
+	GetMenu :: proc(hWnd: HWND) -> HMENU ---
+	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
+	CreateMenu :: proc() -> HMENU ---
+	CreatePopupMenu :: proc() -> HMENU ---
+	DeleteMenu :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT) -> BOOL ---
+	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
+	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
+	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x, y: INT, nReserved: INT, hWnd: HWND, prcRect: ^RECT) -> BOOL ---
 
 	DrawTextW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat) -> INT ---
 	DrawTextExW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat, lpdtp: PDRAWTEXTPARAMS) -> INT ---
@@ -639,3 +650,11 @@ ISOLATIONPOLICY_MANIFEST_RESOURCE_ID               :: LPWSTR(uintptr(0x00000004)
 ISOLATIONPOLICY_BROWSER_MANIFEST_RESOURCE_ID       :: LPWSTR(uintptr(0x00000005))
 MINIMUM_RESERVED_MANIFEST_RESOURCE_ID              :: LPWSTR(uintptr(0x00000001))
 MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID              :: LPWSTR(uintptr(0x00000010))
+
+ACCEL :: struct {
+	/* Also called the flags field */
+	fVirt: BYTE,
+	key: WORD,
+	cmd: WORD,
+}
+LPACCEL :: ^ACCEL

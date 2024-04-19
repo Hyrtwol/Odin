@@ -42,6 +42,7 @@ HFONT :: distinct HANDLE
 HRGN :: distinct HANDLE
 HRSRC :: distinct HANDLE
 HWINSTA :: distinct HANDLE
+HACCEL :: distinct HANDLE
 BOOL :: distinct b32
 BYTE :: distinct u8
 BOOLEAN :: distinct b8
