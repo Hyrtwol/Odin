@@ -62,7 +62,7 @@ option_flag :: enum u8 {
 	show_big_icons,
 }
 option_flags :: bit_set[option_flag]
-options: option_flags = {.show_small_icons}
+options: option_flags = {.icon, .show_small_icons}
 all: u16 = max(u16)
 
 add_args_to_commands :: proc() {
