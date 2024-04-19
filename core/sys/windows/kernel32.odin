@@ -430,7 +430,7 @@ foreign kernel32 {
 	LoadResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
 	FreeResource :: proc(hResData: HGLOBAL) -> BOOL ---
 	LockResource :: proc(hResData: HGLOBAL) -> LPVOID ---
-	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
+	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> DWORD ---
 	FindResourceW :: proc(hModule: HMODULE, lpName: LPCWSTR, lpType: LPCWSTR) -> HRSRC ---
 	FindResourceExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, wLanguage: LANGID) -> HRSRC ---
 	EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
@@ -439,7 +439,7 @@ foreign kernel32 {
 	EnumResourceLanguagesExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, lpEnumFunc: ENUMRESLANGPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
 	LookupIconIdFromDirectory :: proc(presbits: PBYTE, fIcon: BOOL) -> INT ---
 	LookupIconIdFromDirectoryEx :: proc(presbits: PBYTE, fIcon: BOOL, cxDesired: INT, cyDesired: INT, Flags: UINT) -> INT ---
-
+	CreateIconFromResourceEx :: proc(presbits: PBYTE, dwResSize: DWORD, fIcon: BOOL, dwVer: DWORD, cxDesired: INT, cyDesired: INT, Flags: UINT) -> HICON ---
 
 	GetFullPathNameW  :: proc(filename: LPCWSTR, buffer_length: DWORD, buffer: LPCWSTR, file_part: ^LPCWSTR) -> DWORD ---
 	GetLongPathNameW  :: proc(short, long: LPCWSTR, len: DWORD) -> DWORD ---

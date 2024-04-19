@@ -338,6 +338,23 @@ static void verify_winuser(ofstream& out) {
 	expect_value_uintptr(MINIMUM_RESERVED_MANIFEST_RESOURCE_ID);
 	expect_value_uintptr(MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID);
 
+	expect_value(SM_CXICON);
+	expect_value(SM_CYICON);
+
+	expect_value(LR_DEFAULTCOLOR);
+	expect_value(LR_MONOCHROME);
+	expect_value(LR_COLOR);
+	expect_value(LR_COPYRETURNORG);
+	expect_value(LR_COPYDELETEORG);
+	expect_value(LR_LOADFROMFILE);
+	expect_value(LR_LOADTRANSPARENT);
+	expect_value(LR_DEFAULTSIZE);
+	expect_value(LR_VGACOLOR);
+	expect_value(LR_LOADMAP3DCOLORS);
+	expect_value(LR_CREATEDIBSECTION);
+	expect_value(LR_COPYFROMRESOURCE);
+	expect_value(LR_SHARED);
+
 	test_proc_end();
 }
 
