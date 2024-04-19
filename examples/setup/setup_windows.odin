@@ -37,31 +37,33 @@ MAX_VALUE_NAME: win32.DWORD : 16383
 // https://learn.microsoft.com/en-us/windows/win32/shell/how-to-assign-a-custom-icon-to-a-file-type
 // https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/cc144156(v=vs.85)
 // https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page
+// https://learn.microsoft.com/en-us/windows/win32/sysinfo/getting-system-information
 
 IDI_ICON1 :: 1 // TODO 101
 IDI_ICON2 :: 2 // TODO 102
 
-terminal_colour_flag :: enum {
+terminal_color_flag :: enum {
 	STD_OUTPUT,
 	STD_ERROR,
 }
-terminal_colours :: bit_set[terminal_colour_flag]
-has_terminal_colours: terminal_colours = {}
+terminal_colors :: bit_set[terminal_color_flag]
+has_terminal_colors: terminal_colors = {}
 wanted_code_page := win32.CODEPAGE.UTF8
 
-show_small_icons := true
-
-command_flag :: enum u8 {
-	si,
-	mi,
-	vi,
-	ci,
+option_flag :: enum u8 {
+	sys_info,
+	module_info,
+	version_info,
+	icon_info,
 	icon,
-	lc,
+	language,
+	environment_variables,
+	show_small_icons,
+	show_big_icons,
 }
-commands :: bit_set[command_flag]
-cmds: commands = {.icon}
-all: u8 = 0xFF
+option_flags :: bit_set[option_flag]
+options: option_flags = {.icon, .show_small_icons}
+all: u16 = max(u16)
 
 add_args_to_commands :: proc() {
 	for arg in os.args {
@@ -69,60 +71,60 @@ add_args_to_commands :: proc() {
 			cmd := arg[1:]
 			switch cmd {
 			case "si":
-				cmds += {.si}
+				options += {.sys_info}
 			case "mi":
-				cmds += {.mi}
+				options += {.module_info}
 			case "vi":
-				cmds += {.vi}
+				options += {.version_info}
 			case "ci":
-				cmds += {.ci}
+				options += {.icon_info}
 			case "icon":
-				cmds += {.icon}
+				options += {.icon}
 			case "lc":
-				cmds += {.lc}
+				options += {.environment_variables}
+			case "ev":
+				options += {.language}
 			case "all":
-				cmds = transmute(commands)all
+				options = transmute(option_flags)all
 			}
 		}
 	}
 }
 
 is_user_interactive :: proc() -> bool {
-	isUserNonInteractive := false
+	is_User_non_interactive := false
 	process_window_station := win32.GetProcessWindowStation()
 	if process_window_station != nil {
 		length_needed: win32.DWORD = 0
 		user_object_flags: win32.USEROBJECTFLAGS
 		if win32.GetUserObjectInformationW(win32.HANDLE(process_window_station), .UOI_FLAGS, &user_object_flags, size_of(win32.USEROBJECTFLAGS), &length_needed) {
 			assert(length_needed == size_of(win32.USEROBJECTFLAGS))
-			isUserNonInteractive = (user_object_flags.dwFlags & 1) == 0
+			is_User_non_interactive = (user_object_flags.dwFlags & 1) == 0
 		}
 	}
-	return !isUserNonInteractive
+	return !is_User_non_interactive
 }
 
 show_last_error :: proc(caption: string, loc := #caller_location) {
-	error_text: [512]win32.WCHAR
-
 	fmt.eprintln(caption)
 	last_error := win32.GetLastError()
-
-	error_wstring := wstring(&error_text[0])
-	cch := win32.FormatMessageW(win32.FORMAT_MESSAGE_FROM_SYSTEM | win32.FORMAT_MESSAGE_IGNORE_INSERTS, nil, last_error, win32.LANGID_NEUTRAL, error_wstring, len(error_text) - 1, nil)
-	if cch != 0 {return}
-	error_string, err := wstring_to_utf8(&error_wstring[0], int(cch))
-	if err == .None {
-		fmt.eprintln(error_string)
-	} else {
-		fmt.eprintfln("Last error code: %d (0x%8X)", last_error)
+	error_text: [512]win32.WCHAR
+	cch := win32.FormatMessageW(win32.FORMAT_MESSAGE_FROM_SYSTEM | win32.FORMAT_MESSAGE_IGNORE_INSERTS, nil, last_error, win32.LANGID_NEUTRAL, &error_text[0], len(error_text) - 1, nil)
+	if cch > 0 {
+		error_string, err := wstring_to_utf8(&error_text[0], int(cch))
+		if err == .None {
+			fmt.eprintln(error_string)
+			return
+		}
 	}
+	fmt.eprintfln("Last error code: %d (0x%8X)", last_error)
 }
 
 lcid_to_local_name :: proc(lcid: win32.LCID) -> string {
 	wc: [512]win32.WCHAR
-	cc := win32.LCIDToLocaleName(lcid, &wc[0], len(wc) - 1, 0)
-	if cc != 0 {
-		name, err := wstring_to_utf8(&wc[0], int(cc))
+	cch := win32.LCIDToLocaleName(lcid, &wc[0], len(wc) - 1, 0)
+	if cch != 0 {
+		name, err := wstring_to_utf8(&wc[0], int(cch))
 		if err == .None {
 			return name
 		}
@@ -131,15 +133,15 @@ lcid_to_local_name :: proc(lcid: win32.LCID) -> string {
 }
 
 get_language_name :: proc(lang: win32.DWORD, allocator := context.allocator) -> (res: string, hr: int) {
-	cchLang: win32.DWORD = 255
-	text := make([]u16, cchLang + 1, allocator = context.temp_allocator)
+	cch: win32.DWORD = 255
+	text := make([]u16, cch + 1, allocator = context.temp_allocator)
 	defer delete(text)
-	cchLang = win32.VerLanguageNameW(lang, &text[0], cchLang)
-	if cchLang == 0 {
+	cch = win32.VerLanguageNameW(lang, &text[0], cch)
+	if cch == 0 {
 		hr = -3
 	} else {
 		err: runtime.Allocator_Error
-		res, err = wstring_to_utf8(&text[0], int(cchLang), allocator = allocator)
+		res, err = wstring_to_utf8(&text[0], int(cch), allocator = allocator)
 		hr = int(err)
 	}
 	return
@@ -158,15 +160,15 @@ get_codepage_and_language :: proc(info: []u8) -> (u16, u16, int) {
 }
 
 query_string_file_info :: proc(info: []u8, cplhex, key: string, allocator := context.allocator) -> (text: string, hr: int) {
-	wvalue: wstring
-	len: win32.UINT
+	wtext: wstring
+	cch: win32.UINT
 	cplstr := utf8_to_wstring(fmt.tprintf("\\StringFileInfo\\%s\\%s", cplhex, key))
-	if !win32.VerQueryValueW(&info[0], cplstr, (^rawptr)(&wvalue), &len) {
+	if !win32.VerQueryValueW(&info[0], cplstr, (^rawptr)(&wtext), &cch) {
 		hr = -7
 		return
 	}
 	err: runtime.Allocator_Error
-	text, err = wstring_to_utf8(wvalue, int(len), allocator = allocator)
+	text, err = wstring_to_utf8(wtext, int(cch), allocator = allocator)
 	hr = int(err)
 	return
 }
@@ -276,8 +278,8 @@ show_code_pages :: proc() {
 
 show_system_defaults :: proc() {
 	fmt.println("[System Default]")
-	fmt.printfln("  %-20s: %d", "LangID", win32.GetSystemDefaultLangID())
 	fmt.printfln("  %-20s: %d", "LCID", win32.GetSystemDefaultLCID())
+	fmt.printfln("  %-20s: %d", "LangID", win32.GetSystemDefaultLangID())
 	w: [512]win32.WCHAR
 	cch := win32.GetSystemDefaultLocaleName(wstring(&w), len(w))
 	locale_name, err := wstring_to_utf8(wstring(&w), int(cch))
@@ -301,6 +303,9 @@ show_system_info :: proc() {
 	print_key_value("Maximum Application Address", info.lpMaximumApplicationAddress)
 	print_key_value("Allocation Granularity", info.dwAllocationGranularity)
 }
+
+CHECK_OK :: "👍"
+CHECK_FAIL :: "👎"
 
 ESC :: "\x1B"
 CSI :: ESC + "["
@@ -357,7 +362,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 			if icon_info.hbmMask != nil {win32.DeleteObject(win32.HGDIOBJ(icon_info.hbmMask))}
 			if icon_info.hbmColor != nil {win32.DeleteObject(win32.HGDIOBJ(icon_info.hbmColor))}
 		}
-		if .ci in cmds {
+		if .icon_info in options {
 			print_key_value("Icon", icon_info.fIcon)
 			print_key_value("Hotspot", icon_info.Hotspot)
 			print_key_value("Mask", icon_info.hbmMask)
@@ -368,7 +373,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 			fmt.printfln("  %-20s: \"%s\"", "ModName", wstring(&icon_info.szModName))
 			fmt.printfln("  %-20s: \"%s\"", "ResName", wstring(&icon_info.szResName))
 		}
-		if .icon in cmds {
+		if .icon in options {
 			pixels: []rgba = nil
 
 			if icon_info.hbmColor != nil {
@@ -397,10 +402,10 @@ show_icon_info :: proc(icon: win32.HICON) {
 				hr := win32.GetDIBits(dc, icon_info.hbmColor, 0, win32.UINT(height), &pixels[0], &bmi, win32.DIB_RGB_COLORS)
 				if win32.FAILED(hr) {
 					show_last_error("GetDIBits")
-				} else if .STD_OUTPUT in has_terminal_colours {
-					if show_small_icons {
+				} else if .STD_OUTPUT in has_terminal_colors {
+					if .show_small_icons in options {
 						print_icon_small(pixels, width, height)
-					} else {
+					} else if .show_big_icons in options{
 						print_icon_big(pixels, width, height)
 					}
 				} else {
@@ -413,7 +418,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 
 show_icon :: proc(module: win32.HMODULE, icon_id: int) {
 	icon := win32.LoadIconW(win32.HINSTANCE(module), win32.MAKEINTRESOURCEW(icon_id))
-	if .mi in cmds {
+	if .module_info in options {
 		print_key_value("Icon", icon)
 	}
 	if icon == nil {return}
@@ -422,14 +427,14 @@ show_icon :: proc(module: win32.HMODULE, icon_id: int) {
 
 get_module_filename :: proc(module: win32.HMODULE) -> string {
 	w: [512]win32.WCHAR
-	cc := win32.GetModuleFileNameW(module, &w[0], len(w) - 1)
-	if cc != 0 {
-		name, err := wstring_to_utf8(&w[0], int(cc))
+	cch := win32.GetModuleFileNameW(module, &w[0], len(w) - 1)
+	if cch != 0 {
+		name, err := wstring_to_utf8(&w[0], int(cch))
 		if err == .None {
 			return name
 		}
 	}
-	return "na"
+	return ""
 }
 
 show_module :: proc(path: string) {
@@ -437,7 +442,7 @@ show_module :: proc(path: string) {
 	module := win32.LoadLibraryExW(utf8_to_wstring(path), nil, .LOAD_LIBRARY_AS_DATAFILE)
 	if module == nil {show_last_error("LoadLibraryExW");return}
 	defer {if !win32.FreeLibrary(module) {fmt.eprintln("Unable to free library!")}}
-	if .mi in cmds {
+	if .module_info in options {
 		fmt.println("[Module]")
 		print_key_value("Module Handle", module)
 	}
@@ -609,7 +614,7 @@ check_virtual_terminal_level :: proc() {
 	key_name :: "VirtualTerminalLevel"
 
 	fmt.print("Terminal Colors:")
-	for tc in has_terminal_colours {fmt.printf(" %s", tc)}
+	for tc in has_terminal_colors {fmt.printf(" %s", tc)}
 	fmt.println()
 
 	virtual_terminal_level: string
@@ -637,7 +642,7 @@ check_virtual_terminal_level :: proc() {
 		}
 	}
 	if virtual_terminal_level == "DWORD: 0x1" {
-		fmt.println("Found HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001 👍")
+		fmt.println("Found HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001 " + CHECK_OK)
 	} else {
 		// fmt.println("Adding HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001")
 		fmt.println(key_name + ":", virtual_terminal_level)
@@ -653,7 +658,7 @@ check_virtual_terminal_level :: proc() {
 		if win32.FAILED(status) {
 			fmt.eprint("RegSetValueExW:", status)
 		} else {
-			fmt.println("Added HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001 👍")
+			fmt.println("Added HKEY_CURRENT_USER\\" + sub_key + "\\" + key_name + "=dword:00000001 " + CHECK_OK)
 		}
 	}
 }
@@ -696,7 +701,7 @@ check_environment_variables :: proc() {
 			}
 		}
 	}
-	fmt.println("Found environment variable ODIN_ROOT:", found_odin_root)
+	fmt.printfln("Found environment variable ODIN_ROOT: %s " + CHECK_OK, found_odin_root)
 	if odin_root != found_odin_root {
 
 		hKey, err := reg_open_key(win32.HKEY_CURRENT_USER, "Environment", 0, win32.KEY_WRITE)
@@ -710,7 +715,7 @@ check_environment_variables :: proc() {
 		if win32.FAILED(status) {
 			fmt.eprintln("RegSetValueExW:", status)
 		} else {
-			fmt.printfln("Added HKEY_CURRENT_USER\\Environment\\ODIN_ROOT=%s 👍", v)
+			fmt.printfln("Added HKEY_CURRENT_USER\\Environment\\ODIN_ROOT=%s " + CHECK_OK, v)
 		}
 	}
 
@@ -727,7 +732,34 @@ check_environment_variables :: proc() {
 		if !found {
 			fmt.eprintln(odin_root_path + " is not added to the PATH")
 		} else {
-			fmt.println(odin_root_path + " found in the PATH 👍")
+			fmt.println("Found " + odin_root_path + " in the PATH " + CHECK_OK)
+		}
+	}
+
+	if .environment_variables in options {
+		fmt.println("Environment Variables")
+		envVarStrings: []wstring = {
+			L("OS         = %OS%"),
+			//L("PATH       = %PATH%"),
+			L("HOMEPATH   = %HOMEPATH%"),
+			L("TEMP       = %TEMP%"),
+			L("ODIN_ROOT  = %ODIN_ROOT%"),
+		}
+		INFO_BUFFER_SIZE :: 32767
+		infoBuf: [INFO_BUFFER_SIZE]win32.WCHAR
+
+		for evs in envVarStrings {
+			bufCharCount := win32.ExpandEnvironmentStringsW(evs, &infoBuf[0], INFO_BUFFER_SIZE)
+			if (bufCharCount > INFO_BUFFER_SIZE) {
+				fmt.printfln("\t(Buffer too small to expand: \"%s\")", evs)
+			} else if bufCharCount == 0 {
+				fmt.eprintln("ExpandEnvironmentStrings")
+			} else {
+				val, err := wstring_to_utf8(&infoBuf[0], int(bufCharCount))
+				if err == nil {
+					fmt.printfln("\t%s", val)
+				}
+			}
 		}
 	}
 }
@@ -784,21 +816,27 @@ setup_windows :: proc() -> int {
 
 	add_args_to_commands()
 
+	if options != {} {
+		fmt.print("Options:")
+		for cmd in options {fmt.printf(" %s", cmd)}
+		fmt.println()
+	}
+
 	check_virtual_terminal_level()
 	check_environment_variables()
 	check_acp()
 
-	if .si in cmds {
+	if .sys_info in options {
 		print_key_value("Is User Interactive", is_user_interactive())
 	}
 
-	if .mi in cmds {
+	if .module_info in options {
 		module := win32.GetModuleHandleW(nil)
 		print_key_value("Module Filename", get_module_filename(module))
 	}
 
 	odin_path := filepath.join({ODIN_ROOT, "odin.exe"}, allocator = context.temp_allocator)
-	if .vi in cmds {
+	if .version_info in options {
 		odin_path_w := utf8_to_wstring(odin_path)
 		info_size := win32.GetFileVersionInfoSizeW(odin_path_w, nil)
 		if info_size == 0 {
@@ -836,12 +874,12 @@ setup_windows :: proc() -> int {
 			fmt.printfln(" \"%s\"", lcid_to_local_name(u32(langid)))
 		}
 
-		if .lc in cmds {
+		if .language in options {
 			show_string_file_info(info, codepage, langid)
 			show_code_pages()
 			show_system_defaults()
 		}
-		if .si in cmds {
+		if .sys_info in options {
 			show_system_info()
 		}
 	}
@@ -888,12 +926,12 @@ init_console :: proc() {
 		}
 		return false
 	}
-	has_terminal_colours = {}
+	has_terminal_colors = {}
 	if enable_virtual_terminal_processing(win32.STD_OUTPUT_HANDLE) {
-		has_terminal_colours |= {.STD_OUTPUT}
+		has_terminal_colors |= {.STD_OUTPUT}
 	}
 	if enable_virtual_terminal_processing(win32.STD_ERROR_HANDLE) {
-		has_terminal_colours |= {.STD_ERROR}
+		has_terminal_colors |= {.STD_ERROR}
 	}
 
 	cpi, cpo := win32.GetConsoleCP(), win32.GetConsoleOutputCP()
