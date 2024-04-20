@@ -5,7 +5,7 @@
 //#include "..\resource\resource.h"
 #include "winres.h"
 
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 #pragma code_page(65001)
 
 #define IDI_ICON1                       101
@@ -48,7 +48,7 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "080904b0"
+        BLOCK "0409FDE9"
         BEGIN
             VALUE "CompanyName", "https://odin-lang.org/"
             VALUE "FileDescription", "Odin Setup"
@@ -67,7 +67,7 @@ BEGIN
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x809, 0x04b0
+        VALUE "Translation", 0x0409, 0xFDE9
     END
 END
 

@@ -135,9 +135,9 @@ lcid_to_local_name :: proc(lcid: win32.LCID) -> string {
 get_language_name :: proc(lang: win32.DWORD, allocator := context.allocator) -> (res: string, hr: int) {
 	cch: win32.DWORD = 255
 	text := make([]u16, cch + 1, allocator = context.temp_allocator)
-	defer delete(text)
 	cch = win32.VerLanguageNameW(lang, &text[0], cch)
 	if cch == 0 {
+		fmt.eprintfln("VerLanguageNameW: %0h %d", lang, cch)
 		hr = -3
 	} else {
 		err: runtime.Allocator_Error
@@ -276,10 +276,22 @@ show_code_pages :: proc() {
 	}
 }
 
+print_language :: proc(key: string, #any_int langid: int) {
+	fmt.printf("  %-20s: %d (0x%X)", key, langid, langid)
+	language_name, err := get_language_name(u32(langid), allocator = context.temp_allocator)
+	if err == 0 {
+		fmt.printf(" \"%s\"", language_name)
+	} else {
+		fmt.printf(" language not found: 0x%X %v", langid, err)
+	}
+	fmt.printfln(" \"%s\"", lcid_to_local_name(u32(langid)))
+}
+
 show_system_defaults :: proc() {
 	fmt.println("[System Default]")
-	fmt.printfln("  %-20s: %d", "LCID", win32.GetSystemDefaultLCID())
-	fmt.printfln("  %-20s: %d", "LangID", win32.GetSystemDefaultLangID())
+	print_language("LCID", win32.GetSystemDefaultLCID())
+	print_language("LangID", win32.GetSystemDefaultLangID())
+
 	w: [512]win32.WCHAR
 	cch := win32.GetSystemDefaultLocaleName(wstring(&w), len(w))
 	locale_name, err := wstring_to_utf8(wstring(&w), int(cch))
@@ -564,51 +576,40 @@ reg_enum_key :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := contex
 
 reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := context.temp_allocator) -> (key, value: string, err: i32) {
 	//ERROR_MORE_DATA :: i32(os.ERROR_MORE_DATA)
-
 	wchValue: [MAX_VALUE_NAME]win32.WCHAR
 	cchValue := MAX_VALUE_NAME
 	type: win32.DWORD = 0
 	//data: win32.LPBYTE
-	cbData: win32.DWORD = 0
-
-	// err = win32.RegEnumValueW(hKey, dwIndex, &wchValue[0], &cchValue, nil, &type, nil, &cbData)
-	// fmt.printfln("cbData=%d type=%d", cbData, type)
-	// if err != 0 {show_last_error("RegEnumValueW");return}
-
-	cbData = 1000
-	data := make([]win32.BYTE, cbData)
-	defer delete(data)
+	cbData: win32.DWORD = 1000
+	data := make([]win32.BYTE, cbData, context.temp_allocator)
 	//data: [cbData]win32.BYTE
 	err = win32.RegEnumValueW(hKey, dwIndex, &wchValue[0], &cchValue, nil, &type, &data[0], &cbData)
-	//fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
-	//if err != 0 {show_last_error("RegEnumValueW");return}
-
-	if err == 0 {
-		if cchValue > 0 {
-			aerr: runtime.Allocator_Error
-			key, aerr = wstring_to_utf8(&wchValue[0], int(cchValue), allocator = allocator)
-			err = i32(aerr)
-		}
-		if cbData > 0 {
-			switch type {
-			case win32.REG_SZ:
-				aerr: runtime.Allocator_Error
-				value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
-				err = i32(aerr)
-			case win32.REG_EXPAND_SZ:
-				aerr: runtime.Allocator_Error
-				value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
-				err = i32(aerr)
-			case win32.REG_DWORD:
-				assert(cbData == size_of(win32.DWORD))
-				value = fmt.tprintf("DWORD: %#X", data[0])
-			case:
-				fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
-			}
-		}
-	} else {
+	if err != 0 {
 		fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
-		//show_last_error("reg_enum_value")
+		show_last_error("RegEnumValueW")
+		return
+	}
+	if cchValue > 0 {
+		aerr: runtime.Allocator_Error
+		key, aerr = wstring_to_utf8(&wchValue[0], int(cchValue), allocator = allocator)
+		err = i32(aerr)
+	}
+	if cbData > 0 {
+		switch type {
+		case win32.REG_SZ:
+			aerr: runtime.Allocator_Error
+			value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
+			err = i32(aerr)
+		case win32.REG_EXPAND_SZ:
+			aerr: runtime.Allocator_Error
+			value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
+			err = i32(aerr)
+		case win32.REG_DWORD:
+			assert(cbData == size_of(win32.DWORD))
+			value = fmt.tprintf("DWORD: %#X", data[0])
+		case:
+			fmt.printfln("cbData=%d type=%d err=%d", cbData, type, err)
+		}
 	}
 	return
 }
@@ -744,11 +745,11 @@ check_environment_variables :: proc() {
 	if .environment_variables in options {
 		fmt.println("[Environment Variables]")
 		envVarStrings: []wstring = {
-			L("OS         = %OS%"),
-			//L("PATH       = %PATH%"),
-			L("HOMEPATH   = %HOMEPATH%"),
-			L("TEMP       = %TEMP%"),
-			L("ODIN_ROOT  = %ODIN_ROOT%"),
+			L("OS                  : %OS%"),
+			//L("PATH                : %PATH%"),
+			L("HOMEPATH            : %HOMEPATH%"),
+			L("TEMP                : %TEMP%"),
+			L("ODIN_ROOT           : %ODIN_ROOT%"),
 		}
 		INFO_BUFFER_SIZE :: 32767
 		infoBuf: [INFO_BUFFER_SIZE]win32.WCHAR
@@ -869,17 +870,7 @@ setup_windows :: proc() -> int {
 
 		fmt.printfln("  %-20s: %d (0x%X) %v", "Codepage", codepage, codepage, win32.CODEPAGE(codepage))
 		show_code_page(win32.CODEPAGE(codepage))
-
-		{
-			fmt.printf("  %-20s: %d (0x%X)", "Language", langid, langid)
-			language_name, err := get_language_name(u32(langid), allocator = context.temp_allocator)
-			if err == 0 {
-				fmt.printf(" \"%s\"", language_name)
-			} else {
-				fmt.printf(" language not found: 0x%X %v", langid, err)
-			}
-			fmt.printfln(" \"%s\"", lcid_to_local_name(u32(langid)))
-		}
+		print_language("Language", langid)
 
 		if .language in options {
 			show_string_file_info(info, codepage, langid)

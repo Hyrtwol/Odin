@@ -3,7 +3,7 @@
 
 // https://learn.microsoft.com/en-us/windows/win32/menurc/stringfileinfo-block
 
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 #pragma code_page(65001) // 1252 or 65001 (CP_UTF8)
 
 #define IDI_ICON1                       1 // TODO 101
@@ -49,7 +49,7 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "0809FDE9"
+        BLOCK "0409FDE9"
         BEGIN
             VALUE "CompanyName", "https://odin-lang.org/"
             VALUE "FileDescription", "Odin general-purpose programming language." // note this is shown in the task manager
@@ -67,7 +67,7 @@ BEGIN
     BLOCK "VarFileInfo"
     BEGIN
         //0xFDE9=65001=CP_UTF8
-        VALUE "Translation", 0x0809, 0xFDE9
+        VALUE "Translation", 0x0409, 0xFDE9
     END
 END
 
