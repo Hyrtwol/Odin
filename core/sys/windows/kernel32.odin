@@ -227,6 +227,7 @@ foreign kernel32 {
 	SetEnvironmentVariableW :: proc(n: LPCWSTR, v: LPCWSTR) -> BOOL ---
 	GetEnvironmentStringsW :: proc() -> LPWCH ---
 	FreeEnvironmentStringsW :: proc(env_ptr: LPWCH) -> BOOL ---
+	ExpandEnvironmentStringsW :: proc(lpSrc: LPCWSTR, lpDst: LPWSTR, nSize: DWORD) -> DWORD ---
 	GetModuleFileNameW :: proc(hModule: HMODULE, lpFilename: LPWSTR, nSize: DWORD) -> DWORD ---
 	CreateDirectoryW :: proc(
 		lpPathName: LPCWSTR,
@@ -327,6 +328,7 @@ foreign kernel32 {
 		lpName: LPCWSTR,
 	) -> HANDLE ---
 	ResetEvent :: proc(hEvent: HANDLE) -> BOOL ---
+	SetEvent :: proc(hEvent: HANDLE) -> BOOL ---
 	WaitForMultipleObjects :: proc(
 		nCount: DWORD,
 		lpHandles: ^HANDLE,
@@ -427,9 +429,17 @@ foreign kernel32 {
 
 	LoadResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
 	FreeResource :: proc(hResData: HGLOBAL) -> BOOL ---
-	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> HGLOBAL ---
+	LockResource :: proc(hResData: HGLOBAL) -> LPVOID ---
+	SizeofResource :: proc(hModule: HMODULE, hResInfo: HRSRC) -> DWORD ---
 	FindResourceW :: proc(hModule: HMODULE, lpName: LPCWSTR, lpType: LPCWSTR) -> HRSRC ---
-	//EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
+	FindResourceExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, wLanguage: LANGID) -> HRSRC ---
+	EnumResourceNamesW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR) -> BOOL ---
+	EnumResourceNamesExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpEnumFunc: ENUMRESNAMEPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	EnumResourceTypesExW :: proc(hModule: HMODULE, lpEnumFunc: ENUMRESTYPEPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	EnumResourceLanguagesExW :: proc(hModule: HMODULE, lpType: LPCWSTR, lpName: LPCWSTR, lpEnumFunc: ENUMRESLANGPROCW, lParam: LONG_PTR, dwFlags: DWORD, LangId: LANGID) -> BOOL ---
+	LookupIconIdFromDirectory :: proc(presbits: PBYTE, fIcon: BOOL) -> INT ---
+	LookupIconIdFromDirectoryEx :: proc(presbits: PBYTE, fIcon: BOOL, cxDesired: INT, cyDesired: INT, Flags: UINT) -> INT ---
+	CreateIconFromResourceEx :: proc(presbits: PBYTE, dwResSize: DWORD, fIcon: BOOL, dwVer: DWORD, cxDesired: INT, cyDesired: INT, Flags: UINT) -> HICON ---
 
 	GetFullPathNameW  :: proc(filename: LPCWSTR, buffer_length: DWORD, buffer: LPCWSTR, file_part: ^LPCWSTR) -> DWORD ---
 	GetLongPathNameW  :: proc(short, long: LPCWSTR, len: DWORD) -> DWORD ---
@@ -562,6 +572,10 @@ FILE_MAP_COPY            :: DWORD(0x00000001)
 FILE_MAP_RESERVE         :: DWORD(0x80000000)
 FILE_MAP_TARGETS_INVALID :: DWORD(0x40000000)
 FILE_MAP_LARGE_PAGES     :: DWORD(0x20000000)
+
+// Flags for `SetFileCompletionNotificationModes`.
+FILE_SKIP_COMPLETION_PORT_ON_SUCCESS :: 0x1
+FILE_SKIP_SET_EVENT_ON_HANDLE        :: 0x2
 
 PAGE_NOACCESS          :: 0x01
 PAGE_READONLY          :: 0x02

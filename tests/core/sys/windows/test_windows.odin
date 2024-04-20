@@ -11,7 +11,7 @@ import "core:testing"
 L :: intrinsics.constant_utf16_cstring
 
 TEST_count := 0
-TEST_fail := 0
+TEST_fail  := 0
 
 t := &testing.T{}
 
@@ -60,6 +60,16 @@ expect_value_64 :: proc(t: ^testing.T, #any_int act: u64, #any_int exp: u64, loc
 }
 
 @(private)
+expect_value_int :: proc(t: ^testing.T, act, exp: int, loc := #caller_location) {
+	expectf(t, act == exp, "0x%8X (should be: 0x%8X)", act, exp, loc = loc)
+}
+
+@(private)
+expect_value_uintptr :: proc(t: ^testing.T, act: uintptr, exp: int, loc := #caller_location) {
+	expectf(t, act == uintptr(exp), "0x%8X (should be: 0x%8X)", act, uintptr(exp), loc = loc)
+}
+
+@(private)
 expect_value_str :: proc(t: ^testing.T, wact, wexp: win32.wstring, loc := #caller_location) {
 	act, exp: string
 	err: runtime.Allocator_Error
@@ -72,11 +82,15 @@ expect_value_str :: proc(t: ^testing.T, wact, wexp: win32.wstring, loc := #calle
 
 main :: proc() {
 	verify_win32_type_sizes(t)
+	verify_macros(t)
 	verify_winnt(t)
 	verify_winuser(t)
 	verify_gdi32(t)
 	verify_winmm(t)
+	verify_advapi32(t)
 	verify_winnls(t)
+	verify_winreg(t)
+	verify_verrsrc(t)
 	verify_error_codes(t)
 	verify_error_helpers(t)
 

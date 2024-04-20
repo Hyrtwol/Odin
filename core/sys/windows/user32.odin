@@ -6,8 +6,8 @@ foreign import user32 "system:User32.lib"
 
 @(default_calling_convention="system")
 foreign user32 {
-	GetClassInfoW :: proc(hInstance: HINSTANCE, lpClassNAme: LPCWSTR, lpWndClass: ^WNDCLASSW) -> BOOL ---
-	GetClassInfoExW :: proc(hInsatnce: HINSTANCE, lpszClass: LPCWSTR, lpwcx: ^WNDCLASSEXW) -> BOOL ---
+	GetClassInfoW :: proc(hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: ^WNDCLASSW) -> BOOL ---
+	GetClassInfoExW :: proc(hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: ^WNDCLASSEXW) -> BOOL ---
 
 	GetClassLongW :: proc(hWnd: HWND, nIndex: INT) -> DWORD ---
 	SetClassLongW :: proc(hWnd: HWND, nIndex: INT, dwNewLong: LONG) -> DWORD ---
@@ -126,11 +126,13 @@ foreign user32 {
 	GetDlgCtrlID :: proc(hWnd: HWND) -> INT ---
 	GetDlgItem :: proc(hDlg: HWND, nIDDlgItem: INT) -> HWND ---
 
-	CreatePopupMenu :: proc() -> HMENU ---
-	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
-	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
-	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x: int, y: int, nReserved: int, hWnd: HWND, prcRect: ^RECT) -> i32 ---
 	RegisterWindowMessageW :: proc(lpString: LPCWSTR) -> UINT ---
+
+	CreateAcceleratorTableW :: proc(paccel: LPACCEL, cAccel: INT) -> HACCEL ---
+	DestroyAcceleratorTable :: proc(hAccel: HACCEL) -> BOOL ---
+	LoadAcceleratorsW :: proc(hInstance: HINSTANCE, lpTableName: LPCWSTR) -> HACCEL ---
+	TranslateAcceleratorW :: proc(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG) -> INT ---
+	CopyAcceleratorTableW :: proc(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: INT) -> INT ---
 
 	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT = nil, bErase: BOOL = false) -> BOOL ---
 	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT = nil) -> BOOL ---
@@ -259,6 +261,15 @@ foreign user32 {
 
 	GetSystemMenu :: proc(hWnd: HWND, bRevert: BOOL) -> HMENU ---
 	EnableMenuItem :: proc(hMenu: HMENU, uIDEnableItem: UINT, uEnable: UINT) -> BOOL ---
+	MenuItemFromPoint :: proc(hWnd: HWND, hMenu: HMENU, ptScreen: POINT) -> INT ---
+	GetMenu :: proc(hWnd: HWND) -> HMENU ---
+	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
+	CreateMenu :: proc() -> HMENU ---
+	CreatePopupMenu :: proc() -> HMENU ---
+	DeleteMenu :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT) -> BOOL ---
+	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
+	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
+	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x, y: INT, nReserved: INT, hWnd: HWND, prcRect: ^RECT) -> BOOL ---
 
 	DrawTextW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat) -> INT ---
 	DrawTextExW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat, lpdtp: PDRAWTEXTPARAMS) -> INT ---
@@ -268,7 +279,7 @@ foreign user32 {
 	IsValidLocaleName :: proc(lpLocaleName: LPCWSTR) -> BOOL ---
 	ResolveLocaleName :: proc(lpNameToResolve: LPCWSTR, lpLocaleName: LPWSTR, cchLocaleName: INT) -> INT ---
 	IsValidCodePage :: proc(CodePage: UINT) -> BOOL ---
-	GetACP :: proc() -> UINT ---
+	GetACP :: proc() -> CODEPAGE ---
 	GetCPInfoExW :: proc(CodePage: CODEPAGE, dwFlags: DWORD, lpCPInfoEx: LPCPINFOEXW) -> BOOL ---
 
 	GetProcessWindowStation :: proc() -> HWINSTA ---
@@ -610,3 +621,40 @@ USEROBJECTFLAGS :: struct  {
 
 PROPENUMPROCW :: #type proc(unnamedParam1: HWND, unnamedParam2: LPCWSTR, unnamedParam3: HANDLE) -> BOOL
 PROPENUMPROCEXW :: #type proc(unnamedParam1: HWND, unnamedParam2: LPCWSTR, unnamedParam3: HANDLE, unnamedParam4: ULONG_PTR) -> BOOL
+
+RT_CURSOR       :: LPWSTR(uintptr(0x00000001))
+RT_BITMAP       :: LPWSTR(uintptr(0x00000002))
+RT_ICON         :: LPWSTR(uintptr(0x00000003))
+RT_MENU         :: LPWSTR(uintptr(0x00000004))
+RT_DIALOG       :: LPWSTR(uintptr(0x00000005))
+RT_STRING       :: LPWSTR(uintptr(0x00000006))
+RT_FONTDIR      :: LPWSTR(uintptr(0x00000007))
+RT_FONT         :: LPWSTR(uintptr(0x00000008))
+RT_ACCELERATOR  :: LPWSTR(uintptr(0x00000009))
+RT_RCDATA       :: LPWSTR(uintptr(0x0000000A))
+RT_MESSAGETABLE :: LPWSTR(uintptr(0x0000000B))
+RT_GROUP_CURSOR :: LPWSTR(uintptr(0x0000000C))
+RT_GROUP_ICON   :: LPWSTR(uintptr(0x0000000E))
+RT_VERSION      :: LPWSTR(uintptr(0x00000010))
+RT_DLGINCLUDE   :: LPWSTR(uintptr(0x00000011))
+RT_PLUGPLAY     :: LPWSTR(uintptr(0x00000013))
+RT_VXD          :: LPWSTR(uintptr(0x00000014))
+RT_ANICURSOR    :: LPWSTR(uintptr(0x00000015))
+RT_ANIICON      :: LPWSTR(uintptr(0x00000016))
+RT_MANIFEST     :: LPWSTR(uintptr(0x00000018))
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID                 :: LPWSTR(uintptr(0x00000001))
+ISOLATIONAWARE_MANIFEST_RESOURCE_ID                :: LPWSTR(uintptr(0x00000002))
+ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID :: LPWSTR(uintptr(0x00000003))
+ISOLATIONPOLICY_MANIFEST_RESOURCE_ID               :: LPWSTR(uintptr(0x00000004))
+ISOLATIONPOLICY_BROWSER_MANIFEST_RESOURCE_ID       :: LPWSTR(uintptr(0x00000005))
+MINIMUM_RESERVED_MANIFEST_RESOURCE_ID              :: LPWSTR(uintptr(0x00000001))
+MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID              :: LPWSTR(uintptr(0x00000010))
+
+ACCEL :: struct {
+	/* Also called the flags field */
+	fVirt: BYTE,
+	key: WORD,
+	cmd: WORD,
+}
+LPACCEL :: ^ACCEL

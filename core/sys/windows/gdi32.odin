@@ -40,6 +40,15 @@ foreign gdi32 {
 	SetBkColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 
 	CreateFontW :: proc(cHeight, cWidth, cEscapement, cOrientation, cWeight: INT, bItalic, bUnderline, bStrikeOut, iCharSet, iOutPrecision: DWORD, iClipPrecision, iQuality, iPitchAndFamily: DWORD, pszFaceName: LPCWSTR) -> HFONT ---
+	CreateFontIndirectW :: proc(lplf: ^LOGFONTW) -> HFONT ---
+	CreateFontIndirectExW :: proc(unnamedParam1: ^ENUMLOGFONTEXDVW) -> HFONT ---
+	AddFontResourceW :: proc(unnamedParam1: LPCWSTR) -> INT ---
+	AddFontResourceExW :: proc(name: LPCWSTR, fl: DWORD, res: PVOID) -> INT ---
+	AddFontMemResourceEx :: proc(pFileView: PVOID, cjSize: DWORD, pvResrved: PVOID, pNumFonts: ^DWORD) -> HANDLE ---
+	EnumFontsW :: proc(hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM) -> INT ---
+	EnumFontFamiliesW :: proc(hdc: HDC, lpLogfont: LPCWSTR, lpProc: FONTENUMPROCW, lParam: LPARAM) -> INT ---
+	EnumFontFamiliesExW :: proc(hdc: HDC, lpLogfont: LPLOGFONTW, lpProc: FONTENUMPROCW, lParam: LPARAM, dwFlags: DWORD) -> INT ---
+
 	TextOutW :: proc(hdc: HDC, x, y: INT, lpString: LPCWSTR, c: INT) -> BOOL ---
 	SetTextColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 	GetTextExtentPoint32W :: proc(hdc: HDC, lpString: LPCWSTR, c: INT, psizl: LPSIZE) -> BOOL ---
@@ -88,15 +97,11 @@ PALETTEINDEX :: #force_inline proc "contextless" (#any_int i: int) -> COLORREF {
 FXPT2DOT30 :: distinct fixed.Fixed(i32, 30)
 
 CIEXYZ :: struct {
-	ciexyzX: FXPT2DOT30,
-	ciexyzY: FXPT2DOT30,
-	ciexyzZ: FXPT2DOT30,
+	ciexyzX, ciexyzY, ciexyzZ: FXPT2DOT30,
 }
 
 CIEXYZTRIPLE :: struct {
-	ciexyzRed:   CIEXYZ,
-	ciexyzGreen: CIEXYZ,
-	ciexyzBlue:  CIEXYZ,
+	ciexyzRed, ciexyzGreen, ciexyzBlue: CIEXYZ,
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header
@@ -128,10 +133,7 @@ BITMAPV5HEADER :: struct {
 }
 
 PALETTEENTRY :: struct {
-	peRed:   BYTE,
-	peGreen: BYTE,
-	peBlue:  BYTE,
-	peFlags: BYTE,
+	peRed, peGreen, peBlue, peFlags: BYTE,
 }
 
 LOGPALETTE :: struct {
@@ -278,3 +280,79 @@ TA_BOTTOM     :: 8
 TA_BASELINE   :: 24
 TA_RTLREADING :: 256
 TA_MASK       :: (TA_BASELINE+TA_CENTER+TA_UPDATECP+TA_RTLREADING)
+
+MM_MAX_NUMAXES :: 16
+DESIGNVECTOR :: struct {
+	dvReserved: DWORD,
+	dvNumAxes:  DWORD,
+	dvValues:   [MM_MAX_NUMAXES]LONG,
+}
+
+LF_FACESIZE :: 32
+LF_FULLFACESIZE :: 64
+
+LOGFONTW :: struct {
+	lfHeight:         LONG,
+	lfWidth:          LONG,
+	lfEscapement:     LONG,
+	lfOrientation:    LONG,
+	lfWeight:         LONG,
+	lfItalic:         BYTE,
+	lfUnderline:      BYTE,
+	lfStrikeOut:      BYTE,
+	lfCharSet:        BYTE,
+	lfOutPrecision:   BYTE,
+	lfClipPrecision:  BYTE,
+	lfQuality:        BYTE,
+	lfPitchAndFamily: BYTE,
+	lfFaceName:       [LF_FACESIZE]WCHAR,
+}
+LPLOGFONTW :: ^LOGFONTW
+
+ENUMLOGFONTW :: struct {
+	elfLogFont:  LOGFONTW,
+	elfFullName: [LF_FULLFACESIZE]WCHAR,
+	elfStyle:    [LF_FACESIZE]WCHAR,
+}
+LPENUMLOGFONTW :: ^ENUMLOGFONTW
+
+ENUMLOGFONTEXW :: struct {
+	elfLogFont:  LOGFONTW,
+	elfFullName: [LF_FULLFACESIZE]WCHAR,
+	elfStyle:    [LF_FACESIZE]WCHAR,
+	elfScript:   [LF_FACESIZE]WCHAR,
+}
+
+ENUMLOGFONTEXDVW :: struct {
+	elfEnumLogfontEx: ENUMLOGFONTEXW,
+	elfDesignVector:  DESIGNVECTOR,
+}
+
+NEWTEXTMETRICW :: struct {
+	tmHeight:           LONG,
+	tmAscent:           LONG,
+	tmDescent:          LONG,
+	tmInternalLeading:  LONG,
+	tmExternalLeading:  LONG,
+	tmAveCharWidth:     LONG,
+	tmMaxCharWidth:     LONG,
+	tmWeight:           LONG,
+	tmOverhang:         LONG,
+	tmDigitizedAspectX: LONG,
+	tmDigitizedAspectY: LONG,
+	tmFirstChar:        WCHAR,
+	tmLastChar:         WCHAR,
+	tmDefaultChar:      WCHAR,
+	tmBreakChar:        WCHAR,
+	tmItalic:           BYTE,
+	tmUnderlined:       BYTE,
+	tmStruckOut:        BYTE,
+	tmPitchAndFamily:   BYTE,
+	tmCharSet:          BYTE,
+	ntmFlags:           DWORD,
+	ntmSizeEM:          UINT,
+	ntmCellHeight:      UINT,
+	ntmAvgWidth:        UINT,
+}
+
+FONTENUMPROCW :: #type proc(lpelf: ^ENUMLOGFONTW, lpntm: ^NEWTEXTMETRICW, FontType: DWORD, lParam: LPARAM) -> INT
