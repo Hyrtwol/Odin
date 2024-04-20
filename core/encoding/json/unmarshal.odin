@@ -1,4 +1,4 @@
-package json
+package encoding_json
 
 import "core:mem"
 import "core:math"
@@ -343,6 +343,16 @@ unmarshal_expect_token :: proc(p: ^Parser, kind: Token_Kind, loc := #caller_loca
 	return prev
 }
 
+@(private)
+json_name_from_tag_value :: proc(value: string) -> (json_name, extra: string) {
+	json_name = value
+	if comma_index := strings.index_byte(json_name, ','); comma_index >= 0 {
+		json_name = json_name[:comma_index]
+		extra = json_name[comma_index:]
+	}
+	return
+}
+
 
 @(private)
 unmarshal_object :: proc(p: ^Parser, v: any, end_token: Token_Kind) -> (err: Unmarshal_Error) {
@@ -384,7 +394,8 @@ unmarshal_object :: proc(p: ^Parser, v: any, end_token: Token_Kind) -> (err: Unm
 			
 			for field, field_idx in fields {
 				tag_value := string(reflect.struct_tag_get(field.tag, "json"))
-				if key == tag_value {
+				json_name, _ := json_name_from_tag_value(tag_value)
+				if key == json_name {
 					use_field_idx = field_idx
 					break
 				}
@@ -483,9 +494,9 @@ unmarshal_object :: proc(p: ^Parser, v: any, end_token: Token_Kind) -> (err: Unm
 			
 			
 			mem.zero_slice(elem_backing)
-			if err := unmarshal_value(p, map_backing_value); err != nil {
+			if uerr := unmarshal_value(p, map_backing_value); uerr != nil {
 				delete(key, p.allocator)
-				return err
+				return uerr
 			}
 
 			key_ptr := rawptr(&key)

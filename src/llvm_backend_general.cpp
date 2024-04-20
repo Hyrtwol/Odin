@@ -211,7 +211,7 @@ gb_internal void lb_loop_end(lbProcedure *p, lbLoopData const &data) {
 
 
 gb_internal void lb_make_global_private_const(LLVMValueRef global_data) {
-	LLVMSetLinkage(global_data, LLVMPrivateLinkage);
+	LLVMSetLinkage(global_data, LLVMLinkerPrivateLinkage);
 	LLVMSetUnnamedAddress(global_data, LLVMGlobalUnnamedAddr);
 	LLVMSetGlobalConstant(global_data, true);
 }
@@ -453,7 +453,7 @@ gb_internal lbAddr lb_addr_swizzle_large(lbValue addr, Type *array_type, Slice<i
 gb_internal lbAddr lb_addr_bit_field(lbValue addr, Type *type, i64 index, i64 bit_offset, i64 bit_size) {
 	GB_ASSERT(is_type_pointer(addr.type));
 	Type *mt = type_deref(addr.type);
-	GB_ASSERT(is_type_bit_field(mt));
+	GB_ASSERT_MSG(is_type_bit_field(mt), "%s", type_to_string(mt));
 
 	lbAddr v = {lbAddr_BitField, addr};
 	v.bitfield.type       = type;
@@ -953,16 +953,6 @@ gb_internal void lb_addr_store(lbProcedure *p, lbAddr addr, lbValue value) {
 
 	GB_ASSERT(value.value != nullptr);
 	value = lb_emit_conv(p, value, lb_addr_type(addr));
-
-	// if (lb_is_const_or_global(value)) {
-	// 	// NOTE(bill): Just bypass the actual storage and set the initializer
-	// 	if (LLVMGetValueKind(addr.addr.value) == LLVMGlobalVariableValueKind) {
-	// 		LLVMValueRef dst = addr.addr.value;
-	// 		LLVMValueRef src = value.value;
-	// 		LLVMSetInitializer(dst, src);
-	// 		return;
-	// 	}
-	// }
 
 	lb_emit_store(p, addr.addr, value);
 }
@@ -2080,7 +2070,7 @@ gb_internal LLVMTypeRef lb_type_internal(lbModule *m, Type *type) {
 		break;
 
 	case Type_Map:
-		init_map_internal_types(type);
+		init_map_internal_debug_types(type);
 		GB_ASSERT(t_raw_map != nullptr);
 		return lb_type_internal(m, t_raw_map);
 

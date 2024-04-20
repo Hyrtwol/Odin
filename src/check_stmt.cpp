@@ -474,16 +474,59 @@ gb_internal Type *check_assignment_variable(CheckerContext *ctx, Operand *lhs, O
 		}
 
 		Entity *e = entity_of_node(lhs->expr);
+		Entity *original_e = e;
+
+		Ast *name = unparen_expr(lhs->expr);
+		while (name->kind == Ast_SelectorExpr) {
+			name = name->SelectorExpr.expr;
+			e = entity_of_node(name);
+		}
+		if (e == nullptr) {
+			e = original_e;
+		}
 
 		gbString str = expr_to_string(lhs->expr);
 		if (e != nullptr && e->flags & EntityFlag_Param) {
+			ERROR_BLOCK();
 			if (e->flags & EntityFlag_Using) {
 				error(lhs->expr, "Cannot assign to '%s' which is from a 'using' procedure parameter", str);
 			} else {
 				error(lhs->expr, "Cannot assign to '%s' which is a procedure parameter", str);
 			}
+			error_line("\tSuggestion: Did you mean to pass '%.*s' by pointer?\n", LIT(e->token.string));
+			show_error_on_line(e->token.pos, token_pos_end(e->token));
 		} else {
+			ERROR_BLOCK();
 			error(lhs->expr, "Cannot assign to '%s'", str);
+
+			if (e && e->flags & EntityFlag_ForValue) {
+				isize offset = show_error_on_line(e->token.pos, token_pos_end(e->token), "Suggestion:");
+				if (offset < 0) {
+					if (is_type_map(e->type)) {
+						error_line("\tSuggestion: Did you mean? 'for key, &%.*s in ...'\n", LIT(e->token.string));
+					} else {
+						error_line("\tSuggestion: Did you mean? 'for &%.*s in ...'\n", LIT(e->token.string));
+					}
+				} else {
+					error_line("\t");
+					for (isize i = 0; i < offset-1; i++) {
+						error_line(" ");
+					}
+					error_line("'%.*s' is immutable, declare it as '&%.*s' to make it mutable\n", LIT(e->token.string), LIT(e->token.string));
+				}
+
+			} else if (e && e->flags & EntityFlag_SwitchValue) {
+				isize offset = show_error_on_line(e->token.pos, token_pos_end(e->token), "Suggestion:");
+				if (offset < 0) {
+					error_line("\tSuggestion: Did you mean? 'switch &%.*s in ...'\n", LIT(e->token.string));
+				} else {
+					error_line("\t");
+					for (isize i = 0; i < offset-1; i++) {
+						error_line(" ");
+					}
+					error_line("'%.*s' is immutable, declare it as '&%.*s' to make it mutable\n", LIT(e->token.string), LIT(e->token.string));
+				}
+			}
 		}
 		gb_string_free(str);
 
@@ -740,6 +783,25 @@ gb_internal bool check_using_stmt_entity(CheckerContext *ctx, AstUsingStmt *us, 
 	return true;
 }
 
+gb_internal void error_var_decl_identifier(Ast *name) {
+	GB_ASSERT(name != nullptr);
+	GB_ASSERT(name->kind != Ast_Ident);
+
+	ERROR_BLOCK();
+	gbString s = expr_to_string(name);
+	defer (gb_string_free(s));
+
+	error(name, "A variable declaration must be an identifier, got '%s'", s);
+	if (name->kind == Ast_Implicit) {
+		String imp = name->Implicit.string;
+		if (imp == "context") {
+			error_line("\tSuggestion: '%.*s' is a reserved keyword, would 'ctx' suffice?\n", LIT(imp));
+		} else {
+			error_line("\tNote: '%.*s' is a reserved keyword\n", LIT(imp));
+		}
+	}
+}
+
 gb_internal void check_inline_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags) {
 	ast_node(irs, UnrollRangeStmt, node);
 	check_open_scope(ctx, node);
@@ -851,7 +913,7 @@ gb_internal void check_inline_range_stmt(CheckerContext *ctx, Ast *node, u32 mod
 				entity = found;
 			}
 		} else {
-			error(name, "A variable declaration must be an identifier");
+			error_var_decl_identifier(name);
 		}
 
 		if (entity == nullptr) {
@@ -1747,9 +1809,7 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 				entity = found;
 			}
 		} else {
-			gbString s = expr_to_string(lhs[i]);
-			error(name, "A variable declaration must be an identifier, got %s", s);
-			gb_string_free(s);
+			error_var_decl_identifier(name);
 		}
 
 		if (entity == nullptr) {
@@ -1801,7 +1861,7 @@ gb_internal void check_value_decl_stmt(CheckerContext *ctx, Ast *node, u32 mod_f
 	for (Ast *name : vd->names) {
 		Entity *entity = nullptr;
 		if (name->kind != Ast_Ident) {
-			error(name, "A variable declaration must be an identifier");
+			error_var_decl_identifier(name);
 		} else {
 			Token token = name->Ident.token;
 			String str = token.string;
@@ -2058,13 +2118,13 @@ gb_internal void check_expr_stmt(CheckerContext *ctx, Ast *node) {
 	}
 
 	Ast *expr = strip_or_return_expr(operand.expr);
-	if (expr->kind == Ast_CallExpr) {
+	if (expr && expr->kind == Ast_CallExpr) {
 		BuiltinProcId builtin_id = BuiltinProc_Invalid;
 		bool do_require = false;
 
 		AstCallExpr *ce = &expr->CallExpr;
 		Type *t = base_type(type_of_expr(ce->proc));
-		if (t->kind == Type_Proc) {
+		if (t && t->kind == Type_Proc) {
 			do_require = t->Proc.require_results;
 		} else if (check_stmt_internal_builtin_proc_id(ce->proc, &builtin_id)) {
 			auto const &bp = builtin_procs[builtin_id];
@@ -2076,7 +2136,7 @@ gb_internal void check_expr_stmt(CheckerContext *ctx, Ast *node) {
 			gb_string_free(expr_str);
 		}
 		return;
-	} else if (expr->kind == Ast_SelectorCallExpr) {
+	} else if (expr && expr->kind == Ast_SelectorCallExpr) {
 		BuiltinProcId builtin_id = BuiltinProc_Invalid;
 		bool do_require = false;
 
@@ -2338,14 +2398,14 @@ gb_internal void check_return_stmt(CheckerContext *ctx, Ast *node) {
 				unsafe_return_error(o, "the address of a compound literal");
 			} else if (x->kind == Ast_IndexExpr) {
 				Entity *f = entity_of_node(x->IndexExpr.expr);
-				if (is_type_array_like(f->type) || is_type_matrix(f->type)) {
+				if (f && (is_type_array_like(f->type) || is_type_matrix(f->type))) {
 					if (is_entity_local_variable(f)) {
 						unsafe_return_error(o, "the address of an indexed variable", f->type);
 					}
 				}
 			} else if (x->kind == Ast_MatrixIndexExpr) {
 				Entity *f = entity_of_node(x->MatrixIndexExpr.expr);
-				if (is_type_matrix(f->type) && is_entity_local_variable(f)) {
+				if (f && (is_type_matrix(f->type) && is_entity_local_variable(f))) {
 					unsafe_return_error(o, "the address of an indexed variable", f->type);
 				}
 			}

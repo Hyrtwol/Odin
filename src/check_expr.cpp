@@ -4595,7 +4595,8 @@ gb_internal ExactValue get_constant_field_single(CheckerContext *c, ExactValue v
 					String name = fv->field->Ident.token.string;
 					Selection sub_sel = lookup_field(node->tav.type, name, false);
 					defer (array_free(&sub_sel.index));
-					if (sub_sel.index[0] == index) {
+					if (sub_sel.index.count > 0 &&
+					    sub_sel.index[0] == index) {
 						value = fv->value->tav.value;
 						found = true;
 						break;
@@ -8156,19 +8157,31 @@ gb_internal ExprKind check_basic_directive_expr(CheckerContext *c, Operand *o, A
 	o->mode = Addressing_Constant;
 	String name = bd->name.string;
 	if (name == "file") {
+		String file = get_file_path_string(bd->token.pos.file_id);
+		if (build_context.obfuscate_source_code_locations) {
+			file = obfuscate_string(file, "F");
+		}
 		o->type = t_untyped_string;
-		o->value = exact_value_string(get_file_path_string(bd->token.pos.file_id));
+		o->value = exact_value_string(file);
 	} else if (name == "line") {
+		i32 line = bd->token.pos.line;
+		if (build_context.obfuscate_source_code_locations) {
+			line = obfuscate_i32(line);
+		}
 		o->type = t_untyped_integer;
-		o->value = exact_value_i64(bd->token.pos.line);
+		o->value = exact_value_i64(line);
 	} else if (name == "procedure") {
 		if (c->curr_proc_decl == nullptr) {
 			error(node, "#procedure may only be used within procedures");
 			o->type = t_untyped_string;
 			o->value = exact_value_string(str_lit(""));
 		} else {
+			String p = c->proc_name;
+			if (build_context.obfuscate_source_code_locations) {
+				p = obfuscate_string(p, "P");
+			}
 			o->type = t_untyped_string;
-			o->value = exact_value_string(c->proc_name);
+			o->value = exact_value_string(p);
 		}
 	} else if (name == "caller_location") {
 		init_core_source_code_location(c->checker);

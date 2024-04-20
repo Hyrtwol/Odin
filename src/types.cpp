@@ -769,7 +769,6 @@ gb_internal gbString type_to_string (Type *type, bool shorthand=true);
 gb_internal gbString type_to_string (Type *type, gbAllocator allocator, bool shorthand=true);
 gb_internal i64      type_size_of_internal(Type *t, TypePath *path);
 gb_internal i64     type_align_of_internal(Type *t, TypePath *path);
-gb_internal void     init_map_internal_types(Type *type);
 gb_internal Type *   bit_set_to_int(Type *t);
 gb_internal bool     are_types_identical(Type *x, Type *y);
 
@@ -3158,7 +3157,7 @@ gb_internal Selection lookup_field_with_selection(Type *type_, String field_name
 				mutex_lock(md->mutex);
 				defer (mutex_unlock(md->mutex));
 				for (TypeNameObjCMetadataEntry const &entry : md->type_entries) {
-					GB_ASSERT(entry.entity->kind == Entity_Procedure);
+					GB_ASSERT(entry.entity->kind == Entity_Procedure || entry.entity->kind == Entity_ProcGroup);
 					if (entry.name == field_name) {
 						sel.entity = entry.entity;
 						sel.pseudo_field = true;

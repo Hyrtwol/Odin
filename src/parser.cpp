@@ -1482,7 +1482,24 @@ gb_internal Token expect_token(AstFile *f, TokenKind kind) {
 	if (prev.kind != kind) {
 		String c = token_strings[kind];
 		String p = token_to_string(prev);
+		begin_error_block();
 		syntax_error(f->curr_token, "Expected '%.*s', got '%.*s'", LIT(c), LIT(p));
+		if (kind == Token_Ident) switch (prev.kind) {
+		case Token_context:
+			error_line("\tSuggestion: '%.*s' is a keyword, would 'ctx' suffice?\n", LIT(prev.string));
+			break;
+		case Token_package:
+			error_line("\tSuggestion: '%.*s' is a keyword, would 'pkg' suffice?\n", LIT(prev.string));
+			break;
+		default:
+			if (token_is_keyword(prev.kind)) {
+				error_line("\tNote: '%.*s' is a keyword\n", LIT(prev.string));
+			}
+			break;
+		}
+
+		end_error_block();
+
 		if (prev.kind == Token_EOF) {
 			exit_with_errors();
 		}
@@ -4055,7 +4072,12 @@ gb_internal Array<Ast *> convert_to_ident_list(AstFile *f, Array<AstAndFlags> li
 		case Ast_BadExpr:
 			break;
 		case Ast_Implicit:
+			begin_error_block();
 			syntax_error(ident, "Expected an identifier, '%.*s' which is a keyword", LIT(ident->Implicit.string));
+			if (ident->Implicit.kind == Token_context) {
+				error_line("\tSuggestion: Would 'ctx' suffice as an alternative name?\n");
+			}
+			end_error_block();
 			ident = ast_ident(f, blank_token);
 			break;
 
@@ -6092,7 +6114,13 @@ gb_internal bool parse_file(Parser *p, AstFile *f) {
 	CommentGroup *docs = f->lead_comment;
 
 	if (f->curr_token.kind != Token_package) {
+		ERROR_BLOCK();
 		syntax_error(f->curr_token, "Expected a package declaration at the beginning of the file");
+		// IMPORTANT NOTE(bill): this is technically a race condition with the suggestion, but it's ony a suggession
+		// so in practice is should be "fine"
+		if (f->pkg && f->pkg->name != "") {
+			error_line("\tSuggestion: Add 'package %.*s' to the top of the file\n", LIT(f->pkg->name));
+		}
 		return false;
 	}
 

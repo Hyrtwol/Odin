@@ -62,7 +62,7 @@ _ :: xlib
 
 // NOTE: needed for doc generator
 
-import NS  "vendor:darwin/Foundation"
+import NS  "core:sys/darwin/Foundation"
 import MTL "vendor:darwin/Metal"
 import MTK "vendor:darwin/MetalKit"
 import CA  "vendor:darwin/QuartzCore"
@@ -73,10 +73,12 @@ _ :: MTK
 _ :: CA
 
 
+import DXC   "vendor:directx/dxc"
 import D3D11 "vendor:directx/d3d11"
 import D3D12 "vendor:directx/d3d12"
 import DXGI  "vendor:directx/dxgi"
 
+_ :: DXC
 _ :: D3D11
 _ :: D3D12
 _ :: DXGI

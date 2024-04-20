@@ -29,6 +29,7 @@ import blake2s          "core:crypto/blake2s"
 import chacha20         "core:crypto/chacha20"
 import chacha20poly1305 "core:crypto/chacha20poly1305"
 import crypto_hash      "core:crypto/hash"
+import ed25519          "core:crypto/ed25519"
 import hkdf             "core:crypto/hkdf"
 import hmac             "core:crypto/hmac"
 import kmac             "core:crypto/kmac"
@@ -37,6 +38,7 @@ import md5              "core:crypto/legacy/md5"
 import sha1             "core:crypto/legacy/sha1"
 import pbkdf2           "core:crypto/pbkdf2"
 import poly1305         "core:crypto/poly1305"
+import ristretto255     "core:crypto/ristretto255"
 import sha2             "core:crypto/sha2"
 import sha3             "core:crypto/sha3"
 import shake            "core:crypto/shake"
@@ -57,6 +59,7 @@ import json             "core:encoding/json"
 import varint           "core:encoding/varint"
 import xml              "core:encoding/xml"
 import endian           "core:encoding/endian"
+import cbor             "core:encoding/cbor"
 
 import fmt              "core:fmt"
 import hash             "core:hash"
@@ -151,6 +154,7 @@ _ :: blake2b
 _ :: blake2s
 _ :: chacha20
 _ :: chacha20poly1305
+_ :: ed25519
 _ :: hmac
 _ :: hkdf
 _ :: kmac
@@ -158,6 +162,7 @@ _ :: keccak
 _ :: md5
 _ :: pbkdf2
 _ :: poly1305
+_ :: ristretto255
 _ :: sha1
 _ :: sha2
 _ :: sha3
@@ -176,6 +181,7 @@ _ :: json
 _ :: varint
 _ :: xml
 _ :: endian
+_ :: cbor
 _ :: fmt
 _ :: hash
 _ :: xxhash
