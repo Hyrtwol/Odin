@@ -94,6 +94,17 @@ main :: proc() {
 	verify_error_codes(t)
 	verify_error_helpers(t)
 
+	lcid_to_local(t)
+
+	string_from_clsid(t)
+	clsid_from_string(t)
+	string_from_iid(t)
+	iid_from_string(t)
+	verify_coinit(t)
+
+	make_hresult(t)
+	decode_hresult(t)
+
 	fmt.printf("%v/%v tests successful.\n", TEST_count - TEST_fail, TEST_count)
 	if TEST_fail > 0 {
 		os.exit(1)
