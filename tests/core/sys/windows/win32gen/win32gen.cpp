@@ -303,6 +303,7 @@ static void verify_winuser(ofstream& out) {
 	expect_size(RID_DEVICE_INFO_KEYBOARD);
 	expect_size(RID_DEVICE_INFO_MOUSE);
 	expect_size(RID_DEVICE_INFO);
+	expect_value(GET_RAWINPUT_CODE_WPARAM(0x12345678));
 
 	expect_size(DRAWTEXTPARAMS);
 	expect_size(BSMINFO);
