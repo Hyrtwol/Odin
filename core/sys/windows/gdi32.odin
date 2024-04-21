@@ -75,6 +75,12 @@ foreign gdi32 {
 	Polyline :: proc(hdc: HDC, apt: ^POINT, cpt: INT) -> BOOL ---
 	PolylineTo :: proc(hdc: HDC, apt: ^POINT, cpt: DWORD) -> BOOL ---
 
+	BeginPath :: proc(hdc: HDC) -> BOOL ---
+	EndPath :: proc(hdc: HDC) -> BOOL ---
+	AbortPath :: proc(hdc: HDC) -> BOOL ---
+	StrokePath :: proc(hdc: HDC) -> BOOL ---
+	StrokeAndFillPath :: proc(hdc: HDC) -> BOOL ---
+
 	GdiTransparentBlt :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, crTransparent: UINT) -> BOOL ---
 	GdiGradientFill :: proc(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nCount: ULONG, ulMode: ULONG) -> BOOL ---
 	GdiAlphaBlend :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, ftn: BLENDFUNCTION) -> BOOL ---
