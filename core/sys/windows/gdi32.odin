@@ -69,6 +69,11 @@ foreign gdi32 {
 
 	RoundRect :: proc(hdc: HDC, left: INT, top: INT, right: INT, bottom: INT, width: INT, height: INT) -> BOOL ---
 	SetPixel :: proc(hdc: HDC, x: INT, y: INT, color: COLORREF) -> COLORREF ---
+	LineTo :: proc(hdc: HDC, x, y: INT) -> BOOL ---
+	MoveToEx :: proc(hdc: HDC, x, y: INT, lppt: LPPOINT) -> BOOL ---
+	Polygon :: proc(hdc: HDC, apt: ^POINT, cpt: INT) -> BOOL ---
+	Polyline :: proc(hdc: HDC, apt: ^POINT, cpt: INT) -> BOOL ---
+	PolylineTo :: proc(hdc: HDC, apt: ^POINT, cpt: DWORD) -> BOOL ---
 
 	GdiTransparentBlt :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, crTransparent: UINT) -> BOOL ---
 	GdiGradientFill :: proc(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nCount: ULONG, ulMode: ULONG) -> BOOL ---

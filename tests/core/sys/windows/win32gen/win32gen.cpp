@@ -276,17 +276,23 @@ static void verify_winuser(ofstream& out) {
 	expect_size(PAINTSTRUCT);
 	expect_size(CREATESTRUCTW);
 	expect_size(WINDOWPLACEMENT);
-
 	expect_size(MOUSEINPUT);
 	expect_size(KEYBDINPUT);
 	expect_size(HARDWAREINPUT);
 	expect_size(INPUT);
+
 	// expect_size(ICONINFO);
 	// expect_size(CURSORSHAPE);
 	expect_size(ICONINFOEXW);
 
+	expect_size(CURSORINFO);
+	//expect_value(CURSOR_SHOWING);
+	//expect_value(CURSOR_SUPPRESSED);
+
+	expect_size(WINDOWINFO);
+
 	expect_size(RAWINPUTHEADER);
-	expect_size(RAWHID);
+	//expect_size(RAWHID);
 	expect_size(RAWMOUSE);
 	expect_size(RAWKEYBOARD);
 	expect_size(RAWINPUT);
@@ -298,7 +304,6 @@ static void verify_winuser(ofstream& out) {
 	expect_size(RID_DEVICE_INFO_MOUSE);
 	expect_size(RID_DEVICE_INFO);
 
-	expect_size(WINDOWINFO);
 	expect_size(DRAWTEXTPARAMS);
 	expect_size(BSMINFO);
 

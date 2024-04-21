@@ -4,7 +4,7 @@ package sys_windows
 import "base:intrinsics"
 foreign import user32 "system:User32.lib"
 
-@(default_calling_convention="system")
+@(default_calling_convention = "system")
 foreign user32 {
 	GetClassInfoW :: proc(hInstance: HINSTANCE, lpClassName: LPCWSTR, lpWndClass: ^WNDCLASSW) -> BOOL ---
 	GetClassInfoExW :: proc(hInstance: HINSTANCE, lpszClass: LPCWSTR, lpwcx: ^WNDCLASSEXW) -> BOOL ---
@@ -155,6 +155,7 @@ foreign user32 {
 	MessageBoxExW :: proc(hWnd: HWND, lpText: LPCWSTR, lpCaption: LPCWSTR, uType: UINT, wLanguageId: WORD) -> INT ---
 
 	ClipCursor :: proc(lpRect: LPRECT) -> BOOL ---
+	GetCursorInfo :: proc(pci: PCURSORINFO) -> BOOL ---
 	GetCursorPos :: proc(lpPoint: LPPOINT) -> BOOL ---
 	SetCursorPos :: proc(X: INT, Y: INT) -> BOOL ---
 	SetCursor :: proc(hCursor: HCURSOR) -> HCURSOR ---
@@ -362,10 +363,10 @@ DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 :: DPI_AWARENESS_CONTEXT(~uintptr(3))
 DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED    :: DPI_AWARENESS_CONTEXT(~uintptr(4)) // -5
 
 RAWINPUTHEADER :: struct {
-	dwType: DWORD,
-	dwSize: DWORD,
+	dwType:  DWORD,
+	dwSize:  DWORD,
 	hDevice: HANDLE,
-	wParam: WPARAM,
+	wParam:  WPARAM,
 }
 
 RAWHID :: struct {
@@ -642,7 +643,21 @@ MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID              :: LPWSTR(uintptr(0x00000010)
 ACCEL :: struct {
 	/* Also called the flags field */
 	fVirt: BYTE,
-	key: WORD,
-	cmd: WORD,
+	key:   WORD,
+	cmd:   WORD,
 }
 LPACCEL :: ^ACCEL
+
+CURSORINFO :: struct {
+	cbSize:      DWORD,
+	flags:       CURSORINFOFLAGS,
+	hCursor:     HCURSOR,
+	ptScreenPos: POINT,
+}
+PCURSORINFO :: ^CURSORINFO
+
+CURSORINFOFLAGS :: enum DWORD {
+	HIDDEN     = 0x00000000,
+	SHOWING    = 0x00000001,
+	SUPPRESSED = 0x00000002,
+}
