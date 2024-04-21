@@ -28,7 +28,7 @@ hkey
 hlsl
 hmenu
 hmonitor
-Hotspot
+hotspot
 hresult
 hrsrc
 hwnd
@@ -50,6 +50,7 @@ odinfmt
 panicf
 pbyte
 pcwstr
+polyline
 printfln
 println
 proc
