@@ -3,42 +3,29 @@ package sys_windows
 
 foreign import shell32 "system:Shell32.lib"
 
-@(default_calling_convention="system")
+@(default_calling_convention = "system")
 foreign shell32 {
-	CommandLineToArgvW :: proc(cmd_list: wstring, num_args: ^c_int) -> ^wstring ---
-	ShellExecuteW :: proc(
-		hwnd: HWND,
-		lpOperation: LPCWSTR,
-		lpFile: LPCWSTR,
-		lpParameters: LPCWSTR,
-		lpDirectory: LPCWSTR,
-		nShowCmd: INT,
-	) -> HINSTANCE ---
+	CommandLineToArgvW :: proc(cmd_list: wstring, num_args: ^INT) -> ^wstring ---
+	ShellExecuteW :: proc(hwnd: HWND, lpOperation: LPCWSTR, lpFile: LPCWSTR, lpParameters: LPCWSTR, lpDirectory: LPCWSTR, nShowCmd: INT) -> HINSTANCE ---
 	ShellExecuteExW :: proc(pExecInfo: ^SHELLEXECUTEINFOW) -> BOOL ---
-	SHCreateDirectoryExW :: proc(
-		hwnd: HWND,
-		pszPath: LPCWSTR,
-		psa: ^SECURITY_ATTRIBUTES,
-	) -> c_int ---
-	SHFileOperationW :: proc(lpFileOp: LPSHFILEOPSTRUCTW) -> c_int ---
-	SHGetFolderPathW :: proc(hwnd: HWND, csidl: c_int, hToken: HANDLE, dwFlags: DWORD, pszPath: LPWSTR) -> HRESULT ---
+	SHCreateDirectoryExW :: proc(hwnd: HWND, pszPath: LPCWSTR, psa: ^SECURITY_ATTRIBUTES) -> INT ---
+	SHFileOperationW :: proc(lpFileOp: LPSHFILEOPSTRUCTW) -> INT ---
+	SHGetFolderPathW :: proc(hwnd: HWND, csidl: INT, hToken: HANDLE, dwFlags: DWORD, pszPath: LPWSTR) -> HRESULT ---
 	SHAppBarMessage :: proc(dwMessage: DWORD, pData: PAPPBARDATA) -> UINT_PTR ---
-
 	Shell_NotifyIconW :: proc(dwMessage: DWORD, lpData: ^NOTIFYICONDATAW) -> BOOL ---
 	SHChangeNotify :: proc(wEventId: LONG, uFlags: UINT, dwItem1: LPCVOID, dwItem2: LPCVOID) ---
-
-	SHGetKnownFolderIDList :: proc(rfid: REFKNOWNFOLDERID, dwFlags: /* KNOWN_FOLDER_FLAG */ DWORD, hToken: HANDLE, ppidl: rawptr) -> HRESULT ---
-	SHSetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: /* KNOWN_FOLDER_FLAG */ DWORD, hToken: HANDLE, pszPath: PCWSTR ) -> HRESULT ---
-	SHGetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: /* KNOWN_FOLDER_FLAG */ DWORD, hToken: HANDLE, ppszPath: ^LPWSTR) -> HRESULT ---
+	SHGetKnownFolderIDList :: proc(rfid: REFKNOWNFOLDERID, dwFlags: DWORD, hToken: HANDLE, ppidl: rawptr) -> HRESULT ---
+	SHSetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: DWORD, hToken: HANDLE, pszPath: PCWSTR) -> HRESULT ---
+	SHGetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: DWORD, hToken: HANDLE, ppszPath: ^LPWSTR) -> HRESULT ---
 }
 
 APPBARDATA :: struct {
-	cbSize: DWORD,
-	hWnd: HWND,
+	cbSize:           DWORD,
+	hWnd:             HWND,
 	uCallbackMessage: UINT,
-	uEdge: UINT,
-	rc: RECT,
-	lParam: LPARAM,
+	uEdge:            UINT,
+	rc:               RECT,
+	lParam:           LPARAM,
 }
 PAPPBARDATA :: ^APPBARDATA
 
@@ -81,7 +68,6 @@ KNOWN_FOLDER_FLAG :: enum u32 {
 
 	// if NTDDI_VERSION >= NTDDI_WIN7
 	NO_APPCONTAINER_REDIRECTION      = 0x00010000,
-
 	CREATE                           = 0x00008000,
 	DONT_VERIFY                      = 0x00004000,
 	DONT_UNEXPAND                    = 0x00002000,

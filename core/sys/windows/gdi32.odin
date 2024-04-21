@@ -70,11 +70,8 @@ foreign gdi32 {
 	RoundRect :: proc(hdc: HDC, left: INT, top: INT, right: INT, bottom: INT, width: INT, height: INT) -> BOOL ---
 	SetPixel :: proc(hdc: HDC, x: INT, y: INT, color: COLORREF) -> COLORREF ---
 
-	// same as msimg32.TransparentBlt
 	GdiTransparentBlt :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, crTransparent: UINT) -> BOOL ---
-	// same as msimg32.GradientFill
 	GdiGradientFill :: proc(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nCount: ULONG, ulMode: ULONG) -> BOOL ---
-	// same as msimg32.AlphaBlend
 	GdiAlphaBlend :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, ftn: BLENDFUNCTION) -> BOOL ---
 
 	GetObjectW :: proc(h: HANDLE, c: INT, pv: LPVOID) -> int ---
@@ -162,8 +159,11 @@ PICONINFOEXW :: ^ICONINFOEXW
 AC_SRC_OVER :: 0x00
 AC_SRC_ALPHA :: 0x01
 
+// alias for msimg32.TransparentBlt
 TransparentBlt :: GdiTransparentBlt
+// alias for msimg32.GradientFill
 GradientFill :: GdiGradientFill
+// alias for msimg32.AlphaBlend
 AlphaBlend :: GdiAlphaBlend
 
 COLOR16 :: USHORT

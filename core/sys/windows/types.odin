@@ -784,19 +784,6 @@ MOUSEEVENTF_MOVE_NOCOALESCE :: 0x2000
 MOUSEEVENTF_VIRTUALDESK :: 0x4000
 MOUSEEVENTF_ABSOLUTE :: 0x8000
 
-WNDCLASSA :: struct {
-	style: UINT,
-	lpfnWndProc: WNDPROC,
-	cbClsExtra: c_int,
-	cbWndExtra: c_int,
-	hInstance: HINSTANCE,
-	hIcon: HICON,
-	hCursor: HCURSOR,
-	hbrBackground: HBRUSH,
-	lpszMenuName: LPCSTR,
-	lpszClassName: LPCSTR,
-}
-
 WNDCLASSW :: struct {
 	style: UINT,
 	lpfnWndProc: WNDPROC,
@@ -808,21 +795,6 @@ WNDCLASSW :: struct {
 	hbrBackground: HBRUSH,
 	lpszMenuName: LPCWSTR,
 	lpszClassName: LPCWSTR,
-}
-
-WNDCLASSEXA :: struct {
-	cbSize: UINT,
-	style: UINT,
-	lpfnWndProc: WNDPROC,
-	cbClsExtra: c_int,
-	cbWndExtra: c_int,
-	hInstance: HINSTANCE,
-	hIcon: HICON,
-	hCursor: HCURSOR,
-	hbrBackground: HBRUSH,
-	lpszMenuName: LPCSTR,
-	lpszClassName: LPCSTR,
-	hIconSm: HICON,
 }
 
 WNDCLASSEXW :: struct {
@@ -1031,21 +1003,6 @@ WIN32_FIND_DATAW :: struct {
 	dwReserved1: DWORD,
 	cFileName: [260]wchar_t, // #define MAX_PATH 260
 	cAlternateFileName: [14]wchar_t,
-}
-
-CREATESTRUCTA :: struct {
-	lpCreateParams: LPVOID,
-	hInstance:      HINSTANCE,
-	hMenu:          HMENU,
-	hwndParent:     HWND,
-	cy:             c_int,
-	cx:             c_int,
-	y:              c_int,
-	x:              c_int,
-	style:          LONG,
-	lpszName:       LPCSTR,
-	lpszClass:      LPCSTR,
-	dwExStyle:      DWORD,
 }
 
 CREATESTRUCTW:: struct {
