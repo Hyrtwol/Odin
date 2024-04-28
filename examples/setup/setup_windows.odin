@@ -378,7 +378,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 		}
 		if .icon_info in options {
 			print_key_value("Icon", icon_info.fIcon)
-			print_key_value("Hotspot", icon_info.Hotspot)
+			print_key_value("Hotspot", [2]win32.DWORD{icon_info.xHotspot, icon_info.yHotspot})
 			print_key_value("Mask", icon_info.hbmMask)
 			print_key_value("Color", icon_info.hbmColor)
 			print_key_value("ResID", icon_info.wResID)
