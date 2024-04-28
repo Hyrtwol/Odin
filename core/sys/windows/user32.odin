@@ -130,6 +130,7 @@ foreign user32 {
 	CreatePopupMenu :: proc() -> HMENU ---
 	DeleteMenu :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT) -> BOOL ---
 	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
+	InsertMenuW :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
 	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
 	GetMenu :: proc(hWnd: HWND) -> HMENU ---
 	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
@@ -141,6 +142,13 @@ foreign user32 {
 	LoadAcceleratorsW :: proc(hInstance: HINSTANCE, lpTableName: LPCWSTR) -> HACCEL ---
 	TranslateAcceleratorW :: proc(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG) -> INT ---
 	CopyAcceleratorTableW :: proc(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: INT) -> INT ---
+
+	InsertMenuItemW :: proc(hmenu: HMENU, item: UINT, fByPosition: BOOL, lpmi: LPMENUITEMINFOW) -> BOOL ---
+	GetMenuItemInfoW :: proc(hmenu: HMENU, item: UINT, fByPosition: BOOL, lpmii: LPMENUITEMINFOW) -> BOOL ---
+	SetMenuItemInfoW :: proc(hmenu: HMENU, item: UINT, fByPositon: BOOL, lpmii: LPMENUITEMINFOW) -> BOOL ---
+	GetMenuDefaultItem :: proc(hMenu: HMENU, fByPos: UINT, gmdiFlags: UINT) -> UINT ---
+	SetMenuDefaultItem :: proc(hMenu: HMENU, uItem: UINT, fByPos: UINT) -> BOOL ---
+	GetMenuItemRect :: proc(hWnd: HWND, hMenu: HMENU, uItem: UINT, lprcItem: LPRECT) -> c_int ---
 
 	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT, bErase: BOOL) -> BOOL ---
 	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT) -> BOOL ---
@@ -658,3 +666,30 @@ ACCEL :: struct {
 	cmd: WORD,
 }
 LPACCEL :: ^ACCEL
+
+MIIM_STATE      :: 0x00000001
+MIIM_ID         :: 0x00000002
+MIIM_SUBMENU    :: 0x00000004
+MIIM_CHECKMARKS :: 0x00000008
+MIIM_TYPE       :: 0x00000010
+MIIM_DATA       :: 0x00000020
+
+MIIM_STRING :: 0x00000040
+MIIM_BITMAP :: 0x00000080
+MIIM_FTYPE  :: 0x00000100
+
+MENUITEMINFOW :: struct {
+    cbSize: UINT,
+    fMask: UINT,
+    fType: UINT,         // used if MIIM_TYPE (4.0) or MIIM_FTYPE (>4.0)
+    fState: UINT,        // used if MIIM_STATE
+    wID: UINT,           // used if MIIM_ID
+    hSubMenu: HMENU,      // used if MIIM_SUBMENU
+    hbmpChecked: HBITMAP,   // used if MIIM_CHECKMARKS
+    hbmpUnchecked: HBITMAP, // used if MIIM_CHECKMARKS
+    dwItemData: ULONG_PTR,   // used if MIIM_DATA
+    dwTypeData: LPWSTR,    // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
+    cch: UINT,           // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
+    hbmpItem: HBITMAP,      // used if MIIM_BITMAP
+}
+LPMENUITEMINFOW :: ^MENUITEMINFOW
