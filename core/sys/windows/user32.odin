@@ -94,14 +94,14 @@ foreign user32 {
 	GetIconInfoExW :: proc(hIcon: HICON, piconinfo: PICONINFOEXW) -> BOOL ---
 	LoadCursorA :: proc(hInstance: HINSTANCE, lpCursorName: LPCSTR) -> HCURSOR ---
 	LoadCursorW :: proc(hInstance: HINSTANCE, lpCursorName: LPCWSTR) -> HCURSOR ---
-	LoadImageW :: proc(hInst: HINSTANCE, name: LPCWSTR, type: UINT, cx: INT, cy: INT, fuLoad: UINT) -> HANDLE ---
+	LoadImageW :: proc(hInst: HINSTANCE, name: LPCWSTR, type: UINT, cx, cy: INT, fuLoad: UINT) -> HANDLE ---
 
-	CreateIcon :: proc(hInstance: HINSTANCE, nWidth: INT, nHeight: INT, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: PBYTE, lpbXORbits: PBYTE) -> HICON ---
+	CreateIcon :: proc(hInstance: HINSTANCE, nWidth, nHeight: INT, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: PBYTE, lpbXORbits: PBYTE) -> HICON ---
 	CreateIconFromResource :: proc(presbits: PBYTE, dwResSize: DWORD, fIcon: BOOL, dwVer: DWORD) -> HICON ---
 	DestroyIcon :: proc(hIcon: HICON) -> BOOL ---
-	DrawIcon :: proc(hDC: HDC, X: INT, Y: INT, hIcon: HICON) -> BOOL ---
+	DrawIcon :: proc(hDC: HDC, X, Y: INT, hIcon: HICON) -> BOOL ---
 
-	CreateCursor :: proc(hInst: HINSTANCE, xHotSpot: INT, yHotSpot: INT, nWidth: INT, nHeight: INT, pvANDPlane: PVOID, pvXORPlane: PVOID) -> HCURSOR ---
+	CreateCursor :: proc(hInst: HINSTANCE, xHotSpot, yHotSpot, nWidth, nHeight: INT, pvANDPlane: PVOID, pvXORPlane: PVOID) -> HCURSOR ---
 	DestroyCursor :: proc(hCursor: HCURSOR) -> BOOL ---
 
 	GetWindowRect :: proc(hWnd: HWND, lpRect: LPRECT) -> BOOL ---
@@ -184,7 +184,7 @@ foreign user32 {
 
 	ClipCursor :: proc(lpRect: LPRECT) -> BOOL ---
 	GetCursorPos :: proc(lpPoint: LPPOINT) -> BOOL ---
-	SetCursorPos :: proc(X: INT, Y: INT) -> BOOL ---
+	SetCursorPos :: proc(X, Y: INT) -> BOOL ---
 	SetCursor :: proc(hCursor: HCURSOR) -> HCURSOR ---
 	when !intrinsics.is_package_imported("raylib") {
 		ShowCursor :: proc(bShow: BOOL) -> INT ---
@@ -286,7 +286,6 @@ foreign user32 {
 	DrawTextW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat) -> INT ---
 	DrawTextExW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat, lpdtp: PDRAWTEXTPARAMS) -> INT ---
 
-	// WinNls.h
 	GetLocaleInfoEx :: proc(lpLocaleName: LPCWSTR, LCType: LCTYPE, lpLCData: LPWSTR, cchData: INT) -> INT ---
 	IsValidLocaleName :: proc(lpLocaleName: LPCWSTR) -> BOOL ---
 	ResolveLocaleName :: proc(lpNameToResolve: LPCWSTR, lpLocaleName: LPWSTR, cchLocaleName: INT) -> INT ---
