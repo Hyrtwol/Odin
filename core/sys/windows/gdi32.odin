@@ -7,6 +7,7 @@ foreign import gdi32 "system:Gdi32.lib"
 
 @(default_calling_convention="system")
 foreign gdi32 {
+	GetDeviceCaps :: proc(hdc: HDC, index: INT) -> INT ---
 	GetStockObject :: proc(i: INT) -> HGDIOBJ ---
 	SelectObject :: proc(hdc: HDC, h: HGDIOBJ) -> HGDIOBJ ---
 	DeleteObject :: proc(ho: HGDIOBJ) -> BOOL ---
@@ -20,19 +21,14 @@ foreign gdi32 {
 	RestoreDC :: proc(hdc: HDC, nSavedDC: INT) -> BOOL ---
 
 	CreateDIBPatternBrush :: proc(h: HGLOBAL, iUsage: UINT) -> HBRUSH ---
-
 	CreateDIBitmap :: proc(hdc: HDC, pbmih: ^BITMAPINFOHEADER, flInit: DWORD, pjBits: VOID, pbmi: ^BITMAPINFO, iUsage: UINT) -> HBITMAP ---
-
 	CreateDIBSection :: proc(hdc: HDC, pbmi: ^BITMAPINFO, usage: UINT, ppvBits: VOID, hSection: HANDLE, offset: DWORD) -> HBITMAP ---
-
 	StretchDIBits :: proc(hdc: HDC, xDest: INT, yDest: INT, DestWidth: INT, DestHeight: INT, xSrc: INT, ySrc: INT, SrcWidth: INT, SrcHeight: INT, lpBits: VOID, lpbmi: ^BITMAPINFO, iUsage: UINT, rop: DWORD) -> INT ---
-
 	StretchBlt :: proc(hdcDest: HDC, xDest: INT, yDest: INT, wDest: INT, hDest: INT, hdcSrc: HDC, xSrc: INT, ySrc: INT, wSrc: INT, hSrc: INT, rop: DWORD) -> BOOL ---
 
 	SetPixelFormat :: proc(hdc: HDC, format: INT, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
 	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
-	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: INT, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
-
+	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: INT, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---	
 	SwapBuffers :: proc(hdc: HDC) -> BOOL ---
 
 	SetDCBrushColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
@@ -72,7 +68,6 @@ foreign gdi32 {
 	CreatePalette :: proc(plpal: ^LOGPALETTE) -> HPALETTE ---
 	SelectPalette :: proc(hdc: HDC, hPal: HPALETTE, bForceBkgd: BOOL) -> HPALETTE ---
 	RealizePalette :: proc(hdc: HDC) -> UINT ---
-
 
 	SetTextColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
 	RoundRect :: proc(hdc: HDC, left: INT, top: INT, right: INT, bottom: INT, width: INT, height: INT) -> BOOL ---
@@ -160,14 +155,13 @@ BKMODE :: enum {
 }
 
 ICONINFOEXW :: struct {
-	cbSize:    DWORD,
-	fIcon:     BOOL,
-	Hotspot:   [2]DWORD,
-	hbmMask:   HBITMAP,
-	hbmColor:  HBITMAP,
-	wResID:    WORD,
-	szModName: [MAX_PATH]WCHAR,
-	szResName: [MAX_PATH]WCHAR,
+	cbSize:             DWORD,
+	fIcon:              BOOL,
+	xHotspot, yHotspot: DWORD,
+	hbmMask, hbmColor:  HBITMAP,
+	wResID:             WORD,
+	szModName:          [MAX_PATH]WCHAR,
+	szResName:          [MAX_PATH]WCHAR,
 }
 PICONINFOEXW :: ^ICONINFOEXW
 

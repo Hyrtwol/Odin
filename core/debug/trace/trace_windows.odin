@@ -28,20 +28,18 @@ _destroy :: proc "contextless" (ctx: ^Context) -> bool {
 	return true
 }
 
-_frames :: proc(ctx: ^Context, skip: uint, allocator: runtime.Allocator) -> []Frame {
-	buffer: [MAX_FRAMES]rawptr
-	frame_count := win32.RtlCaptureStackBackTrace(u32(skip) + 2, len(buffer), &buffer[0], nil)
-	frames := make([]Frame, frame_count, allocator)
-	for &f, i in frames {
+_frames :: proc "contextless" (ctx: ^Context, skip: uint, frames_buffer: []Frame) -> []Frame {
+	frame_count := win32.RtlCaptureStackBackTrace(u32(skip) + 2, u32(len(frames_buffer)), ([^]rawptr)(&frames_buffer[0]), nil)
+	for i in 0..<frame_count {
 		// NOTE: Return address is one after the call instruction so subtract a byte to
 		// end up back inside the call instruction which is needed for SymFromAddr.
-		f = Frame(buffer[i]) - 1
+		frames_buffer[i] -= 1
 	}
-	return frames
+	return frames_buffer[:frame_count]
 }
 
 
-_resolve :: proc(ctx: ^Context, frame: Frame, allocator: runtime.Allocator) -> (result: runtime.Source_Code_Location) {
+_resolve :: proc(ctx: ^Context, frame: Frame, allocator: runtime.Allocator) -> (fl: Frame_Location) {
 	intrinsics.atomic_store(&ctx.in_resolve, true)
 	defer intrinsics.atomic_store(&ctx.in_resolve, false)
 
@@ -54,17 +52,17 @@ _resolve :: proc(ctx: ^Context, frame: Frame, allocator: runtime.Allocator) -> (
 	symbol.SizeOfStruct = size_of(symbol)
 	symbol.MaxNameLen = 255
 	if win32.SymFromAddrW(ctx.impl.hProcess, win32.DWORD64(frame), &{}, symbol) {
-		result.procedure, _ = win32.wstring_to_utf8(&symbol.Name[0], -1, allocator)
+		fl.procedure, _ = win32.wstring_to_utf8(&symbol.Name[0], -1, allocator)
 	} else {
-		result.procedure = fmt.aprintf("(procedure: 0x%x)", frame, allocator=allocator)
+		fl.procedure = fmt.aprintf("(procedure: 0x%x)", frame, allocator=allocator)
 	}
 
 	line: win32.IMAGEHLP_LINE64
 	line.SizeOfStruct = size_of(line)
 	if win32.SymGetLineFromAddrW64(ctx.impl.hProcess, win32.DWORD64(frame), &{}, &line) {
-		result.file_path, _ = win32.wstring_to_utf8(line.FileName, -1, allocator)
-		result.line = i32(line.LineNumber)
+		fl.file_path, _ = win32.wstring_to_utf8(line.FileName, -1, allocator)
+		fl.line = i32(line.LineNumber)
 	}
 
-	return result
+	return
 }

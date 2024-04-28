@@ -14,9 +14,10 @@ foreign shell32 {
 	SHAppBarMessage :: proc(dwMessage: DWORD, pData: PAPPBARDATA) -> UINT_PTR ---
 	Shell_NotifyIconW :: proc(dwMessage: DWORD, lpData: ^NOTIFYICONDATAW) -> BOOL ---
 	SHChangeNotify :: proc(wEventId: LONG, uFlags: UINT, dwItem1: LPCVOID, dwItem2: LPCVOID) ---
-	SHGetKnownFolderIDList :: proc(rfid: REFKNOWNFOLDERID, dwFlags: DWORD, hToken: HANDLE, ppidl: rawptr) -> HRESULT ---
-	SHSetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: DWORD, hToken: HANDLE, pszPath: PCWSTR) -> HRESULT ---
-	SHGetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: DWORD, hToken: HANDLE, ppszPath: ^LPWSTR) -> HRESULT ---
+	SHGetKnownFolderIDList :: proc(rfid: REFKNOWNFOLDERID, dwFlags: /* KNOWN_FOLDER_FLAG */ DWORD, hToken: HANDLE, ppidl: rawptr) -> HRESULT ---
+	SHSetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: /* KNOWN_FOLDER_FLAG */ DWORD, hToken: HANDLE, pszPath: PCWSTR ) -> HRESULT ---
+	SHGetKnownFolderPath :: proc(rfid: REFKNOWNFOLDERID, dwFlags: /* KNOWN_FOLDER_FLAG */ DWORD, hToken: HANDLE, ppszPath: ^LPWSTR) -> HRESULT ---
+	ExtractIconExW :: proc(pszFile: LPCWSTR, nIconIndex: c_int, phiconLarge: ^HICON, phiconSmall: ^HICON, nIcons: UINT) -> UINT ---
 }
 
 APPBARDATA :: struct {

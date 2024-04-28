@@ -84,14 +84,14 @@ foreign user32 {
 	LoadIconW :: proc(hInstance: HINSTANCE, lpIconName: LPCWSTR) -> HICON ---
 	GetIconInfoExW :: proc(hIcon: HICON, piconinfo: PICONINFOEXW) -> BOOL ---
 	LoadCursorW :: proc(hInstance: HINSTANCE, lpCursorName: LPCWSTR) -> HCURSOR ---
-	LoadImageW :: proc(hInst: HINSTANCE, name: LPCWSTR, type: UINT, cx: INT, cy: INT, fuLoad: UINT) -> HANDLE ---
+	LoadImageW :: proc(hInst: HINSTANCE, name: LPCWSTR, type: UINT, cx, cy: INT, fuLoad: UINT) -> HANDLE ---
 
-	CreateIcon :: proc(hInstance: HINSTANCE, nWidth: INT, nHeight: INT, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: PBYTE, lpbXORbits: PBYTE) -> HICON ---
+	CreateIcon :: proc(hInstance: HINSTANCE, nWidth, nHeight: INT, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: PBYTE, lpbXORbits: PBYTE) -> HICON ---
 	CreateIconFromResource :: proc(presbits: PBYTE, dwResSize: DWORD, fIcon: BOOL, dwVer: DWORD) -> HICON ---
 	DestroyIcon :: proc(hIcon: HICON) -> BOOL ---
-	DrawIcon :: proc(hDC: HDC, X: INT, Y: INT, hIcon: HICON) -> BOOL ---
+	DrawIcon :: proc(hDC: HDC, X, Y: INT, hIcon: HICON) -> BOOL ---
 
-	CreateCursor :: proc(hInst: HINSTANCE, xHotSpot: INT, yHotSpot: INT, nWidth: INT, nHeight: INT, pvANDPlane: PVOID, pvXORPlane: PVOID) -> HCURSOR ---
+	CreateCursor :: proc(hInst: HINSTANCE, xHotSpot, yHotSpot, nWidth, nHeight: INT, pvANDPlane: PVOID, pvXORPlane: PVOID) -> HCURSOR ---
 	DestroyCursor :: proc(hCursor: HCURSOR) -> BOOL ---
 
 	GetWindowRect :: proc(hWnd: HWND, lpRect: LPRECT) -> BOOL ---
@@ -120,6 +120,7 @@ foreign user32 {
 	CreatePopupMenu :: proc() -> HMENU ---
 	DeleteMenu :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT) -> BOOL ---
 	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
+	InsertMenuW :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
 	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
 	GetMenu :: proc(hWnd: HWND) -> HMENU ---
 	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
@@ -131,6 +132,13 @@ foreign user32 {
 	LoadAcceleratorsW :: proc(hInstance: HINSTANCE, lpTableName: LPCWSTR) -> HACCEL ---
 	TranslateAcceleratorW :: proc(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG) -> INT ---
 	CopyAcceleratorTableW :: proc(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: INT) -> INT ---
+
+	InsertMenuItemW :: proc(hmenu: HMENU, item: UINT, fByPosition: BOOL, lpmi: LPMENUITEMINFOW) -> BOOL ---
+	GetMenuItemInfoW :: proc(hmenu: HMENU, item: UINT, fByPosition: BOOL, lpmii: LPMENUITEMINFOW) -> BOOL ---
+	SetMenuItemInfoW :: proc(hmenu: HMENU, item: UINT, fByPositon: BOOL, lpmii: LPMENUITEMINFOW) -> BOOL ---
+	GetMenuDefaultItem :: proc(hMenu: HMENU, fByPos: UINT, gmdiFlags: UINT) -> UINT ---
+	SetMenuDefaultItem :: proc(hMenu: HMENU, uItem: UINT, fByPos: UINT) -> BOOL ---
+	GetMenuItemRect :: proc(hWnd: HWND, hMenu: HMENU, uItem: UINT, lprcItem: LPRECT) -> c_int ---
 
 	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT, bErase: BOOL) -> BOOL ---
 	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT) -> BOOL ---
@@ -165,12 +173,13 @@ foreign user32 {
 	ClipCursor :: proc(lpRect: LPRECT) -> BOOL ---
 	GetCursorInfo :: proc(pci: PCURSORINFO) -> BOOL ---
 	GetCursorPos :: proc(lpPoint: LPPOINT) -> BOOL ---
-	SetCursorPos :: proc(X: INT, Y: INT) -> BOOL ---
+	SetCursorPos :: proc(X, Y: INT) -> BOOL ---
 	SetCursor :: proc(hCursor: HCURSOR) -> HCURSOR ---
 	when !intrinsics.is_package_imported("raylib") {
 		ShowCursor :: proc(bShow: BOOL) -> INT ---
 	}
 
+	EnumDisplayDevicesW :: proc (lpDevice: LPCWSTR, iDevNum: DWORD, lpDisplayDevice: PDISPLAY_DEVICEW, dwFlags: DWORD) -> BOOL ---
 	EnumDisplaySettingsW :: proc(lpszDeviceName: LPCWSTR, iModeNum: DWORD, lpDevMode: ^DEVMODEW) -> BOOL ---
 
 	MonitorFromPoint  :: proc(pt: POINT, dwFlags: Monitor_From_Flags) -> HMONITOR ---
@@ -179,6 +188,9 @@ foreign user32 {
 	EnumDisplayMonitors :: proc(hdc: HDC, lprcClip: LPRECT, lpfnEnum: Monitor_Enum_Proc, dwData: LPARAM) -> BOOL ---
 
 	EnumWindows :: proc(lpEnumFunc: Window_Enum_Proc, lParam: LPARAM) -> BOOL ---
+
+	IsProcessDPIAware :: proc() -> BOOL ---
+	SetProcessDPIAware :: proc() -> BOOL ---
 
 	SetThreadDpiAwarenessContext :: proc(dpiContext: DPI_AWARENESS_CONTEXT) -> DPI_AWARENESS_CONTEXT ---
 	GetThreadDpiAwarenessContext :: proc() -> DPI_AWARENESS_CONTEXT ---
@@ -263,7 +275,6 @@ foreign user32 {
 	DrawTextW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat) -> INT ---
 	DrawTextExW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat, lpdtp: PDRAWTEXTPARAMS) -> INT ---
 
-	// WinNls.h
 	GetLocaleInfoEx :: proc(lpLocaleName: LPCWSTR, LCType: LCTYPE, lpLCData: LPWSTR, cchData: INT) -> INT ---
 	IsValidLocaleName :: proc(lpLocaleName: LPCWSTR) -> BOOL ---
 	ResolveLocaleName :: proc(lpNameToResolve: LPCWSTR, lpLocaleName: LPWSTR, cchLocaleName: INT) -> INT ---
@@ -532,8 +543,8 @@ WINDOWPLACEMENT :: struct {
 	flags: UINT,
 	showCmd: UINT,
 	ptMinPosition: POINT,
-  	ptMaxPosition: POINT,
-  	rcNormalPosition: RECT,
+	ptMaxPosition: POINT,
+	rcNormalPosition: RECT,
 }
 
 WINDOWINFO :: struct {
@@ -670,3 +681,38 @@ CURSORINFOFLAGS :: enum DWORD {
 	SHOWING    = 0x00000001,
 	SUPPRESSED = 0x00000002,
 }
+
+MIIM_STATE      :: 0x00000001
+MIIM_ID         :: 0x00000002
+MIIM_SUBMENU    :: 0x00000004
+MIIM_CHECKMARKS :: 0x00000008
+MIIM_TYPE       :: 0x00000010
+MIIM_DATA       :: 0x00000020
+MIIM_STRING     :: 0x00000040
+MIIM_BITMAP     :: 0x00000080
+MIIM_FTYPE      :: 0x00000100
+
+MENUITEMINFOW :: struct {
+    cbSize: UINT,
+    fMask: UINT,
+    fType: UINT,         // used if MIIM_TYPE (4.0) or MIIM_FTYPE (>4.0)
+    fState: UINT,        // used if MIIM_STATE
+    wID: UINT,           // used if MIIM_ID
+    hSubMenu: HMENU,      // used if MIIM_SUBMENU
+    hbmpChecked: HBITMAP,   // used if MIIM_CHECKMARKS
+    hbmpUnchecked: HBITMAP, // used if MIIM_CHECKMARKS
+    dwItemData: ULONG_PTR,   // used if MIIM_DATA
+    dwTypeData: LPWSTR,    // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
+    cch: UINT,           // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
+    hbmpItem: HBITMAP,      // used if MIIM_BITMAP
+}
+LPMENUITEMINFOW :: ^MENUITEMINFOW
+DISPLAY_DEVICEW :: struct {
+	cb: DWORD,
+	DeviceName: [32]WCHAR,
+	DeviceString: [128]WCHAR,
+	StateFlags: DWORD,
+	DeviceID: [128]WCHAR,
+	DeviceKey: [128]WCHAR,
+}
+PDISPLAY_DEVICEW :: ^DISPLAY_DEVICEW
