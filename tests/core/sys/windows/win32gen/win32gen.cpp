@@ -478,6 +478,7 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(GRADIENT_TRIANGLE);
 	expect_size(GRADIENT_RECT);
 	expect_size(BLENDFUNCTION);
+	expect_size(DISPLAY_DEVICEW);
 	expect_value(AC_SRC_OVER);
 	expect_value(AC_SRC_ALPHA);
 	expect_value(RGB(12, 34, 56));

@@ -4,7 +4,7 @@ package sys_windows
 
 foreign import shcore "system:Shcore.lib"
 
-@(default_calling_convention="stdcall")
+@(default_calling_convention="system")
 foreign shcore {
 	GetProcessDpiAwareness :: proc(hprocess: HANDLE, value: ^PROCESS_DPI_AWARENESS) -> HRESULT ---
 	SetProcessDpiAwareness :: proc(value: PROCESS_DPI_AWARENESS) -> HRESULT ---
