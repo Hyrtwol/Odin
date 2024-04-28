@@ -4,13 +4,16 @@ import "base:intrinsics"
 import "base:runtime"
 
 Frame :: distinct uintptr
-MAX_FRAMES :: 64
 
-Frame_Location :: runtime.Source_Code_Location
+Frame_Location :: struct {
+	using loc: runtime.Source_Code_Location,
+	allocator: runtime.Allocator,
+}
 
-delete_frame_location :: proc(loc: Frame_Location, allocator: runtime.Allocator) -> runtime.Allocator_Error {
-	delete(loc.procedure, allocator) or_return
-	delete(loc.file_path, allocator) or_return
+delete_frame_location :: proc(fl: Frame_Location) -> runtime.Allocator_Error {
+	allocator := fl.allocator
+	delete(fl.loc.procedure, allocator) or_return
+	delete(fl.loc.file_path, allocator) or_return
 	return nil
 }
 
@@ -28,8 +31,8 @@ destroy :: proc(ctx: ^Context) -> bool {
 }
 
 @(require_results)
-frames :: proc(ctx: ^Context, skip: uint, allocator: runtime.Allocator) -> []Frame {
-	return _frames(ctx, skip, allocator)
+frames :: proc(ctx: ^Context, skip: uint, frames_buffer: []Frame) -> []Frame {
+	return _frames(ctx, skip, frames_buffer)
 }
 
 @(require_results)
