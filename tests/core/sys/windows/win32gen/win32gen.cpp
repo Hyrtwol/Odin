@@ -442,6 +442,85 @@ static void verify_winuser(ofstream& out) {
 	expect_value(MIIM_BITMAP);
 	expect_value(MIIM_FTYPE);
 
+	expect_value(ANSI_CHARSET);
+	expect_value(DEFAULT_CHARSET);
+	expect_value(SYMBOL_CHARSET);
+	expect_value(SHIFTJIS_CHARSET);
+	expect_value(HANGEUL_CHARSET);
+	expect_value(HANGUL_CHARSET);
+	expect_value(GB2312_CHARSET);
+	expect_value(CHINESEBIG5_CHARSET);
+	expect_value(OEM_CHARSET);
+	expect_value(JOHAB_CHARSET);
+	expect_value(HEBREW_CHARSET);
+	expect_value(ARABIC_CHARSET);
+	expect_value(GREEK_CHARSET);
+	expect_value(TURKISH_CHARSET);
+	expect_value(VIETNAMESE_CHARSET);
+	expect_value(THAI_CHARSET);
+	expect_value(EASTEUROPE_CHARSET);
+	expect_value(RUSSIAN_CHARSET);
+	expect_value(MAC_CHARSET);
+	expect_value(BALTIC_CHARSET);
+
+	expect_value(FS_LATIN1);
+	expect_value(FS_LATIN2);
+	expect_value(FS_CYRILLIC);
+	expect_value(FS_GREEK);
+	expect_value(FS_TURKISH);
+	expect_value(FS_HEBREW);
+	expect_value(FS_ARABIC);
+	expect_value(FS_BALTIC);
+	expect_value(FS_VIETNAMESE);
+	expect_value(FS_THAI);
+	expect_value(FS_JISJAPAN);
+	expect_value(FS_CHINESESIMP);
+	expect_value(FS_WANSUNG);
+	expect_value(FS_CHINESETRAD);
+	expect_value(FS_JOHAB);
+	expect_value(FS_SYMBOL);
+
+	expect_value(OUT_DEFAULT_PRECIS);
+	expect_value(OUT_STRING_PRECIS);
+	expect_value(OUT_CHARACTER_PRECIS);
+	expect_value(OUT_STROKE_PRECIS);
+	expect_value(OUT_TT_PRECIS);
+	expect_value(OUT_DEVICE_PRECIS);
+	expect_value(OUT_RASTER_PRECIS);
+	expect_value(OUT_TT_ONLY_PRECIS);
+	expect_value(OUT_OUTLINE_PRECIS);
+	expect_value(OUT_SCREEN_OUTLINE_PRECIS);
+	expect_value(OUT_PS_ONLY_PRECIS);
+
+	expect_value(CLIP_DEFAULT_PRECIS);
+	expect_value(CLIP_CHARACTER_PRECIS);
+	expect_value(CLIP_STROKE_PRECIS);
+	expect_value(CLIP_MASK);
+	expect_value(CLIP_LH_ANGLES);
+	expect_value(CLIP_TT_ALWAYS);
+	expect_value(CLIP_DFA_DISABLE);
+	expect_value(CLIP_EMBEDDED);
+
+	expect_value(DEFAULT_QUALITY);
+	expect_value(DRAFT_QUALITY);
+	expect_value(PROOF_QUALITY);
+	expect_value(NONANTIALIASED_QUALITY);
+	expect_value(ANTIALIASED_QUALITY);
+	expect_value(CLEARTYPE_QUALITY);
+	expect_value(CLEARTYPE_NATURAL_QUALITY);
+
+	expect_value(DEFAULT_PITCH);
+	expect_value(FIXED_PITCH);
+	expect_value(VARIABLE_PITCH);
+	expect_value(MONO_FONT);
+
+	expect_value(FF_DONTCARE);
+	expect_value(FF_ROMAN);
+	expect_value(FF_SWISS);
+	expect_value(FF_MODERN);
+	expect_value(FF_SCRIPT);
+	expect_value(FF_DECORATIVE);
+
 	test_proc_end();
 }
 
