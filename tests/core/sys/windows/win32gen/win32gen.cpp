@@ -6,6 +6,7 @@
 #include <commdlg.h>
 #include <winver.h>
 #include <shobjidl.h>
+#include <shellapi.h>
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <wincrypt.h>
@@ -273,6 +274,7 @@ static void verify_winuser(ofstream& out) {
 	expect_size(MSG);
 	expect_size(WINDOWPOS);
 	expect_size(ACCEL);
+	expect_size(MENUITEMINFOW);
 	expect_size(PAINTSTRUCT);
 	expect_size(CREATESTRUCTW);
 	expect_size(WINDOWPLACEMENT);
@@ -354,6 +356,91 @@ static void verify_winuser(ofstream& out) {
 	expect_value(LR_CREATEDIBSECTION);
 	expect_value(LR_COPYFROMRESOURCE);
 	expect_value(LR_SHARED);
+
+	expect_value(NIM_ADD);
+	expect_value(NIM_MODIFY);
+	expect_value(NIM_DELETE);
+	expect_value(NIM_SETFOCUS);
+	expect_value(NIM_SETVERSION);
+
+	expect_value(NIF_MESSAGE);
+	expect_value(NIF_ICON);
+	expect_value(NIF_TIP);
+	expect_value(NIF_STATE);
+	expect_value(NIF_INFO);
+	expect_value(NIF_GUID);
+	expect_value(NIF_REALTIME);
+	expect_value(NIF_SHOWTIP);
+
+	expect_value(MF_INSERT);
+	expect_value(MF_CHANGE);
+	expect_value(MF_APPEND);
+	expect_value(MF_DELETE);
+	expect_value(MF_REMOVE);
+	expect_value(MF_BYCOMMAND);
+	expect_value(MF_BYPOSITION);
+	expect_value(MF_SEPARATOR);
+	expect_value(MF_ENABLED);
+	expect_value(MF_GRAYED);
+	expect_value(MF_DISABLED);
+	expect_value(MF_UNCHECKED);
+	expect_value(MF_CHECKED);
+	expect_value(MF_USECHECKBITMAPS);
+	expect_value(MF_STRING);
+	expect_value(MF_BITMAP);
+	expect_value(MF_OWNERDRAW);
+	expect_value(MF_POPUP);
+	expect_value(MF_MENUBARBREAK);
+	expect_value(MF_MENUBREAK);
+	expect_value(MF_UNHILITE);
+	expect_value(MF_HILITE);
+	expect_value(MF_DEFAULT);
+	expect_value(MF_SYSMENU);
+	expect_value(MF_HELP);
+	expect_value(MF_RIGHTJUSTIFY);
+	expect_value(MF_MOUSESELECT);
+	expect_value(MF_END);
+
+	expect_value(MFS_GRAYED);
+	expect_value(MFS_DISABLED);
+	expect_value(MFS_CHECKED);
+	expect_value(MFS_HILITE);
+	expect_value(MFS_ENABLED);
+	expect_value(MFS_UNCHECKED);
+	expect_value(MFS_UNHILITE);
+	expect_value(MFS_DEFAULT);
+
+	expect_value(TPM_LEFTBUTTON);
+	expect_value(TPM_RIGHTBUTTON);
+	expect_value(TPM_LEFTALIGN);
+	expect_value(TPM_CENTERALIGN);
+	expect_value(TPM_RIGHTALIGN);
+	expect_value(TPM_TOPALIGN);
+	expect_value(TPM_VCENTERALIGN);
+	expect_value(TPM_BOTTOMALIGN);
+
+	expect_value(TPM_HORIZONTAL);
+	expect_value(TPM_VERTICAL);
+	expect_value(TPM_NONOTIFY);
+	expect_value(TPM_RETURNCMD);
+	expect_value(TPM_RECURSE);
+	expect_value(TPM_HORPOSANIMATION);
+	expect_value(TPM_HORNEGANIMATION);
+	expect_value(TPM_VERPOSANIMATION);
+	expect_value(TPM_VERNEGANIMATION);
+	expect_value(TPM_NOANIMATION);
+	expect_value(TPM_LAYOUTRTL);
+	expect_value(TPM_WORKAREA);
+
+	expect_value(MIIM_STATE);
+	expect_value(MIIM_ID);
+	expect_value(MIIM_SUBMENU);
+	expect_value(MIIM_CHECKMARKS);
+	expect_value(MIIM_TYPE);
+	expect_value(MIIM_DATA);
+	expect_value(MIIM_STRING);
+	expect_value(MIIM_BITMAP);
+	expect_value(MIIM_FTYPE);
 
 	test_proc_end();
 }
