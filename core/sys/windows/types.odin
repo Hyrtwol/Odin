@@ -98,10 +98,14 @@ LONG32  :: i32
 ULONG64 :: u64
 LONG64  :: i64
 
+DWORD64 :: u64
+PDWORD64 :: ^DWORD64
+
 PDWORD_PTR :: ^DWORD_PTR
 ATOM :: distinct WORD
 
 wstring :: [^]WCHAR
+PWSTR   :: [^]WCHAR
 
 PBYTE :: ^BYTE
 LPBYTE :: ^BYTE
@@ -1934,7 +1938,7 @@ BITMAPINFOHEADER :: struct {
 
 BITMAPINFO :: struct {
 	bmiHeader: BITMAPINFOHEADER,
-	bmiColors: [^]RGBQUAD,
+	bmiColors: [1]RGBQUAD,
 }
 
 BITMAP :: struct {
@@ -2147,8 +2151,6 @@ LANG_NEUTRAL :: 0x00
 LANG_INVARIANT :: 0x7f
 SUBLANG_NEUTRAL :: 0x00 // language neutral
 SUBLANG_DEFAULT :: 0x01 // user default
-// #define MAKELANGID(p, s)((((WORD)(s)) << 10) | (WORD)(p))
-LANGID_NEUTRAL :: (SUBLANG_DEFAULT << 10) | (LANG_NEUTRAL & 0x3ff) //= MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT)
 
 MB_ERR_INVALID_CHARS :: 8
 WC_ERR_INVALID_CHARS :: 128

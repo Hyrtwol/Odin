@@ -98,7 +98,7 @@ foreign user32 {
 	GetClientRect :: proc(hWnd: HWND, lpRect: LPRECT) -> BOOL ---
 	ClientToScreen :: proc(hWnd: HWND, lpPoint: LPPOINT) -> BOOL ---
 	ScreenToClient :: proc(hWnd: HWND, lpPoint: LPPOINT) -> BOOL ---
-	SetWindowPos :: proc(hWnd: HWND, hWndInsertAfter: HWND, X: INT, Y: INT, cx: INT, cy: INT, uFlags: UINT) -> BOOL ---
+	SetWindowPos :: proc(hWnd: HWND, hWndInsertAfter: HWND, X, Y, cx, cy: INT, uFlags: UINT) -> BOOL ---
 	MoveWindow :: proc(hWnd: HWND, X, Y, hWidth, hHeight: INT, bRepaint: BOOL) -> BOOL ---
 	GetSystemMetrics :: proc(nIndex: INT) -> INT ---
 	AdjustWindowRect :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL) -> BOOL ---
@@ -116,6 +116,14 @@ foreign user32 {
 	GetDlgCtrlID :: proc(hWnd: HWND) -> INT ---
 	GetDlgItem :: proc(hDlg: HWND, nIDDlgItem: INT) -> HWND ---
 
+	CreateMenu :: proc() -> HMENU ---
+	CreatePopupMenu :: proc() -> HMENU ---
+	DeleteMenu :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT) -> BOOL ---
+	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
+	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
+	GetMenu :: proc(hWnd: HWND) -> HMENU ---
+	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
+	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x, y: INT, nReserved: INT, hWnd: HWND, prcRect: ^RECT) -> BOOL ---
 	RegisterWindowMessageW :: proc(lpString: LPCWSTR) -> UINT ---
 
 	CreateAcceleratorTableW :: proc(paccel: LPACCEL, cAccel: INT) -> HACCEL ---
@@ -124,9 +132,9 @@ foreign user32 {
 	TranslateAcceleratorW :: proc(hWnd: HWND, hAccTable: HACCEL, lpMsg: LPMSG) -> INT ---
 	CopyAcceleratorTableW :: proc(hAccelSrc: HACCEL, lpAccelDst: LPACCEL, cAccelEntries: INT) -> INT ---
 
-	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT = nil, bErase: BOOL = false) -> BOOL ---
-	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT = nil) -> BOOL ---
-	InvalidateRect :: proc(hWnd: HWND, lpRect: ^RECT = nil, bErase: BOOL = false) -> BOOL ---
+	GetUpdateRect :: proc(hWnd: HWND, lpRect: LPRECT, bErase: BOOL) -> BOOL ---
+	ValidateRect :: proc(hWnd: HWND, lpRect: ^RECT) -> BOOL ---
+	InvalidateRect :: proc(hWnd: HWND, lpRect: ^RECT, bErase: BOOL) -> BOOL ---
 
 	BeginPaint :: proc(hWnd: HWND, lpPaint: ^PAINTSTRUCT) -> HDC ---
 	EndPaint :: proc(hWnd: HWND, lpPaint: ^PAINTSTRUCT) -> BOOL ---
@@ -231,14 +239,14 @@ foreign user32 {
 	SetLayeredWindowAttributes  :: proc(hWnd: HWND, crKey: COLORREF, bAlpha: BYTE, dwFlags: DWORD) -> BOOL ---
 
 	FillRect :: proc(hDC: HDC, lprc: ^RECT, hbr: HBRUSH) -> int ---
+	EqualRect :: proc(lprc1, lprc2: ^RECT) -> BOOL ---
 	OffsetRect :: proc(lprc1: ^RECT, dx, dy: INT) -> BOOL ---
 	InflateRect :: proc(lprc1: ^RECT, dx, dy: INT) -> BOOL ---
-	IntersectRect :: proc(lprcDst: ^RECT, lprcSrc1, lprcSrc2: ^RECT) -> BOOL ---
-	SubtractRect :: proc(lprcDst: ^RECT, lprcSrc1, lprcSrc2: ^RECT) -> BOOL ---
-	UnionRect :: proc(lprcDst: ^RECT, lprcSrc1, lprcSrc2: ^RECT) -> BOOL ---
+	IntersectRect :: proc(lprcDst, lprcSrc1, lprcSrc2: ^RECT) -> BOOL ---
+	SubtractRect :: proc(lprcDst, lprcSrc1, lprcSrc2: ^RECT) -> BOOL ---
+	UnionRect :: proc(lprcDst, lprcSrc1, lprcSrc2: ^RECT) -> BOOL ---
 	IsRectEmpty :: proc(lprc: ^RECT) -> BOOL ---
 	SetRectEmpty :: proc(lprc: ^RECT) -> BOOL ---
-	EqualRect :: proc(lprc1, lprc2: ^RECT) -> BOOL ---
 	CopyRect :: proc(lprcDst, lprcSrc: ^RECT) -> BOOL ---
 
 	GetWindowInfo :: proc(hwnd: HWND, pwi: PWINDOWINFO) -> BOOL ---
@@ -251,14 +259,6 @@ foreign user32 {
 	GetSystemMenu :: proc(hWnd: HWND, bRevert: BOOL) -> HMENU ---
 	EnableMenuItem :: proc(hMenu: HMENU, uIDEnableItem: UINT, uEnable: UINT) -> BOOL ---
 	MenuItemFromPoint :: proc(hWnd: HWND, hMenu: HMENU, ptScreen: POINT) -> INT ---
-	GetMenu :: proc(hWnd: HWND) -> HMENU ---
-	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
-	CreateMenu :: proc() -> HMENU ---
-	CreatePopupMenu :: proc() -> HMENU ---
-	DeleteMenu :: proc(hMenu: HMENU, uPosition: UINT, uFlags: UINT) -> BOOL ---
-	DestroyMenu :: proc(hMenu: HMENU) -> BOOL ---
-	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
-	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x, y: INT, nReserved: INT, hWnd: HWND, prcRect: ^RECT) -> BOOL ---
 
 	DrawTextW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat) -> INT ---
 	DrawTextExW :: proc(hdc: HDC, lpchText: LPCWSTR, cchText: INT, lprc: LPRECT, format: DrawTextFormat, lpdtp: PDRAWTEXTPARAMS) -> INT ---
