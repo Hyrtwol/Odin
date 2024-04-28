@@ -105,11 +105,13 @@ is_user_interactive :: proc() -> bool {
 	return !is_User_non_interactive
 }
 
+LANGID_NEUTRAL := win32.MAKELANGID(win32.LANG_NEUTRAL, win32.SUBLANG_DEFAULT)
+
 show_last_error :: proc(caption: string, loc := #caller_location) {
 	fmt.eprintln(caption)
 	last_error := win32.GetLastError()
 	error_text: [512]win32.WCHAR
-	cch := win32.FormatMessageW(win32.FORMAT_MESSAGE_FROM_SYSTEM | win32.FORMAT_MESSAGE_IGNORE_INSERTS, nil, last_error, win32.LANGID_NEUTRAL, &error_text[0], len(error_text) - 1, nil)
+	cch := win32.FormatMessageW(win32.FORMAT_MESSAGE_FROM_SYSTEM | win32.FORMAT_MESSAGE_IGNORE_INSERTS, nil, last_error, LANGID_NEUTRAL, &error_text[0], len(error_text) - 1, nil)
 	if cch > 0 {
 		error_string, err := wstring_to_utf8(&error_text[0], int(cch))
 		if err == .None {
