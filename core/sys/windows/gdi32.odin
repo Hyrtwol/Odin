@@ -25,6 +25,7 @@ foreign gdi32 {
 	CreateDIBSection :: proc(hdc: HDC, pbmi: ^BITMAPINFO, usage: UINT, ppvBits: VOID, hSection: HANDLE, offset: DWORD) -> HBITMAP ---
 	StretchDIBits :: proc(hdc: HDC, xDest, yDest, DestWidth, DestHeight: INT, xSrc, ySrc, SrcWidth, SrcHeight: INT, lpBits: VOID, lpbmi: ^BITMAPINFO, iUsage: UINT, rop: DWORD) -> INT ---
 	StretchBlt :: proc(hdcDest: HDC, xDest, yDest, wDest, hDest: INT, hdcSrc: HDC, xSrc, ySrc, wSrc, hSrc: INT, rop: DWORD) -> BOOL ---
+	SetStretchBltMode :: proc (hdc: HDC, mode: StretchBltModes) -> INT ---
 
 	SetPixelFormat :: proc(hdc: HDC, format: INT, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
 	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
@@ -138,9 +139,16 @@ LOGPALETTE :: struct {
 	palPalEntry:   []PALETTEENTRY,
 }
 
-BKMODE :: enum {
+BKMODE :: enum INT {
 	TRANSPARENT = 1,
 	OPAQUE      = 2,
+}
+
+StretchBltModes :: enum INT {
+	BLACKONWHITE = 1,
+	WHITEONBLACK = 2,
+	COLORONCOLOR = 3,
+	HALFTONE     = 4,
 }
 
 ICONINFOEXW :: struct {
@@ -162,6 +170,27 @@ TransparentBlt :: GdiTransparentBlt
 GradientFill :: GdiGradientFill
 // alias for msimg32.AlphaBlend
 AlphaBlend :: GdiAlphaBlend
+
+// Ternary raster operations
+ROP :: enum DWORD {
+	SRCCOPY        = 0x00CC0020, // dest = source
+	SRCPAINT       = 0x00EE0086, // dest = source OR dest
+	SRCAND         = 0x008800C6, // dest = source AND dest
+	SRCINVERT      = 0x00660046, // dest = source XOR dest
+	SRCERASE       = 0x00440328, // dest = source AND (NOT dest)
+	NOTSRCCOPY     = 0x00330008, // dest = (NOT source)
+	NOTSRCERASE    = 0x001100A6, // dest = (NOT src) AND (NOT dest)
+	MERGECOPY      = 0x00C000CA, // dest = (source AND pattern
+	MERGEPAINT     = 0x00BB0226, // dest = (NOT source) OR dest
+	PATCOPY        = 0x00F00021, // dest = pattern
+	PATPAINT       = 0x00FB0A09, // dest = DPSnoo
+	PATINVERT      = 0x005A0049, // dest = pattern XOR dest
+	DSTINVERT      = 0x00550009, // dest = (NOT dest)
+	BLACKNESS      = 0x00000042, // dest = BLACK
+	WHITENESS      = 0x00FF0062, // dest = WHITE
+	NOMIRRORBITMAP = 0x80000000, // Do not Mirror the bitmap in this call
+	CAPTUREBLT     = 0x40000000, // Include layered windows
+}
 
 COLOR16 :: USHORT
 TRIVERTEX :: struct {
