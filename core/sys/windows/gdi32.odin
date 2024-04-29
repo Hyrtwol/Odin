@@ -23,12 +23,12 @@ foreign gdi32 {
 	CreateDIBPatternBrush :: proc(h: HGLOBAL, iUsage: UINT) -> HBRUSH ---
 	CreateDIBitmap :: proc(hdc: HDC, pbmih: ^BITMAPINFOHEADER, flInit: DWORD, pjBits: VOID, pbmi: ^BITMAPINFO, iUsage: UINT) -> HBITMAP ---
 	CreateDIBSection :: proc(hdc: HDC, pbmi: ^BITMAPINFO, usage: UINT, ppvBits: VOID, hSection: HANDLE, offset: DWORD) -> HBITMAP ---
-	StretchDIBits :: proc(hdc: HDC, xDest: INT, yDest: INT, DestWidth: INT, DestHeight: INT, xSrc: INT, ySrc: INT, SrcWidth: INT, SrcHeight: INT, lpBits: VOID, lpbmi: ^BITMAPINFO, iUsage: UINT, rop: DWORD) -> INT ---
-	StretchBlt :: proc(hdcDest: HDC, xDest: INT, yDest: INT, wDest: INT, hDest: INT, hdcSrc: HDC, xSrc: INT, ySrc: INT, wSrc: INT, hSrc: INT, rop: DWORD) -> BOOL ---
+	StretchDIBits :: proc(hdc: HDC, xDest, yDest, DestWidth, DestHeight: INT, xSrc, ySrc, SrcWidth, SrcHeight: INT, lpBits: VOID, lpbmi: ^BITMAPINFO, iUsage: UINT, rop: DWORD) -> INT ---
+	StretchBlt :: proc(hdcDest: HDC, xDest, yDest, wDest, hDest: INT, hdcSrc: HDC, xSrc, ySrc, wSrc, hSrc: INT, rop: DWORD) -> BOOL ---
 
 	SetPixelFormat :: proc(hdc: HDC, format: INT, ppfd: ^PIXELFORMATDESCRIPTOR) -> BOOL ---
 	ChoosePixelFormat :: proc(hdc: HDC, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
-	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: INT, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---	
+	DescribePixelFormat :: proc(hdc: HDC, iPixelFormat: INT, nBytes: UINT, ppfd: ^PIXELFORMATDESCRIPTOR) -> INT ---
 	SwapBuffers :: proc(hdc: HDC) -> BOOL ---
 
 	SetDCBrushColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
@@ -56,9 +56,9 @@ foreign gdi32 {
 	CreateCompatibleBitmap :: proc(hdc: HDC, cx, cy: INT) -> HBITMAP ---
 	BitBlt :: proc(hdc: HDC, x, y, cx, cy: INT, hdcSrc: HDC, x1, y1: INT, rop: DWORD) -> BOOL ---
 	GetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start, cLines: UINT, lpvBits: LPVOID, lpbmi: ^BITMAPINFO, usage: UINT) -> INT ---
-	SetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start: UINT, cLines: UINT, lpBits: VOID, lpbmi: ^BITMAPINFO, ColorUse: UINT) -> INT ---
-	SetDIBColorTable :: proc(hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ^RGBQUAD) -> UINT ---
-	GetDIBColorTable :: proc(hdc: HDC, iStart: UINT, cEntries: UINT, prgbq: ^RGBQUAD) -> UINT ---
+	SetDIBits :: proc(hdc: HDC, hbm: HBITMAP, start, cLines: UINT, lpBits: VOID, lpbmi: ^BITMAPINFO, ColorUse: UINT) -> INT ---
+	SetDIBColorTable :: proc(hdc: HDC, iStart, cEntries: UINT, prgbq: ^RGBQUAD) -> UINT ---
+	GetDIBColorTable :: proc(hdc: HDC, iStart, cEntries: UINT, prgbq: ^RGBQUAD) -> UINT ---
 
 	CreatePen :: proc(iStyle, cWidth: INT, color: COLORREF) -> HPEN ---
 	ExtCreatePen :: proc(iPenStyle, cWidth: DWORD, plbrush: ^LOGBRUSH, cStyle: DWORD, pstyle: ^DWORD) -> HPEN ---
@@ -70,8 +70,8 @@ foreign gdi32 {
 	RealizePalette :: proc(hdc: HDC) -> UINT ---
 
 	SetTextColor :: proc(hdc: HDC, color: COLORREF) -> COLORREF ---
-	RoundRect :: proc(hdc: HDC, left: INT, top: INT, right: INT, bottom: INT, width: INT, height: INT) -> BOOL ---
-	SetPixel :: proc(hdc: HDC, x: INT, y: INT, color: COLORREF) -> COLORREF ---
+	RoundRect :: proc(hdc: HDC, left, top, right, bottom, width, height: INT) -> BOOL ---
+	SetPixel :: proc(hdc: HDC, x, y: INT, color: COLORREF) -> COLORREF ---
 	LineTo :: proc(hdc: HDC, x, y: INT) -> BOOL ---
 	MoveToEx :: proc(hdc: HDC, x, y: INT, lppt: LPPOINT) -> BOOL ---
 	Polygon :: proc(hdc: HDC, apt: ^POINT, cpt: INT) -> BOOL ---
@@ -113,30 +113,19 @@ CIEXYZTRIPLE :: struct {
 
 // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header
 BITMAPV5HEADER :: struct {
-	bV5Size:          DWORD,
-	bV5Width:         LONG,
-	bV5Height:        LONG,
-	bV5Planes:        WORD,
-	bV5BitCount:      WORD,
-	bV5Compression:   DWORD,
-	bV5SizeImage:     DWORD,
-	bV5XPelsPerMeter: LONG,
-	bV5YPelsPerMeter: LONG,
-	bV5ClrUsed:       DWORD,
-	bV5ClrImportant:  DWORD,
-	bV5RedMask:       DWORD,
-	bV5GreenMask:     DWORD,
-	bV5BlueMask:      DWORD,
-	bV5AlphaMask:     DWORD,
-	bV5CSType:        DWORD,
-	bV5Endpoints:     CIEXYZTRIPLE,
-	bV5GammaRed:      DWORD,
-	bV5GammaGreen:    DWORD,
-	bV5GammaBlue:     DWORD,
-	bV5Intent:        DWORD,
-	bV5ProfileData:   DWORD,
-	bV5ProfileSize:   DWORD,
-	bV5Reserved:      DWORD,
+	bV5Size:                                             DWORD,
+	bV5Width, bV5Height:                                 LONG,
+	bV5Planes:                                           WORD,
+	bV5BitCount:                                         WORD,
+	bV5Compression, bV5SizeImage:                        DWORD,
+	bV5XPelsPerMeter, bV5YPelsPerMeter:                  LONG,
+	bV5ClrUsed, bV5ClrImportant:                         DWORD,
+	bV5RedMask, bV5GreenMask, bV5BlueMask, bV5AlphaMask: DWORD,
+	bV5CSType:                                           DWORD,
+	bV5Endpoints:                                        CIEXYZTRIPLE,
+	bV5GammaRed, bV5GammaGreen, bV5GammaBlue, bV5Intent: DWORD,
+	bV5ProfileData, bV5ProfileSize:                      DWORD,
+	bV5Reserved:                                         DWORD,
 }
 
 PALETTEENTRY :: struct {
@@ -155,13 +144,12 @@ BKMODE :: enum {
 }
 
 ICONINFOEXW :: struct {
-	cbSize:             DWORD,
-	fIcon:              BOOL,
-	xHotspot, yHotspot: DWORD,
-	hbmMask, hbmColor:  HBITMAP,
-	wResID:             WORD,
-	szModName:          [MAX_PATH]WCHAR,
-	szResName:          [MAX_PATH]WCHAR,
+	cbSize:               DWORD,
+	fIcon:                BOOL,
+	xHotspot, yHotspot:   DWORD,
+	hbmMask, hbmColor:    HBITMAP,
+	wResID:               WORD,
+	szModName, szResName: [MAX_PATH]WCHAR,
 }
 PICONINFOEXW :: ^ICONINFOEXW
 
