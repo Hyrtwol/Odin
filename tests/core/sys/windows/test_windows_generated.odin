@@ -107,7 +107,7 @@ verify_macros :: proc(t: ^testing.T) {
 	expect_value(t, win32.MAKELCID(1, 2), 0x00020001)
 	expect_value(t, win32.MAKELCID(0x1111, 0x2222), 0x22221111)
 	expect_value(t, win32.MAKELANGID(1, 2), 0x00000801)
-	expect_value(t, win32.MAKELANGID(0x1111, 0x2222), 0x00889911)
+	expect_value(t, win32.MAKELANGID(0x111, 0x222), 0x00088911)
 	expect_value(t, win32.LANGIDFROMLCID(0x12345678), 0x00005678)
 }
 
@@ -168,6 +168,7 @@ verify_winuser :: proc(t: ^testing.T) {
 	expect_size(t, win32.RID_DEVICE_INFO_KEYBOARD, 24)
 	expect_size(t, win32.RID_DEVICE_INFO_MOUSE, 16)
 	expect_size(t, win32.RID_DEVICE_INFO, 32)
+	expect_value(t, win32.GET_RAWINPUT_CODE_WPARAM(0x12345678), 0x00000078)
 	expect_size(t, win32.DRAWTEXTPARAMS, 20)
 	expect_size(t, win32.BSMINFO, 32)
 	expect_value(t, win32.BROADCAST_QUERY_DENY, 0x424D5144)

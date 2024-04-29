@@ -136,7 +136,8 @@ echo Building vendor
 call build_vendor.bat
 if %errorlevel% neq 0 goto end_of_build
 
-if %release_mode% neq 0 goto cleanup_build
+rem if %release_mode% neq 0 goto cleanup_build
+if %release_mode% neq 0 goto run_setup
 
 set demo_log=demo.log
 del %demo_log% > NUL 2> NUL
@@ -149,6 +150,7 @@ odin run examples/demo -resource:examples/demo/demo.rc> %demo_log% -- Hellope Wo
 for %%A in (%demo_log%) do set demo_log_size=%%~zA
 echo demo_log_size %demo_log_size%
 
+:run_setup
 echo Running setup
 @echo on
 call examples\setup\build.bat %rc_flags%

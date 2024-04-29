@@ -228,7 +228,7 @@ static void verify_macros(ofstream& out) {
 	expect_value(MAKELCID(1, 2));
 	expect_value(MAKELCID(0x1111, 0x2222));
 	expect_value(MAKELANGID(1, 2));
-	expect_value(MAKELANGID(0x1111, 0x2222));
+	expect_value(MAKELANGID(0x111, 0x222));
 	expect_value(LANGIDFROMLCID(0x12345678));
 	test_proc_end();
 }

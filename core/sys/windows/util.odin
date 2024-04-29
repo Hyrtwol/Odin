@@ -68,7 +68,7 @@ MAKELCID :: #force_inline proc "contextless" (lgid, srtid: WORD) -> LCID {
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-makelangid
 MAKELANGID :: #force_inline proc "contextless" (p, s: WORD) -> DWORD {
-	return DWORD(WORD(s)) << 10 | DWORD(WORD(p))
+	return DWORD(WORD(s)) << 10 | DWORD(WORD(p)) & 0x3FF
 }
 
 LANGIDFROMLCID :: #force_inline proc "contextless" (lcid: LCID) -> LANGID {
