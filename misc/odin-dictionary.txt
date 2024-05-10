@@ -15,6 +15,7 @@ erasebkgnd
 errno
 errorf
 expectf
+flac
 fmod
 fmodex
 glsl
