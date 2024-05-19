@@ -3,10 +3,10 @@
 package main
 
 import "base:intrinsics"
+import "base:runtime"
 import "core:fmt"
 import "core:os"
 import "core:path/filepath"
-import "core:runtime"
 import "core:strings"
 import win32 "core:sys/windows"
 
@@ -401,7 +401,7 @@ show_icon_info :: proc(icon: win32.HICON) {
 				width, height := bmp.bmWidth, bmp.bmHeight
 
 				bmi: win32.BITMAPINFO = {
-					bmiHeader =  {
+					bmiHeader = {
 						biSize = size_of(win32.BITMAPINFOHEADER),
 						biWidth = width,
 						biHeight = -height,
