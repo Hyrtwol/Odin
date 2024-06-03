@@ -565,7 +565,11 @@ gb_internal Type *check_assignment_variable(CheckerContext *ctx, Operand *lhs, O
 			} else {
 				error(lhs->expr, "Cannot assign to '%s' which is a procedure parameter", str);
 			}
-			error_line("\tSuggestion: Did you mean to pass '%.*s' by pointer?\n", LIT(e->token.string));
+			if (is_type_pointer(e->type)) {
+				error_line("\tSuggestion: Did you mean to shadow it? '%.*s := %.*s'?\n", LIT(e->token.string), LIT(e->token.string));
+			} else {
+				error_line("\tSuggestion: Did you mean to pass '%.*s' by pointer?\n", LIT(e->token.string));
+			}
 			show_error_on_line(e->token.pos, token_pos_end(e->token));
 		} else {
 			ERROR_BLOCK();
@@ -2016,7 +2020,7 @@ gb_internal void check_value_decl_stmt(CheckerContext *ctx, Ast *node, u32 mod_f
 
 
 	// TODO NOTE(bill): This technically checks things multple times
-	AttributeContext ac = make_attribute_context(ctx->foreign_context.link_prefix);
+	AttributeContext ac = make_attribute_context(ctx->foreign_context.link_prefix, ctx->foreign_context.link_suffix);
 	check_decl_attributes(ctx, vd->attributes, var_decl_attribute, &ac);
 
 	for (isize i = 0; i < entity_count; i++) {
@@ -2033,7 +2037,7 @@ gb_internal void check_value_decl_stmt(CheckerContext *ctx, Ast *node, u32 mod_f
 			e->type = init_type;
 			e->state = EntityState_Resolved;
 		}
-		ac.link_name = handle_link_name(ctx, e->token, ac.link_name, ac.link_prefix);
+		ac.link_name = handle_link_name(ctx, e->token, ac.link_name, ac.link_prefix, ac.link_suffix);
 
 		if (ac.link_name.len > 0) {
 			e->Variable.link_name = ac.link_name;

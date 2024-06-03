@@ -45,7 +45,13 @@ if [ -z "$LLVM_CONFIG" ]; then
 	fi
 fi
 
-: ${CXX=$($LLVM_CONFIG --bindir)/clang++}
+if [ -x "$(which clang++)" ]; then
+	: ${CXX="clang++"}
+elif [ -x "$($LLVM_CONFIG --bindir)/clang++" ]; then
+	: ${CXX=$($LLVM_CONFIG --bindir)/clang++}
+else
+	error "No clang++ command found. Set CXX to proceed."
+fi
 
 LLVM_VERSION="$($LLVM_CONFIG --version)"
 LLVM_VERSION_MAJOR="$(echo $LLVM_VERSION | awk -F. '{print $1}')"
@@ -65,8 +71,8 @@ Darwin)
 	fi
 
 	darwin_sysroot=
-	if [ $(which xcode-select) ]; then
-		darwin_sysroot="--sysroot $(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+	if [ $(which xcrun) ]; then
+		darwin_sysroot="--sysroot $(xcrun --sdk macosx --show-sdk-path)"
 	elif [[ -e "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" ]]; then
 		darwin_sysroot="--sysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
 	else
