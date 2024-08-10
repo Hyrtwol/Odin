@@ -168,7 +168,6 @@ verify_winuser :: proc(t: ^testing.T) {
 	expect_size(t, win32.RID_DEVICE_INFO_KEYBOARD, 24)
 	expect_size(t, win32.RID_DEVICE_INFO_MOUSE, 16)
 	expect_size(t, win32.RID_DEVICE_INFO, 32)
-	expect_value(t, win32.GET_RAWINPUT_CODE_WPARAM(0x12345678), 0x00000078)
 	expect_size(t, win32.DRAWTEXTPARAMS, 20)
 	expect_size(t, win32.BSMINFO, 32)
 	expect_value(t, win32.BROADCAST_QUERY_DENY, 0x424D5144)

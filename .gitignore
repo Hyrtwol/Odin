@@ -27,7 +27,7 @@ tests/documentation/all.odin-doc
 # Visual Studio 2015 cache/options directory
 .vs/
 # Visual Studio Code options directory
-.vscode/
+# .vscode/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 demo
@@ -268,6 +268,9 @@ bin/
 *.exe
 *.obj
 *.pdb
+*.res
+desktop.ini
+Thumbs.db
 
 # - Linux/MacOS
 odin
@@ -294,3 +297,4 @@ build.sh
 *.raddbg
 
 misc/featuregen/featuregen
+odin.bat
