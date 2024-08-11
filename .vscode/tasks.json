@@ -92,7 +92,28 @@
 			"command": "odin",
 			"args": [
 				"test",
-				"shared/newtek_lightwave/tests"
+				"shared/newtek_lightwave/tests",
+				"-vet",
+				"-strict-style"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "test newton_dynamics",
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"test",
+				"shared/newton_dynamics/tests",
+				"-vet",
+				"-strict-style"
 			],
 			"problemMatcher": [],
 			"group": {
