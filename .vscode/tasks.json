@@ -47,7 +47,8 @@
 			"args": [
 				"test",
 				".",
-				"-vet"
+				"-vet",
+				"-strict-style"
 			],
 			"problemMatcher": [],
 			"group": {
