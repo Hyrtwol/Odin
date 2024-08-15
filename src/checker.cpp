@@ -3212,6 +3212,12 @@ gb_internal DECL_ATTRIBUTE_PROC(foreign_block_decl_attribute) {
 		}
 		c->foreign_context.visibility_kind = kind;
 		return true;
+	} else if (name == "require_results") {
+		if (value != nullptr) {
+			error(elem, "Expected no value for '%.*s'", LIT(name));
+		}
+		c->foreign_context.require_results = true;
+		return true;
 	}
 
 	return false;
@@ -4300,6 +4306,7 @@ gb_internal void check_collect_value_decl(CheckerContext *c, Ast *decl) {
 				}
 				ast_node(pl, ProcLit, init);
 				e = alloc_entity_procedure(d->scope, token, nullptr, pl->tags);
+				d->foreign_require_results = c->foreign_context.require_results;
 				if (fl != nullptr) {
 					GB_ASSERT(fl->kind == Ast_Ident);
 					e->Procedure.foreign_library_ident = fl;
@@ -5677,6 +5684,18 @@ gb_internal void check_procedure_later_from_entity(Checker *c, Entity *e, char c
 		return;
 	}
 	if ((e->flags & EntityFlag_ProcBodyChecked) != 0) {
+		return;
+	}
+	if ((e->flags & EntityFlag_Overridden) != 0) {
+		// NOTE (zen3ger) Delay checking of a proc alias until the underlying proc is checked.
+		GB_ASSERT(e->aliased_of != nullptr);
+		GB_ASSERT(e->aliased_of->kind == Entity_Procedure);
+		if ((e->aliased_of->flags & EntityFlag_ProcBodyChecked) != 0) {
+			e->flags |= EntityFlag_ProcBodyChecked;
+			return;
+		}
+		// NOTE (zen3ger) A proc alias *does not* have a body and tags!
+		check_procedure_later(c, e->file, e->token, e->decl_info, e->type, nullptr, 0);
 		return;
 	}
 	Type *type = base_type(e->type);
