@@ -2,10 +2,10 @@
 //+build linux
 package main
 
-import "core:fmt"
-import "base:runtime"
-import "core:path/filepath"
 import "base:intrinsics"
+import "base:runtime"
+import "core:fmt"
+import "core:path/filepath"
 
 BYTE :: u8
 WORD :: u16
@@ -20,22 +20,22 @@ RGBQUAD :: struct {
 }
 
 BITMAPINFOHEADER :: struct {
-	biSize: DWORD,
-	biWidth: LONG,
-	biHeight: LONG,
-	biPlanes: WORD,
-	biBitCount: WORD,
-	biCompression: DWORD,
-	biSizeImage: DWORD,
+	biSize:          DWORD,
+	biWidth:         LONG,
+	biHeight:        LONG,
+	biPlanes:        WORD,
+	biBitCount:      WORD,
+	biCompression:   DWORD,
+	biSizeImage:     DWORD,
 	biXPelsPerMeter: LONG,
 	biYPelsPerMeter: LONG,
-	biClrUsed: DWORD,
-	biClrImportant: DWORD,
+	biClrUsed:       DWORD,
+	biClrImportant:  DWORD,
 }
 
-_Path_Separator          :: '/'
-_Path_Separator_Str      :: "/"
-_Path_List_Separator     :: ':'
+_Path_Separator :: '/'
+_Path_Separator_Str :: "/"
+_Path_List_Separator :: ':'
 _Path_List_Separator_Str :: ":"
 
 @(private = "package")

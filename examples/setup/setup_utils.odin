@@ -132,8 +132,7 @@ dump_icon :: proc() {
 			n, err = os.read_ptr(fd, &rgba, size_of(RGBQUAD))
 			assert(err == 0)
 			assert(n == 4)
-			palette[i] = {u8(rgba.rgbRed), u8(rgba.rgbGreen), u8(rgba.rgbBlue), u8(rgba.rgbReserved)}
-			//fmt.printfln("rgb[%3d]: %v", i, palette[i])
+			palette[i] = transmute([4]u8)rgba
 		}
 
 		po, err = os.seek(fd, 0, 1)
