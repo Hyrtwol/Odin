@@ -824,7 +824,8 @@ gb_internal bool check_using_stmt_entity(CheckerContext *ctx, AstUsingStmt *us, 
 				if (f->kind == Entity_Variable) {
 					Entity *uvar = alloc_entity_using_variable(e, f->token, f->type, expr);
 					if (!is_ptr && e->flags & EntityFlag_Value) uvar->flags |= EntityFlag_Value;
-					if (e->flags & EntityFlag_Param) uvar->flags |= EntityFlag_Param;
+					if (e->flags & EntityFlag_Param)            uvar->flags |= EntityFlag_Param;
+					if (e->flags & EntityFlag_SoaPtrField)      uvar->flags |= EntityFlag_SoaPtrField;
 					Entity *prev = scope_insert(ctx->scope, uvar);
 					if (prev != nullptr) {
 						gbString expr_str = expr_to_string(expr);
@@ -1478,7 +1479,7 @@ gb_internal void check_type_switch_stmt(CheckerContext *ctx, Ast *node, u32 mod_
 			case_type = nullptr;
 		}
 		if (case_type == nullptr) {
-			case_type = x.type;
+			case_type = type_deref(x.type);
 		}
 		if (switch_kind == TypeSwitch_Any) {
 			if (!is_type_untyped(case_type)) {
@@ -1637,6 +1638,7 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 
 	Ast *expr = unparen_expr(rs->expr);
 
+	bool is_range = false;
 	bool is_possibly_addressable = true;
 	isize max_val_count = 2;
 	if (is_ast_range(expr)) {
@@ -1645,6 +1647,7 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 		Operand y = {};
 
 		is_possibly_addressable = false;
+		is_range = true;
 
 		bool ok = check_range(ctx, expr, true, &x, &y, nullptr);
 		if (!ok) {
@@ -1889,7 +1892,9 @@ gb_internal void check_range_stmt(CheckerContext *ctx, Ast *node, u32 mod_flags)
 			}
 			if (found == nullptr) {
 				entity = alloc_entity_variable(ctx->scope, token, type, EntityState_Resolved);
-				entity->flags |= EntityFlag_ForValue;
+				if (!is_range) {
+					entity->flags |= EntityFlag_ForValue;
+				}
 				entity->flags |= EntityFlag_Value;
 				entity->identifier = name;
 				entity->Variable.for_loop_parent_type = type_of_expr(expr);
@@ -2496,6 +2501,16 @@ gb_internal void check_return_stmt(CheckerContext *ctx, Ast *node) {
 			continue;
 		}
 		Ast *expr = unparen_expr(o.expr);
+		while (expr->kind == Ast_CallExpr && expr->CallExpr.proc->tav.mode == Addressing_Type) {
+			if (expr->CallExpr.args.count != 1) {
+				break;
+			}
+			Ast *arg = expr->CallExpr.args[0];
+			if (arg->kind == Ast_FieldValue || !are_types_identical(arg->tav.type, expr->tav.type)) {
+				break;
+			}
+			expr = unparen_expr(arg);
+		}
 
 		auto unsafe_return_error = [](Operand const &o, char const *msg, Type *extra_type=nullptr) {
 			gbString s = expr_to_string(o.expr);

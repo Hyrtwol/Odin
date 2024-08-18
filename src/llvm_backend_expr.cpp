@@ -3140,15 +3140,6 @@ gb_internal lbValue lb_emit_comp_against_nil(lbProcedure *p, TokenKind op_kind, 
 	return {};
 }
 
-gb_internal lbValue lb_make_soa_pointer(lbProcedure *p, Type *type, lbValue const &addr, lbValue const &index) {
-	lbAddr v = lb_add_local_generated(p, type, false);
-	lbValue ptr = lb_emit_struct_ep(p, v.addr, 0);
-	lbValue idx = lb_emit_struct_ep(p, v.addr, 1);
-	lb_emit_store(p, ptr, addr);
-	lb_emit_store(p, idx, lb_emit_conv(p, index, t_int));
-
-	return lb_addr_load(p, v);
-}
 
 gb_internal lbValue lb_build_unary_and(lbProcedure *p, Ast *expr) {
 	ast_node(ue, UnaryExpr, expr);
@@ -3754,7 +3745,9 @@ gb_internal lbValue lb_get_using_variable(lbProcedure *p, Entity *e) {
 
 	lbValue v = {};
 
+	bool is_soa = false;
 	if (pv == nullptr && parent->flags & EntityFlag_SoaPtrField) {
+		is_soa = true;
 		// NOTE(bill): using SOA value (probably from for-in statement)
 		lbAddr parent_addr = lb_get_soa_variable_addr(p, parent);
 		v = lb_addr_get_ptr(p, parent_addr);
@@ -3765,7 +3758,7 @@ gb_internal lbValue lb_get_using_variable(lbProcedure *p, Entity *e) {
 		v = lb_build_addr_ptr(p, e->using_expr);
 	}
 	GB_ASSERT(v.value != nullptr);
-	GB_ASSERT_MSG(parent->type == type_deref(v.type), "%s %s", type_to_string(parent->type), type_to_string(v.type));
+	GB_ASSERT_MSG(is_soa || parent->type == type_deref(v.type), "%s %s", type_to_string(parent->type), type_to_string(v.type));
 	lbValue ptr = lb_emit_deep_field_gep(p, v, sel);
 	if (parent->scope) {
 		if ((parent->scope->flags & (ScopeFlag_File|ScopeFlag_Pkg)) == 0) {
@@ -5116,8 +5109,9 @@ gb_internal lbAddr lb_build_addr_internal(lbProcedure *p, Ast *expr) {
 					a = lb_addr_get_ptr(p, addr);
 				}
 
-				GB_ASSERT(is_type_array(expr->tav.type) || is_type_simd_vector(expr->tav.type));
-				return lb_addr_swizzle(a, expr->tav.type, swizzle_count, swizzle_indices);
+				Type *type = type_deref(expr->tav.type);
+				GB_ASSERT(is_type_array(type) || is_type_simd_vector(type));
+				return lb_addr_swizzle(a, type, swizzle_count, swizzle_indices);
 			}
 
 			Selection sel = lookup_field(type, selector, false);
