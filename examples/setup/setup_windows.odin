@@ -39,8 +39,8 @@ MAX_VALUE_NAME: win32.DWORD : 16383
 // https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page
 // https://learn.microsoft.com/en-us/windows/win32/sysinfo/getting-system-information
 
-IDI_ICON1 :: 1 // TODO 101
-IDI_ICON2 :: 2 // TODO 102
+IDI_ICON1 :: 101
+IDI_ICON2 :: 102
 
 terminal_color_flag :: enum {
 	STD_OUTPUT,
