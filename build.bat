@@ -57,9 +57,9 @@ set compiler_flags= %compiler_flags% /utf-8
 set compiler_defines= -DODIN_VERSION_RAW=\"%odin_version_raw%\"
 
 rem fileversion is defined as {Major,Minor,Build,Private: u16} so a bit limited
-set rc_flags=-nologo
-set rc_flags=%rc_flags% -DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly%
-set rc_flags=%rc_flags% -DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
+set rc_flags=-nologo -v ^
+-DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly% ^
+-DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
 
 if not exist .git\ goto skip_git_hash
 for /f "tokens=1,2" %%i IN ('git show "--pretty=%%cd %%h" "--date=format:%%Y-%%m" --no-patch --no-notes HEAD') do (
@@ -96,7 +96,7 @@ set libs= ^
 	kernel32.lib ^
 	Synchronization.lib ^
 	bin\llvm\windows\LLVM-C.lib
-set res=misc\odin.res
+set odin_res=misc\odin.res
 set odin_rc=misc\odin.rc
 
 rem DO NOT TOUCH!
@@ -120,7 +120,7 @@ if %release_mode% EQU 0 ( rem Debug
 )
 
 set compiler_settings=%compiler_includes% %compiler_flags% %compiler_warnings% %compiler_defines%
-set linker_settings=%libs% %res% %linker_flags%
+set linker_settings=%libs% %odin_res% %linker_flags%
 
 del *.pdb > NUL 2> NUL
 del *.ilk > NUL 2> NUL
