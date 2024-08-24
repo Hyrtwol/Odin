@@ -1180,11 +1180,15 @@ gb_internal void check_assignment(CheckerContext *c, Operand *operand, Type *typ
 				      LIT(article),
 				      LIT(context_name));
 			} else {
+				ERROR_BLOCK();
 				error(operand->expr,
 				      "Cannot assign '%s', a type, to %.*s%.*s",
 				      op_type_str,
 				      LIT(article),
 				      LIT(context_name));
+				if (type && are_types_identical(type, t_any)) {
+					error_line("\tSuggestion: 'typeid_of(%s)'", expr_str);
+				}
 			}
 			break;
 		default:
@@ -3782,10 +3786,10 @@ gb_internal void check_binary_expr(CheckerContext *c, Operand *x, Ast *node, Typ
 		// NOTE(bill): Allow comparisons between types
 		if (is_ise_expr(be->left)) {
 			// Evalute the right before the left for an '.X' expression
-			check_expr_or_type(c, y, be->right, type_hint);
+			check_expr_or_type(c, y, be->right, nullptr /* ignore type hint */);
 			check_expr_or_type(c, x, be->left, y->type);
 		} else {
-			check_expr_or_type(c, x, be->left, type_hint);
+			check_expr_or_type(c, x, be->left, nullptr /* ignore type hint */);
 			check_expr_or_type(c, y, be->right, x->type);
 		}
 		bool xt = x->mode == Addressing_Type;
@@ -7625,7 +7629,7 @@ gb_internal CallArgumentError check_polymorphic_record_type(CheckerContext *c, O
 			gbString s = gb_string_make_reserve(heap_allocator(), e->token.string.len+3);
 			s = gb_string_append_fmt(s, "%.*s(", LIT(e->token.string));
 
-			TypeTuple *tuple = get_record_polymorphic_params(e->type);
+			TypeTuple *tuple = get_record_polymorphic_params(bt);
 			if (tuple != nullptr) for_array(i, tuple->variables) {
 				Entity *v = tuple->variables[i];
 				String name = v->token.string;
@@ -7640,8 +7644,10 @@ gb_internal CallArgumentError check_polymorphic_record_type(CheckerContext *c, O
 						s = write_type_to_string(s, v->type, false);
 					}
 				} else if (v->kind == Entity_Constant) {
-					s = gb_string_append_fmt(s, "=");
-					s = write_exact_value_to_string(s, v->Constant.value);
+					if (v->Constant.value.kind != ExactValue_Invalid) {
+						s = gb_string_append_fmt(s, "=");
+						s = write_exact_value_to_string(s, v->Constant.value);
+					}
 				}
 			}
 			s = gb_string_append_fmt(s, ")");
@@ -10053,6 +10059,22 @@ gb_internal ExprKind check_compound_literal(CheckerContext *c, Operand *o, Ast *
 
 				if (is_constant) {
 					is_constant = o->mode == Addressing_Constant;
+				}
+
+				if (elem->kind == Ast_BinaryExpr) {
+					switch (elem->BinaryExpr.op.kind) {
+					case Token_Or:
+						{
+							gbString x = expr_to_string(elem->BinaryExpr.left);
+							gbString y = expr_to_string(elem->BinaryExpr.right);
+							gbString e = expr_to_string(elem);
+							error(elem, "Was the following intended? '%s, %s'; if not, surround the expression with parentheses '(%s)'", x, y, e);
+							gb_string_free(e);
+							gb_string_free(y);
+							gb_string_free(x);
+						}
+						break;
+					}
 				}
 
 				check_assignment(c, o, t->BitSet.elem, str_lit("bit_set literal"));
