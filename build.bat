@@ -57,7 +57,7 @@ set compiler_flags= %compiler_flags% /utf-8
 set compiler_defines= -DODIN_VERSION_RAW=\"%odin_version_raw%\"
 
 rem fileversion is defined as {Major,Minor,Build,Private: u16} so a bit limited
-set rc_flags=-nologo -v ^
+set rc_flags=-nologo ^
 -DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly% ^
 -DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
 
