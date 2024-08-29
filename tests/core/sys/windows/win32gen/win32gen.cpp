@@ -96,9 +96,9 @@ static void verify_win32_type_sizes(ofstream& out) {
 	expect_size(BYTE);	// unsigned char
 	expect_size(WORD);	// unsigned short
 #ifdef PROPVARIANT
-	expect_size(FLOAT); // float
+	expect_size(FLOAT);	 // float
 	expect_size(DOUBLE); // double
-	expect_size(DATE); // double
+	expect_size(DATE);	 // double
 #endif
 	// expect_size(PFLOAT);
 	expect_size(PBOOL);
@@ -532,7 +532,33 @@ static void verify_winuser(ofstream& out) {
 	expect_flags("WinEventFlags", "SKIPOWNTHREAD", WINEVENT_SKIPOWNTHREAD);
 	expect_flags("WinEventFlags", "SKIPOWNPROCESS", WINEVENT_SKIPOWNPROCESS);
 	expect_flags("WinEventFlags", "INCONTEXT", WINEVENT_INCONTEXT);
-		
+
+	expect_flags("WS_EX_STYLES", "WS_EX_DLGMODALFRAME", WS_EX_DLGMODALFRAME);
+	//expect_flags("WS_EX_STYLES", "WS_EX_DRAGDETECT", WS_EX_DRAGDETECT);
+	expect_flags("WS_EX_STYLES", "WS_EX_NOPARENTNOTIFY", WS_EX_NOPARENTNOTIFY);
+	expect_flags("WS_EX_STYLES", "WS_EX_TOPMOST", WS_EX_TOPMOST);
+	expect_flags("WS_EX_STYLES", "WS_EX_ACCEPTFILES", WS_EX_ACCEPTFILES);
+	expect_flags("WS_EX_STYLES", "WS_EX_TRANSPARENT", WS_EX_TRANSPARENT);
+	expect_flags("WS_EX_STYLES", "WS_EX_MDICHILD", WS_EX_MDICHILD);
+	expect_flags("WS_EX_STYLES", "WS_EX_TOOLWINDOW", WS_EX_TOOLWINDOW);
+	expect_flags("WS_EX_STYLES", "WS_EX_WINDOWEDGE", WS_EX_WINDOWEDGE);
+	expect_flags("WS_EX_STYLES", "WS_EX_CLIENTEDGE", WS_EX_CLIENTEDGE);
+	expect_flags("WS_EX_STYLES", "WS_EX_CONTEXTHELP", WS_EX_CONTEXTHELP);
+	expect_flags("WS_EX_STYLES", "WS_EX_RIGHT", WS_EX_RIGHT);
+	expect_flags("WS_EX_STYLES", "WS_EX_RTLREADING", WS_EX_RTLREADING);
+	expect_flags("WS_EX_STYLES", "WS_EX_LEFTSCROLLBAR", WS_EX_LEFTSCROLLBAR);
+	expect_flags("WS_EX_STYLES", "WS_EX_CONTROLPARENT", WS_EX_CONTROLPARENT);
+	expect_flags("WS_EX_STYLES", "WS_EX_STATICEDGE", WS_EX_STATICEDGE);
+	expect_flags("WS_EX_STYLES", "WS_EX_APPWINDOW", WS_EX_APPWINDOW);
+	expect_flags("WS_EX_STYLES", "WS_EX_LAYERED", WS_EX_LAYERED);
+	expect_flags("WS_EX_STYLES", "WS_EX_NOINHERITLAYOUT", WS_EX_NOINHERITLAYOUT);
+	expect_flags("WS_EX_STYLES", "WS_EX_NOREDIRECTIONBITMAP", WS_EX_NOREDIRECTIONBITMAP);
+	expect_flags("WS_EX_STYLES", "WS_EX_LAYOUTRTL", WS_EX_LAYOUTRTL);
+	expect_flags("WS_EX_STYLES", "WS_EX_COMPOSITED", WS_EX_COMPOSITED);
+	expect_flags("WS_EX_STYLES", "WS_EX_NOACTIVATE", WS_EX_NOACTIVATE);
+
+	// expect_value(WS_EX_LEFT);
+
 	test_proc_end();
 }
 
