@@ -1786,7 +1786,9 @@ gb_internal void add_entity_use(CheckerContext *c, Ast *identifier, Entity *enti
 	entity->flags |= EntityFlag_Used;
 	if (entity_has_deferred_procedure(entity)) {
 		Entity *deferred = entity->Procedure.deferred_procedure.entity;
-		add_entity_use(c, nullptr, deferred);
+		if (deferred != entity) {
+			add_entity_use(c, nullptr, deferred);
+		}
 	}
 	if (identifier == nullptr || identifier->kind != Ast_Ident) {
 		return;
@@ -4944,12 +4946,18 @@ gb_internal void check_add_import_decl(CheckerContext *ctx, Ast *decl) {
 	}
 
 
-	if (import_name.len == 0) {
+	if (is_blank_ident(import_name) && !is_blank_ident(id->import_name.string)) {
 		String invalid_name = id->fullpath;
 		invalid_name = get_invalid_import_name(invalid_name);
 
-		error(id->token, "Import name %.*s, is not a valid identifier. Perhaps you want to reference the package by a different name like this: import <new_name> \"%.*s\" ", LIT(invalid_name), LIT(invalid_name));
-		error(token, "Import name, %.*s, cannot be use as an import name as it is not a valid identifier", LIT(id->import_name.string));
+		ERROR_BLOCK();
+
+		if (id->import_name.string.len > 0) {
+			error(token, "Import name '%.*s' cannot be use as an import name as it is not a valid identifier", LIT(id->import_name.string));
+		} else {
+			error(id->token, "Import name '%.*s' is not a valid identifier", LIT(invalid_name));
+			error_line("\tSuggestion: Rename the directory or explicitly set an import name like this 'import <new_name> %.*s'", LIT(id->relpath.string));
+		}
 	} else {
 		GB_ASSERT(id->import_name.pos.line != 0);
 		id->import_name.string = import_name;
@@ -5228,9 +5236,9 @@ gb_internal bool collect_file_decl(CheckerContext *ctx, Ast *decl) {
 	case_end;
 
 	case_ast_node(fb, ForeignBlockDecl, decl);
-		if (check_add_foreign_block_decl(ctx, decl)) {
-			return true;
-		}
+		GB_ASSERT(ctx->collect_delayed_decls);
+		decl->state_flags |= StateFlag_BeenHandled;
+		array_add(&curr_file->delayed_decls_queues[AstDelayQueue_ForeignBlock], decl);
 	case_end;
 
 	case_ast_node(ws, WhenStmt, decl);
@@ -5513,8 +5521,6 @@ gb_internal void check_import_entities(Checker *c) {
 		for_array(i, pkg->files) {
 			AstFile *f = pkg->files[i];
 			reset_checker_context(&ctx, f, &untyped);
-			ctx.collect_delayed_decls = false;
-
 			correct_type_aliases_in_scope(&ctx, pkg->scope);
 		}
 
@@ -5522,6 +5528,7 @@ gb_internal void check_import_entities(Checker *c) {
 			AstFile *f = pkg->files[i];
 			reset_checker_context(&ctx, f, &untyped);
 
+			ctx.collect_delayed_decls = true;
 			for (Ast *decl : f->delayed_decls_queues[AstDelayQueue_ForeignBlock]) {
 				check_add_foreign_block_decl(&ctx, decl);
 			}
@@ -6113,6 +6120,11 @@ gb_internal void check_deferred_procedures(Checker *c) {
 		case DeferredProcedure_in_by_ptr:     attribute = "deferred_in_by_ptr";     break;
 		case DeferredProcedure_out_by_ptr:    attribute = "deferred_out_by_ptr";    break;
 		case DeferredProcedure_in_out_by_ptr: attribute = "deferred_in_out_by_ptr"; break;
+		}
+
+		if (src == dst) {
+			error(src->token, "'%.*s' cannot be used as its own %s", LIT(dst->token.string), attribute);
+			continue;
 		}
 
 		if (is_type_polymorphic(src->type) || is_type_polymorphic(dst->type)) {

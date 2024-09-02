@@ -1792,7 +1792,10 @@ gb_internal bool check_builtin_procedure_directive(CheckerContext *c, Operand *o
 			error(call, "'#assert' expects either 1 or 2 arguments, got %td", ce->args.count);
 			return false;
 		}
-		if (!is_type_boolean(operand->type) || operand->mode != Addressing_Constant) {
+
+		// operand->type can be nil if the condition is a procedure, for example: #assert(assert())
+		// So let's check it before we use it, so we get the same error as if we wrote `#exists(assert())
+		if (operand->type == nullptr || !is_type_boolean(operand->type) || operand->mode != Addressing_Constant) {
 			gbString str = expr_to_string(ce->args[0]);
 			error(call, "'%s' is not a constant boolean", str);
 			gb_string_free(str);
