@@ -220,12 +220,8 @@ show_file_info :: proc(info: []u8) -> int {
 	fmt.printfln("  %-20s: %v", "Struct Version", ffi.dwStructVersion.yx)
 	fmt.printfln("  %-20s: %v", "File Version", ffi.dwFileVersion.yxwz)
 	fmt.printfln("  %-20s: %v", "Product Version", ffi.dwProductVersion.yxwz)
-	fmt.printf("  %-20s:", "File Flags Mask")
-	for flg in win32.VS_FILEFLAG {if flg in ffi.dwFileFlagsMask {fmt.printf(" %v", flg)}}
-	fmt.println()
-	fmt.printf("  %-20s:", "File Flags")
-	for flg in win32.VS_FILEFLAG {if flg in ffi.dwFileFlags {fmt.printf(" %v", flg)}}
-	fmt.println()
+	fmt.printfln("  %-20s: %v", "File Flags Mask", ffi.dwFileFlagsMask)
+	fmt.printfln("  %-20s: %v", "File Flags", ffi.dwFileFlags)
 	fmt.printfln("  %-20s: %v, %v", "File OS", ffi.dwFileOS.VOS, ffi.dwFileOS.VOS2)
 	fmt.printfln("  %-20s: %v", "File Date", transmute(u64)ffi.dwFileDate.yx)
 	fmt.printfln("  %-20s: %v", "File Type", ffi.dwFileType)
@@ -256,7 +252,7 @@ show_code_page :: proc(cp: win32.CODEPAGE) {
 show_string_file_info :: proc(info: []u8, codepage: win32.WORD, langid: win32.WORD) {
 	fmt.println("[String File Info]")
 	cplhex := fmt.tprintf("%4x%4x", langid, codepage)
-	keys := []string{"CompanyName", "FileDescription", "FileVersion", "InternalName", "LegalCopyright", "OriginalFilename", "ProductName", "ProductVersion", "Comments", "GitSha"}
+	keys := []string{"CompanyName", "FileDescription", "FileVersion", "InternalName", "LegalCopyright", "OriginalFilename", "ProductName", "ProductVersion", "Comments", "GitSha", "NightlyBuild"}
 	for key in keys {
 		value, err := query_string_file_info(info, cplhex, key, context.temp_allocator)
 		if err == 0 {
