@@ -48,6 +48,17 @@ if "%2" == "1" (
 	set nightly=0
 )
 
+if %release_mode% equ 0 (
+	set V1=%curr_year%
+	set V2=%curr_month%
+	set V3=%curr_day%
+) else (
+	set V1=%curr_year%
+	set V2=%curr_month%
+	set V3=0
+)
+set V4=0
+set odin_version_full="%V1%.%V2%.%V3%.%V4%"
 set odin_version_raw="dev-%curr_year%-%curr_month%"
 
 set compiler_flags= -nologo -Oi -TP -fp:precise -Gm- -MP -FC -EHsc- -GR- -GF
@@ -58,8 +69,8 @@ set compiler_defines= -DODIN_VERSION_RAW=\"%odin_version_raw%\"
 
 rem fileversion is defined as {Major,Minor,Build,Private: u16} so a bit limited
 set rc_flags=-nologo ^
--DV1=%curr_year% -DV2=%curr_month% -DV3=%curr_day% -DV4=%nightly% ^
--DVF=%curr_year%.%curr_month%.%curr_day%.%nightly%
+-DV1=%V1% -DV2=%V2% -DV3=%V3% -DV4=%V4% ^
+-DVF=%odin_version_full% -Dnightly=%nightly%
 
 if not exist .git\ goto skip_git_hash
 for /f "tokens=1,2" %%i IN ('git show "--pretty=%%cd %%h" "--date=format:%%Y-%%m" --no-patch --no-notes HEAD') do (
@@ -130,8 +141,7 @@ echo Building %exe_name% (%release_mode_str%)
 @echo on
 rc %rc_flags% %odin_rc%
 cl %compiler_settings% "src\main.cpp" "src\libtommath.cpp" /link %linker_settings% -OUT:%exe_name%
-mt -inputresource:%exe_name%;#1 -manifest misc\odin.manifest -outputresource:%exe_name%;#1 -validate_manifest -identity:"odin, processorArchitecture=amd64, version=%curr_year%.%curr_month%.%curr_day%.%nightly%, type=win32"
-@echo off
+mt -nologo -inputresource:%exe_name%;#1 -manifest misc\odin.manifest -outputresource:%exe_name%;#1 -validate_manifest -identity:"odin, processorArchitecture=amd64, version=%odin_version_full%, type=win32"
 if %errorlevel% neq 0 goto end_of_build
 
 echo Building vendor
