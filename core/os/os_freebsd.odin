@@ -840,7 +840,8 @@ get_env :: proc(key: string, allocator := context.allocator) -> (value: string) 
 }
 
 @(require_results)
-get_current_directory :: proc() -> string {
+get_current_directory :: proc(allocator := context.allocator) -> string {
+	context.allocator = allocator
 	// NOTE(tetra): I would use PATH_MAX here, but I was not able to find
 	// an authoritative value for it across all systems.
 	// The largest value I could find was 4096, so might as well use the page size.
@@ -920,7 +921,7 @@ get_page_size :: proc() -> int {
 _processor_core_count :: proc() -> int {
 	count : int = 0
 	count_size := size_of(count)
-	if _sysctlbyname("hw.logicalcpu", &count, &count_size, nil, 0) == 0 {
+	if _sysctlbyname("hw.ncpu", &count, &count_size, nil, 0) == 0 {
 		if count > 0 {
 			return count
 		}

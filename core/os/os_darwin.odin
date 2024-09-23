@@ -204,7 +204,7 @@ ENOPROTOOPT     :: _Platform_Error.ENOPROTOOPT
 EPROTONOSUPPORT :: _Platform_Error.EPROTONOSUPPORT
 ESOCKTNOSUPPORT :: _Platform_Error.ESOCKTNOSUPPORT
 ENOTSUP         :: _Platform_Error.ENOTSUP
-EOPNOTSUPP 	:: _Platform_Error.EOPNOTSUPP
+EOPNOTSUPP 	    :: _Platform_Error.EOPNOTSUPP
 EPFNOSUPPORT    :: _Platform_Error.EPFNOSUPPORT
 EAFNOSUPPORT    :: _Platform_Error.EAFNOSUPPORT
 EADDRINUSE      :: _Platform_Error.EADDRINUSE
@@ -1095,7 +1095,8 @@ unset_env :: proc(key: string) -> Error {
 }
 
 @(require_results)
-get_current_directory :: proc() -> string {
+get_current_directory :: proc(allocator := context.allocator) -> string {
+	context.allocator = allocator
 	page_size := get_page_size() // NOTE(tetra): See note in os_linux.odin/get_current_directory.
 	buf := make([dynamic]u8, page_size)
 	for {

@@ -1632,6 +1632,22 @@ gb_internal bool check_builtin_procedure_directive(CheckerContext *c, Operand *o
 
 		operand->type = t_source_code_location;
 		operand->mode = Addressing_Value;
+	} else if (name == "caller_expression") {
+		if (ce->args.count > 1) {
+			error(ce->args[0], "'#caller_expression' expects either 0 or 1 arguments, got %td", ce->args.count);
+		}
+		if (ce->args.count > 0) {
+			Ast *arg = ce->args[0];
+			Operand o = {};
+			Entity *e = check_ident(c, &o, arg, nullptr, nullptr, true);
+			if (e == nullptr || (e->flags & EntityFlag_Param) == 0) {
+				error(ce->args[0], "'#caller_expression' expected a valid earlier parameter name");
+			}
+			arg->Ident.entity = e;
+		}
+
+		operand->type = t_string;
+		operand->mode = Addressing_Value;
 	} else if (name == "exists") {
 		if (ce->args.count != 1) {
 			error(ce->close, "'#exists' expects 1 argument, got %td", ce->args.count);
@@ -4953,16 +4969,14 @@ gb_internal bool check_builtin_procedure(CheckerContext *c, Operand *operand, As
 			check_assignment(c, &x, elem, builtin_name);
 
 			Type *t = type_deref(operand->type);
-			switch (id) {
-			case BuiltinProc_atomic_add:
-			case BuiltinProc_atomic_sub:
-				if (!is_type_numeric(t)) {
+			if (id != BuiltinProc_atomic_exchange) {
+				if (!is_type_integer_like(t)) {
 					gbString str = type_to_string(t);
-					error(operand->expr, "Expected a numeric type for '%.*s', got %s", LIT(builtin_name), str);
+					error(operand->expr, "Expected an integer type for '%.*s', got %s", LIT(builtin_name), str);
 					gb_string_free(str);
 				} else if (is_type_different_to_arch_endianness(t)) {
 					gbString str = type_to_string(t);
-					error(operand->expr, "Expected a numeric type of the same platform endianness for '%.*s', got %s", LIT(builtin_name), str);
+					error(operand->expr, "Expected an integer type of the same platform endianness for '%.*s', got %s", LIT(builtin_name), str);
 					gb_string_free(str);
 				}
 			}
@@ -4998,19 +5012,16 @@ gb_internal bool check_builtin_procedure(CheckerContext *c, Operand *operand, As
 			}
 
 			Type *t = type_deref(operand->type);
-			switch (id) {
-			case BuiltinProc_atomic_add_explicit:
-			case BuiltinProc_atomic_sub_explicit:
-				if (!is_type_numeric(t)) {
+			if (id != BuiltinProc_atomic_exchange_explicit) {
+				if (!is_type_integer_like(t)) {
 					gbString str = type_to_string(t);
-					error(operand->expr, "Expected a numeric type for '%.*s', got %s", LIT(builtin_name), str);
+					error(operand->expr, "Expected an integer type for '%.*s', got %s", LIT(builtin_name), str);
 					gb_string_free(str);
 				} else if (is_type_different_to_arch_endianness(t)) {
 					gbString str = type_to_string(t);
-					error(operand->expr, "Expected a numeric type of the same platform endianness for '%.*s', got %s", LIT(builtin_name), str);
+					error(operand->expr, "Expected an integer type of the same platform endianness for '%.*s', got %s", LIT(builtin_name), str);
 					gb_string_free(str);
 				}
-				break;
 			}
 
 			operand->type = elem;
