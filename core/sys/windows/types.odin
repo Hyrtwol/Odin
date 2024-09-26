@@ -2132,6 +2132,14 @@ BITMAP :: struct {
 	bmBits:       LPVOID,
 }
 
+BITMAPFILEHEADER :: struct #packed {
+	bfType: WORD,
+	bfSize: DWORD,
+	bfReserved1: WORD,
+	bfReserved2: WORD,
+	bfOffBits: DWORD,
+}
+
 // pixel types
 PFD_TYPE_RGBA       :: 0
 PFD_TYPE_COLORINDEX :: 1

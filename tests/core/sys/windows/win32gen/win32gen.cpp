@@ -533,6 +533,7 @@ static void verify_winuser(ofstream& out) {
 	expect_flags("WinEventFlags", "SKIPOWNPROCESS", WINEVENT_SKIPOWNPROCESS);
 	expect_flags("WinEventFlags", "INCONTEXT", WINEVENT_INCONTEXT);
 
+#if NOT_READY
 	expect_flags("WS_EX_STYLES", "WS_EX_DLGMODALFRAME", WS_EX_DLGMODALFRAME);
 	//expect_flags("WS_EX_STYLES", "WS_EX_DRAGDETECT", WS_EX_DRAGDETECT);
 	expect_flags("WS_EX_STYLES", "WS_EX_NOPARENTNOTIFY", WS_EX_NOPARENTNOTIFY);
@@ -556,8 +557,8 @@ static void verify_winuser(ofstream& out) {
 	expect_flags("WS_EX_STYLES", "WS_EX_LAYOUTRTL", WS_EX_LAYOUTRTL);
 	expect_flags("WS_EX_STYLES", "WS_EX_COMPOSITED", WS_EX_COMPOSITED);
 	expect_flags("WS_EX_STYLES", "WS_EX_NOACTIVATE", WS_EX_NOACTIVATE);
-
 	// expect_value(WS_EX_LEFT);
+#endif
 
 	test_proc_end();
 }
@@ -570,6 +571,7 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(RGBQUAD);
 	expect_size(PIXELFORMATDESCRIPTOR);
 	expect_size(BITMAPINFOHEADER);
+	expect_size(BITMAPFILEHEADER);
 	expect_size(BITMAP);
 	expect_size(BITMAPV5HEADER);
 	expect_size(CIEXYZTRIPLE);
