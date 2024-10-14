@@ -56,8 +56,18 @@ MAKELPARAM :: #force_inline proc "contextless" (#any_int l, h: int) -> LPARAM {
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-makelresult
 @(require_results)
-MAKELRESULT :: #force_inline proc "contextless" (#any_int l, h: int) -> LRESULT {
+MAKELRESULT_FROM_LOHI :: #force_inline proc "contextless" (#any_int l, h: int) -> LRESULT {
 	return LRESULT(MAKELONG(l, h))
+}
+
+@(require_results)
+MAKELRESULT_FROM_BOOL :: #force_inline proc "contextless" (result: BOOL) -> LRESULT {
+	return LRESULT(transmute(i32)result)
+}
+
+MAKELRESULT :: proc {
+	MAKELRESULT_FROM_LOHI,
+	MAKELRESULT_FROM_BOOL,
 }
 
 // https://learn.microsoft.com/en-us/windows/win32/api/windowsx/nf-windowsx-get_x_lparam
