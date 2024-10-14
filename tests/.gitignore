@@ -24,3 +24,6 @@ __pycache__/
 # Ignore documentation-related files.
 /documentation/verify/
 /documentation/all.odin-doc
+.vs/
+x64/
+*.user
