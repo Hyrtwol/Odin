@@ -299,7 +299,7 @@ client_sends_server_data :: proc(t: ^testing.T) {
 		r.length, r.err = net.recv_tcp(client, r.data[:])
 		return
 	}
-	
+
 	thread_data := [2]Thread_Data{}
 
 	wg: sync.Wait_Group
@@ -308,7 +308,7 @@ client_sends_server_data :: proc(t: ^testing.T) {
 	thread_data[0].t = t
 	thread_data[0].wg = &wg
 	thread_data[0].tid = thread.create_and_start_with_data(&thread_data[0], tcp_server, context)
-	
+
 	sync.wait_group_wait(&wg)
 	sync.wait_group_add(&wg, 2)
 
@@ -427,9 +427,9 @@ split_url_test :: proc(t: ^testing.T) {
 		testing.expectf(t, host         == test.host,         "Expected `net.split_url` to return %s, got %s", test.host, host)
 		testing.expectf(t, path         == test.path,         "Expected `net.split_url` to return %s, got %s", test.path, path)
 		testing.expectf(t, len(queries) == len(test.queries), "Expected `net.split_url` to return %d queries, got %d queries", len(test.queries), len(queries))
-		for k, v in queries {
-			expected := test.queries[k]
-			testing.expectf(t, v == expected, "Expected `net.split_url` to return %s, got %s", expected, v)
+		for kv in queries {
+			expected := test.queries[kv[0]]
+			testing.expectf(t, kv[1] == expected, "Expected `net.split_url` to return %s, got %s", expected, kv[1])
 		}
 		testing.expectf(t, fragment == test.fragment, "Expected `net.split_url` to return %s, got %s", test.fragment, fragment)
 	}

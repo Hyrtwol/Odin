@@ -68,6 +68,7 @@ foreign kernel32 {
 	SetConsoleCP :: proc(wCodePageID: CODEPAGE) -> BOOL ---
 	GetConsoleOutputCP :: proc() -> CODEPAGE ---
 	SetConsoleOutputCP :: proc(wCodePageID: CODEPAGE) -> BOOL ---
+
 	FlushConsoleInputBuffer :: proc(hConsoleInput: HANDLE) -> BOOL ---
 
 	GetFileInformationByHandle :: proc(hFile: HANDLE, lpFileInformation: LPBY_HANDLE_FILE_INFORMATION) -> BOOL ---
@@ -354,7 +355,6 @@ foreign kernel32 {
 	FindNextFileW :: proc(findFile: HANDLE, findFileData: LPWIN32_FIND_DATAW) -> BOOL ---
 	FindClose :: proc(findFile: HANDLE) -> BOOL ---
 	GetModuleHandleW :: proc(lpModuleName: LPCWSTR) -> HMODULE ---
-	GetModuleHandleA :: proc(lpModuleName: LPCSTR) -> HMODULE ---
 	GetSystemTimeAsFileTime :: proc(lpSystemTimeAsFileTime: LPFILETIME) ---
 	GetSystemTimePreciseAsFileTime :: proc(lpSystemTimeAsFileTime: LPFILETIME) ---
 	FileTimeToSystemTime :: proc(lpFileTime: ^FILETIME, lpSystemTime: ^SYSTEMTIME) -> BOOL ---

@@ -14,6 +14,7 @@ c_short     :: c.short
 c_ushort    :: c.ushort
 size_t      :: c.size_t
 wchar_t     :: c.wchar_t
+c_float     :: c.float
 
 DWORD :: c_ulong
 DWORDLONG :: c.ulonglong
@@ -22,7 +23,7 @@ HANDLE :: distinct LPVOID
 PHANDLE :: ^HANDLE
 HINSTANCE :: HANDLE
 HMODULE :: distinct HINSTANCE
-HRESULT :: distinct LONG
+//HRESULT :: distinct LONG
 HWND :: distinct HANDLE
 HDC :: distinct HANDLE
 HMONITOR :: distinct HANDLE
@@ -72,6 +73,7 @@ ULONG :: c_ulong
 ULONGLONG :: c_ulonglong
 LONGLONG :: c_longlong
 UCHAR :: BYTE
+FLOAT :: c_float
 NTSTATUS :: c.long
 COLORREF :: DWORD
 LPCOLORREF :: ^COLORREF
@@ -1338,19 +1340,6 @@ MOUSEEVENTF_MOVE_NOCOALESCE :: 0x2000
 MOUSEEVENTF_VIRTUALDESK :: 0x4000
 MOUSEEVENTF_ABSOLUTE :: 0x8000
 
-WNDCLASSA :: struct {
-	style: UINT,
-	lpfnWndProc: WNDPROC,
-	cbClsExtra: c_int,
-	cbWndExtra: c_int,
-	hInstance: HINSTANCE,
-	hIcon: HICON,
-	hCursor: HCURSOR,
-	hbrBackground: HBRUSH,
-	lpszMenuName: LPCSTR,
-	lpszClassName: LPCSTR,
-}
-
 WNDCLASSW :: struct {
 	style: UINT,
 	lpfnWndProc: WNDPROC,
@@ -1362,21 +1351,6 @@ WNDCLASSW :: struct {
 	hbrBackground: HBRUSH,
 	lpszMenuName: LPCWSTR,
 	lpszClassName: LPCWSTR,
-}
-
-WNDCLASSEXA :: struct {
-	cbSize: UINT,
-	style: UINT,
-	lpfnWndProc: WNDPROC,
-	cbClsExtra: c_int,
-	cbWndExtra: c_int,
-	hInstance: HINSTANCE,
-	hIcon: HICON,
-	hCursor: HCURSOR,
-	hbrBackground: HBRUSH,
-	lpszMenuName: LPCSTR,
-	lpszClassName: LPCSTR,
-	hIconSm: HICON,
 }
 
 WNDCLASSEXW :: struct {
@@ -1606,21 +1580,6 @@ FILE_ID_INFO :: struct {
 	FileId:             FILE_ID_128,
 }
 
-CREATESTRUCTA :: struct {
-	lpCreateParams: LPVOID,
-	hInstance:      HINSTANCE,
-	hMenu:          HMENU,
-	hwndParent:     HWND,
-	cy:             c_int,
-	cx:             c_int,
-	y:              c_int,
-	x:              c_int,
-	style:          LONG,
-	lpszName:       LPCSTR,
-	lpszClass:      LPCSTR,
-	dwExStyle:      DWORD,
-}
-
 CREATESTRUCTW:: struct {
 	lpCreateParams: LPVOID,
 	hInstance:      HINSTANCE,
@@ -1630,10 +1589,10 @@ CREATESTRUCTW:: struct {
 	cx:             c_int,
 	y:              c_int,
 	x:              c_int,
-	style:          LONG,
+	style:          WS_STYLES,
 	lpszName:       LPCWSTR,
 	lpszClass:      LPCWSTR,
-	dwExStyle:      DWORD,
+	dwExStyle:      WS_EX_STYLES,
 }
 
 MAX_LINKID_TEXT :: 48
@@ -1870,6 +1829,7 @@ AURL_ENABLEEAURLS       :: 8
 AURL_ENABLEDRIVELETTERS :: 16
 AURL_DISABLEMIXEDLGC    :: 32 // Disable mixed Latin Greek Cyrillic IDNs
 
+WS_STYLES :: UINT
 WS_BORDER           : UINT : 0x0080_0000
 WS_CAPTION          : UINT : 0x00C0_0000
 WS_CHILD            : UINT : 0x4000_0000
@@ -1898,6 +1858,44 @@ WS_TILEDWINDOW      : UINT : WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKF
 WS_VISIBLE          : UINT : 0x1000_0000
 WS_VSCROLL          : UINT : 0x0020_0000
 
+when TLC {
+
+WS_EX_STYLE :: enum UINT {
+	WS_EX_DLGMODALFRAME       = 0, // 0x0000_0001,
+	WS_EX_DRAGDETECT          = 1, // 0x0000_0002, // undocumented
+	WS_EX_NOPARENTNOTIFY      = 2, // 0x0000_0004,
+	WS_EX_TOPMOST             = 3, // 0x0000_0008,
+	WS_EX_ACCEPTFILES         = 4, // 0x0000_0010,
+	WS_EX_TRANSPARENT         = 5, // 0x0000_0020,
+	WS_EX_MDICHILD            = 6, // 0x0000_0040,
+	WS_EX_TOOLWINDOW          = 7, // 0x0000_0080,
+	WS_EX_WINDOWEDGE          = 8, // 0x0000_0100,
+	WS_EX_CLIENTEDGE          = 9, // 0x0000_0200,
+	WS_EX_CONTEXTHELP         = 10, // 0x0000_0400,
+	WS_EX_RIGHT               = 12, // 0x0000_1000,
+	WS_EX_RTLREADING          = 13, // 0x0000_2000,
+	WS_EX_LEFTSCROLLBAR       = 14, // 0x0000_4000,
+	WS_EX_CONTROLPARENT       = 16, // 0x0001_0000,
+	WS_EX_STATICEDGE          = 17, // 0x0002_0000,
+	WS_EX_APPWINDOW           = 18, // 0x0004_0000,
+	WS_EX_LAYERED             = 19, // 0x0008_0000,
+	WS_EX_NOINHERITLAYOUT     = 20, // 0x0010_0000,
+	WS_EX_NOREDIRECTIONBITMAP = 21, // 0x0020_0000,
+	WS_EX_LAYOUTRTL           = 22, // 0x0040_0000,
+	WS_EX_COMPOSITED          = 25, // 0x0200_0000,
+	WS_EX_NOACTIVATE          = 27, // 0x0800_0000,
+}
+
+WS_EX_STYLES :: bit_set[WS_EX_STYLE;UINT]
+
+WS_EX_LEFT             : WS_EX_STYLES : {}
+WS_EX_RIGHTSCROLLBAR   : WS_EX_STYLES : {}
+WS_EX_LTRREADING       : WS_EX_STYLES : {}
+WS_EX_OVERLAPPEDWINDOW : WS_EX_STYLES : {.WS_EX_WINDOWEDGE, .WS_EX_CLIENTEDGE}
+WS_EX_PALETTEWINDOW    : WS_EX_STYLES : {.WS_EX_WINDOWEDGE, .WS_EX_TOOLWINDOW, .WS_EX_TOPMOST}
+
+} else {
+WS_EX_STYLES :: UINT
 WS_EX_ACCEPTFILES           : UINT : 0x0000_0010
 WS_EX_APPWINDOW             : UINT : 0x0004_0000
 WS_EX_CLIENTEDGE            : UINT : 0x0000_0200
@@ -1926,6 +1924,7 @@ WS_EX_TOOLWINDOW            : UINT : 0x0000_0080
 WS_EX_TOPMOST               : UINT : 0x0000_0008
 WS_EX_TRANSPARENT           : UINT : 0x0000_0020
 WS_EX_WINDOWEDGE            : UINT : 0x0000_0100
+}
 
 PBS_SMOOTH        :: 0x01
 PBS_VERTICAL      :: 0x04
@@ -2487,6 +2486,27 @@ BLACKNESS      : DWORD : 0x00000042 // dest = BLACK
 WHITENESS      : DWORD : 0x00FF0062 // dest = WHITE
 NOMIRRORBITMAP : DWORD : 0x80000000 // Do not Mirror the bitmap in this call
 CAPTUREBLT     : DWORD : 0x40000000 // Include layered windows
+
+// Ternary raster operations
+ROP :: enum DWORD {
+	SRCCOPY        = 0x00CC0020, // dest = source
+	SRCPAINT       = 0x00EE0086, // dest = source OR dest
+	SRCAND         = 0x008800C6, // dest = source AND dest
+	SRCINVERT      = 0x00660046, // dest = source XOR dest
+	SRCERASE       = 0x00440328, // dest = source AND (NOT dest)
+	NOTSRCCOPY     = 0x00330008, // dest = (NOT source)
+	NOTSRCERASE    = 0x001100A6, // dest = (NOT src) AND (NOT dest)
+	MERGECOPY      = 0x00C000CA, // dest = (source AND pattern
+	MERGEPAINT     = 0x00BB0226, // dest = (NOT source) OR dest
+	PATCOPY        = 0x00F00021, // dest = pattern
+	PATPAINT       = 0x00FB0A09, // dest = DPSnoo
+	PATINVERT      = 0x005A0049, // dest = pattern XOR dest
+	DSTINVERT      = 0x00550009, // dest = (NOT dest)
+	BLACKNESS      = 0x00000042, // dest = BLACK
+	WHITENESS      = 0x00FF0062, // dest = WHITE
+	NOMIRRORBITMAP = 0x80000000, // Do not Mirror the bitmap in this call
+	CAPTUREBLT     = 0x40000000, // Include layered windows
+}
 
 // Stock Logical Objects
 WHITE_BRUSH         :: 0
