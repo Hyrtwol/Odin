@@ -37,7 +37,7 @@ foreign user32 {
 	UnregisterHotKey :: proc(hnwd: HWND, id: c_int) -> BOOL ---
 
 	CreateWindowExW :: proc(
-		dwExStyle:             WS_EX_STYLES,
+		dwExStyle:             DWORD,
 		lpClassName:           LPCWSTR,
 		lpWindowName:          LPCWSTR,
 		dwStyle:               DWORD,
@@ -324,7 +324,7 @@ foreign user32 {
 
 	GetProcessWindowStation   :: proc() -> HWINSTA ---
 	GetUserObjectInformationW :: proc(hObj: HANDLE, nIndex: GetUserObjectInformationFlags, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD) -> BOOL ---
-	
+
 	OpenClipboard                 :: proc(hWndNewOwner: HWND) -> BOOL ---
 	CloseClipboard                :: proc() -> BOOL ---
 	GetClipboardData              :: proc(uFormat: UINT) -> HANDLE ---
@@ -830,16 +830,6 @@ MENUINFO :: struct {
 	dwMenuData:      ULONG_PTR,
 }
 LPMENUINFO :: ^MENUINFO
-
-DISPLAY_DEVICEW :: struct {
-	cb:           DWORD,
-	DeviceName:   [32]WCHAR,
-	DeviceString: [128]WCHAR,
-	StateFlags:   DWORD,
-	DeviceID:     [128]WCHAR,
-	DeviceKey:    [128]WCHAR,
-}
-PDISPLAY_DEVICEW :: ^DISPLAY_DEVICEW
 
 // OUTOFCONTEXT is the zero value, use {}
 WinEventFlags :: distinct bit_set[WinEventFlag; DWORD]
