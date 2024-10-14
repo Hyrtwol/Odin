@@ -1,5 +1,8 @@
 @echo off
 
+@rem select code page with utf-8 support CP_UTF8
+chcp 65001 > NUL 2> NUL
+
 setlocal EnableDelayedExpansion
 
 where /Q cl.exe || (
@@ -120,8 +123,10 @@ set linker_flags= -incremental:no -opt:ref -subsystem:console -MANIFEST:EMBED
 
 if %release_mode% EQU 0 ( rem Debug
 	set linker_flags=%linker_flags% -debug /NATVIS:src\odin_compiler.natvis
+	set release_mode_str=Debug
 ) else ( rem Release
 	set linker_flags=%linker_flags% -debug
+	set release_mode_str=Release
 )
 
 set compiler_settings=%compiler_includes% %compiler_flags% %compiler_warnings% %compiler_defines%
@@ -130,17 +135,42 @@ set linker_settings=%libs% %odin_res% %linker_flags%
 del *.pdb > NUL 2> NUL
 del *.ilk > NUL 2> NUL
 
+echo Building %exe_name% (%release_mode_str%)
+
+@echo on
 rc %rc_flags% %odin_rc%
 cl %compiler_settings% "src\main.cpp" "src\libtommath.cpp" /link %linker_settings% -OUT:%exe_name%
 if %errorlevel% neq 0 goto end_of_build
 mt -nologo -inputresource:%exe_name%;#1 -manifest misc\odin.manifest -outputresource:%exe_name%;#1 -validate_manifest -identity:"odin, processorArchitecture=amd64, version=%odin_version_full%, type=win32"
+@echo off
 if %errorlevel% neq 0 goto end_of_build
+
+echo Building vendor
 
 call build_vendor.bat
 if %errorlevel% neq 0 goto end_of_build
 
+rem if %release_mode% neq 0 goto cleanup_build
+if %release_mode% neq 0 goto run_setup
+
+set demo_log=demo.log
+del %demo_log% > NUL 2> NUL
+
+echo Running demo output %demo_log%
 rem If the demo doesn't run for you and your CPU is more than a decade old, try -microarch:native
-if %release_mode% EQU 0 odin run examples/demo -vet -strict-style -resource:examples/demo/demo.rc -- Hellope World
+@echo on
+if %release_mode% EQU 0 odin run examples/demo -vet -strict-style -resource:examples/demo/demo.rc> %demo_log% -- Hellope World
+@echo off
+for %%A in (%demo_log%) do set demo_log_size=%%~zA
+echo demo_log_size %demo_log_size%
+
+:run_setup
+echo Running setup
+@echo on
+call examples\setup\build.bat %rc_flags%
+@echo off
+
+:cleanup_build
 
 rem Many non-compiler devs seem to run debug build but don't realize.
 if %release_mode% EQU 0 echo: & echo Debug compiler built. Note: run "build.bat release" if you want a faster, release mode compiler.
@@ -148,3 +178,4 @@ if %release_mode% EQU 0 echo: & echo Debug compiler built. Note: run "build.bat 
 del *.obj > NUL 2> NUL
 
 :end_of_build
+echo Build Done

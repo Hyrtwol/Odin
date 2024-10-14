@@ -1,35 +1,31 @@
 #+build windows
 package sys_windows
 
-// https://learn.microsoft.com/en-us/windows/win32/api/winerror/
-
-//  Values are 32 bit values laid out as follows:
+// Values are 32 bit values laid out as follows:
 //
-//   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
-//   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-//  +---+-+-+-----------------------+-------------------------------+
-//  |Sev|C|R|     Facility          |               Code            |
-//  +---+-+-+-----------------------+-------------------------------+
+// * S (1 bit): Severity. If set, indicates a failure result. If clear, indicates a success result.
+// * R (1 bit): Reserved. If the N bit is clear, this bit MUST be set to 0. If the N bit is set, this bit is defined by the NTSTATUS numbering space.
+// * C (1 bit): Customer. This bit specifies if the value is customer-defined or Microsoft-defined. The bit is set for customer-defined values and clear for Microsoft-defined values.
+// * N (1 bit): If set, indicates that the error code is an NTSTATUS value, except that this bit is set.
+// * X (1 bit):  Reserved.  SHOULD be set to 0.
+// * Facility (11 bits): An indicator of the source of the error. New facilities are occasionally added by Microsoft.
+// * Code (2 bytes): The remainder of the error code.
 //
-//  where
-//
-//      Sev - is the severity code
-//
-//          00 - Success
-//          01 - Informational
-//          10 - Warning
-//          11 - Error
-//
-//      C - is the Customer code flag
-//
-//      R - is a reserved bit
-//
-//      Facility - is the facility code
-//
-//      Code - is the facility's status code
+// https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/0642cb2f-2075-4469-918c-4441e69c548a
+HRESULT :: bit_field LONG {
+	Code:     u16      | 16,
+	Facility: FACILITY | 11,
+	X:        bool     | 1,
+	N:        bool     | 1,
+	Customer: bool     | 1,
+	R:        bool     | 1,
+	//Severity: SEVERITY | 1,
+	IsError:  bool     | 1,
+}
+HRESULT_DETAILS :: HRESULT
 
 // Define the facility codes
-FACILITY :: enum DWORD {
+FACILITY :: enum u16 {
 	NULL                                     = 0,
 	RPC                                      = 1,
 	DISPATCH                                 = 2,
@@ -187,10 +183,10 @@ FACILITY :: enum DWORD {
 	PIX                                      = 2748,
 }
 
-ERROR_SUCCESS : DWORD : 0
-NO_ERROR :: 0
-SEC_E_OK : HRESULT : 0x00000000
+NO_ERROR :: HRESULT(0)
+SEC_E_OK :: NO_ERROR
 
+ERROR_SUCCESS                : DWORD : 0
 ERROR_INVALID_FUNCTION       : DWORD : 1
 ERROR_FILE_NOT_FOUND         : DWORD : 2
 ERROR_PATH_NOT_FOUND         : DWORD : 3
@@ -260,28 +256,36 @@ SUCCEEDED :: #force_inline proc "contextless" (#any_int result: int) -> bool { r
 FAILED :: #force_inline proc "contextless" (#any_int result: int) -> bool { return result < S_OK }
 
 // Generic test for error on any status value.
-IS_ERROR :: #force_inline proc "contextless" (#any_int status: int) -> bool { return u32(status) >> 31 == u32(SEVERITY.ERROR) }
+//IS_ERROR :: #force_inline proc(#any_int hr: int) -> bool { return u32(hr) >> 31 == u32(SEVERITY.ERROR) }
+IS_ERROR :: #force_inline proc "contextless" (#any_int hr: int) -> bool { return HRESULT(hr).IsError }
 
 // Return the code
-HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> int { return int(u32(hr) & 0xFFFF) }
+HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> u16 { return HRESULT(hr).Code }
 
 //  Return the facility
-HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return FACILITY((u32(hr) >> 16) & 0x1FFF) }
+HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return HRESULT(hr).Facility }
 
 //  Return the severity
 HRESULT_SEVERITY :: #force_inline proc "contextless" (#any_int hr: int) -> SEVERITY { return SEVERITY((u32(hr) >> 31) & 0x1) }
 
 // Create an HRESULT value from component pieces
-MAKE_HRESULT :: #force_inline proc "contextless" (#any_int sev: int, #any_int fac: int, #any_int code: int) -> HRESULT {
-	return HRESULT((uint(sev)<<31) | (uint(fac)<<16) | (uint(code)))
+MAKE_HRESULT :: #force_inline proc "contextless" (#any_int severity: int, #any_int facility: int, #any_int code: int) -> HRESULT {
+	return HRESULT(
+		((uint(severity) & 0x1) << 31) |
+		((uint(facility) & 0x7FFF) << 16) |
+		(uint(code) & 0xFFFF))
 }
 
 HRESULT_FROM_WIN32 :: #force_inline proc "contextless" (#any_int code: int) -> HRESULT {
 	return HRESULT(code) <= 0 ? HRESULT(code) : HRESULT(uint(code & 0x0000FFFF) | (uint(FACILITY.WIN32) << 16) | 0x80000000)
 }
 
-DECODE_HRESULT :: #force_inline proc "contextless" (#any_int hr: int) -> (SEVERITY, FACILITY, int) {
-	return HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr)
+// DECODE_HRESULT :: #force_inline proc "contextless" (#any_int hr: int) -> (SEVERITY, FACILITY, int) {
+// 	return HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr)
+// }
+
+DECODE_HRESULT :: #force_inline proc "contextless" (#any_int hr: int) -> HRESULT_DETAILS {
+	return HRESULT_DETAILS(hr)
 }
 
 // aka ERROR or WIN32_ERROR to hint the WIN32 facility

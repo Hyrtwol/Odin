@@ -76,6 +76,37 @@ foreign gdi32 {
 	GdiTransparentBlt :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, crTransparent: UINT) -> BOOL ---
 	GdiGradientFill :: proc(hdc: HDC, pVertex: PTRIVERTEX, nVertex: ULONG, pMesh: PVOID, nCount: ULONG, ulMode: ULONG) -> BOOL ---
 	GdiAlphaBlend :: proc(hdcDest: HDC, xoriginDest, yoriginDest, wDest, hDest: INT, hdcSrc: HDC, xoriginSrc, yoriginSrc, wSrc, hSrc: INT, ftn: BLENDFUNCTION) -> BOOL ---
+
+	// Line and Curve Functions
+
+	// Draws a line segment and an arc.
+	AngleArc :: proc(hdc: HDC, x, y: INT, r: DWORD, StartAngle, SweepAngle: FLOAT) -> BOOL ---
+	// Draws an elliptical arc.
+	Arc :: proc(hdc: HDC, x1, y1, x2, y2, x3, y3, x4, y4: INT) -> BOOL ---
+	// Draws an elliptical arc.
+	ArcTo :: proc(hdc: HDC, left, top, right, bottom, xr1, yr1, xr2, yr2: INT) -> BOOL ---
+	// Retrieves the current arc direction for the specified device context.
+	GetArcDirection :: proc(hdc: HDC) -> ArcDirection ---
+	// Determines which pixels should be highlighted for a line defined by the specified starting and ending points.
+	LineDDA :: proc(xStart, yStart, xEnd, yEnd: INT, lpProc: LINEDDAPROC, data: LPARAM) -> BOOL ---
+	// Draws a line from the current position up to, but not including, the specified point.
+	LineTo :: proc(hdc: HDC, x, y: INT) -> BOOL ---
+	// Updates the current position to the specified point and optionally returns the previous position.
+	MoveToEx :: proc(hdc: HDC, x, y: INT, lppt: LPPOINT = nil) -> BOOL ---
+	// Draws one or more Bézier curves.
+	PolyBezier :: proc(hdc: HDC, apt: LPPOINT, cpt: DWORD) -> BOOL ---
+	// Draws one or more Bézier curves.
+	PolyBezierTo :: proc(hdc: HDC, apt: LPPOINT, cpt: DWORD) -> BOOL ---
+	// Draws a set of line segments and Bézier curves.
+	PolyDraw :: proc(hdc: HDC, apt: LPPOINT, aj: ^BYTE, cpt: INT) -> BOOL ---
+	// Polyline	Draws a series of line segments by connecting the points in the specified array.
+	Polyline :: proc(hdc: HDC, apt: LPPOINT, cpt: INT) -> BOOL ---
+	// PolylineTo	Draws one or more straight lines.
+	PolylineTo :: proc(hdc: HDC, apt: LPPOINT, cpt: DWORD) -> BOOL ---
+	// PolyPolyline	Draws multiple series of connected line segments.
+	PolyPolyline :: proc(hdc: HDC, apt: LPPOINT, asz: ^DWORD, csz: DWORD) -> BOOL ---
+	// SetArcDirection	Sets the drawing direction to be used for arc and rectangle functions.
+	SetArcDirection :: proc(hdc: HDC, dir: ArcDirection) -> INT ---
 }
 
 RGB :: #force_inline proc "contextless" (#any_int r, g, b: int) -> COLORREF {
@@ -351,3 +382,12 @@ NEWTEXTMETRICW :: struct {
 }
 
 FONTENUMPROCW :: #type proc "system" (lpelf: ^ENUMLOGFONTW, lpntm: ^NEWTEXTMETRICW, FontType: DWORD, lParam: LPARAM) -> INT
+
+ArcDirection :: enum INT {
+	// Arcs and rectangles are drawn counterclockwise.
+	AD_COUNTERCLOCKWISE = 1,
+	// Arcs and rectangles are drawn clockwise.
+	AD_CLOCKWISE = 2,
+}
+
+LINEDDAPROC :: #type proc(x, y: INT, lpData: LPARAM)
