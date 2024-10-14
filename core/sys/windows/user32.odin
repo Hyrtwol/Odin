@@ -40,7 +40,7 @@ foreign user32 {
 		dwExStyle:             DWORD,
 		lpClassName:           LPCWSTR,
 		lpWindowName:          LPCWSTR,
-		dwStyle:               DWORD,
+		dwStyle:               WS_STYLES,
 		X, Y, nWidth, nHeight: INT,
 		hWndParent:            HWND,
 		hMenu:                 HMENU,
@@ -131,9 +131,9 @@ foreign user32 {
 	SetWindowPos             :: proc(hWnd: HWND, hWndInsertAfter: HWND, X, Y, cx, cy: INT, uFlags: UINT) -> BOOL ---
 	MoveWindow               :: proc(hWnd: HWND, X, Y, hWidth, hHeight: INT, bRepaint: BOOL) -> BOOL ---
 	GetSystemMetrics         :: proc(nIndex: INT) -> INT ---
-	AdjustWindowRect         :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL) -> BOOL ---
-	AdjustWindowRectEx       :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL, dwExStyle: DWORD) -> BOOL ---
-	AdjustWindowRectExForDpi :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL, dwExStyle: DWORD, dpi: UINT) -> BOOL ---
+	AdjustWindowRect         :: proc(lpRect: LPRECT, dwStyle: WS_STYLES, bMenu: BOOL) -> BOOL ---
+	AdjustWindowRectEx       :: proc(lpRect: LPRECT, dwStyle: WS_STYLES, bMenu: BOOL, dwExStyle: WS_EX_STYLES) -> BOOL ---
+	AdjustWindowRectExForDpi :: proc(lpRect: LPRECT, dwStyle: WS_STYLES, bMenu: BOOL, dwExStyle: WS_EX_STYLES, dpi: UINT) -> BOOL ---
 
 	SystemParametersInfoW :: proc(uiAction, uiParam: UINT, pvParam: PVOID, fWinIni: UINT) -> BOOL ---
 	GetMonitorInfoW       :: proc(hMonitor: HMONITOR, lpmi: LPMONITORINFO) -> BOOL ---
@@ -321,7 +321,7 @@ foreign user32 {
 
 	GetProcessWindowStation   :: proc() -> HWINSTA ---
 	GetUserObjectInformationW :: proc(hObj: HANDLE, nIndex: GetUserObjectInformationFlags, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD) -> BOOL ---
-	
+
 	OpenClipboard                 :: proc(hWndNewOwner: HWND) -> BOOL ---
 	CloseClipboard                :: proc() -> BOOL ---
 	GetClipboardData              :: proc(uFormat: UINT) -> HANDLE ---
@@ -352,7 +352,7 @@ foreign user32 {
 CreateWindowW :: #force_inline proc "system" (
 	lpClassName:  LPCTSTR,
 	lpWindowName: LPCTSTR,
-	dwStyle:      DWORD,
+	dwStyle:      WS_STYLES,
 	X:            INT,
 	Y:            INT,
 	nWidth:       INT,
@@ -363,7 +363,7 @@ CreateWindowW :: #force_inline proc "system" (
 	lpParam:      LPVOID,
 ) -> HWND {
 	return CreateWindowExW(
-		0,
+		{},
 		lpClassName,
 		lpWindowName,
 		dwStyle,
@@ -483,9 +483,9 @@ RAWHID :: struct {
 
 RAWMOUSE :: struct {
 	usFlags: USHORT,
-	using DUMMYUNIONNAME: struct #raw_union {
+	using _: struct #raw_union {
 		ulButtons: ULONG,
-		using DUMMYSTRUCTNAME: struct {
+		using _: struct {
 			usButtonFlags: USHORT,
 			usButtonData: USHORT,
 		},
@@ -635,8 +635,8 @@ WINDOWINFO :: struct {
 	cbSize:          DWORD,
 	rcWindow:        RECT,
 	rcClient:        RECT,
-	dwStyle:         DWORD,
-	dwExStyle:       DWORD,
+	dwStyle:         WS_STYLES,
+	dwExStyle:       WS_EX_STYLES,
 	dwWindowStatus:  DWORD,
 	cxWindowBorders: UINT,
 	cyWindowBorders: UINT,
