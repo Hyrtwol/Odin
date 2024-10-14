@@ -1,5 +1,5 @@
 #+build windows
-package test_core_sys_windows
+package test_vendor_directx
 
 import "base:intrinsics"
 import "base:runtime"
