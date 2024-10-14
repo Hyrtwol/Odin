@@ -263,7 +263,8 @@ IS_ERROR :: #force_inline proc "contextless" (#any_int hr: int) -> bool { return
 HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> u16 { return HRESULT(hr).Code }
 
 //  Return the facility
-HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return HRESULT(hr).Facility }
+//HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return HRESULT(hr).Facility }
+HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return FACILITY((u32(hr) >> 16) & 0x1FFF) }
 
 //  Return the severity
 HRESULT_SEVERITY :: #force_inline proc "contextless" (#any_int hr: int) -> SEVERITY { return SEVERITY((u32(hr) >> 31) & 0x1) }
