@@ -75,7 +75,6 @@ ULONG           :: c_ulong
 ULONGLONG       :: c_ulonglong
 LONGLONG        :: c_longlong
 UCHAR           :: BYTE
-FLOAT           :: c_float
 NTSTATUS        :: c.long
 COLORREF        :: DWORD
 LPCOLORREF      :: ^COLORREF
