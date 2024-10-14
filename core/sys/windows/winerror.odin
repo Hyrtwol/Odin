@@ -1,4 +1,4 @@
-#+build windows
+//#+build windows
 package sys_windows
 
 // Values are 32 bit values laid out as follows:
