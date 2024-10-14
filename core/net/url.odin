@@ -23,7 +23,7 @@ import "core:strconv"
 import "core:unicode/utf8"
 import "core:encoding/hex"
 
-split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host, path: string, queries: map[string]string, fragment: string) {
+split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host, path: string, queries: [][2]string, fragment: string) {
 	s := url
 
 	i := strings.index(s, "://")
@@ -45,13 +45,13 @@ split_url :: proc(url: string, allocator := context.allocator) -> (scheme, host,
 		if query_str != "" {
 			queries_parts := strings.split(query_str, "&")
 			defer delete(queries_parts)
-			queries = make(map[string]string, len(queries_parts), allocator)
-			for q in queries_parts {
+			queries = make([][2]string, len(queries_parts), allocator)
+			for q, j in queries_parts {
 				parts := strings.split(q, "=")
 				defer delete(parts)
 				switch len(parts) {
-				case 1:  queries[parts[0]] = ""        // NOTE(tetra): Query not set to anything, was but present.
-				case 2:  queries[parts[0]] = parts[1]  // NOTE(tetra): Query set to something.
+				case 1:  queries[j] = {parts[0], ""}        // NOTE(tetra): Query not set to anything, was but present.
+				case 2:  queries[j] = {parts[0], parts[1]}  // NOTE(tetra): Query set to something.
 				case:    break
 				}
 			}
@@ -84,7 +84,6 @@ join_url :: proc(scheme, host, path: string, queries: map[string]string, fragmen
 		}
 		strings.write_string(&b, strings.trim_space(path))
 	}
-
 
 	query_length := len(queries)
 	if query_length > 0 {

@@ -111,11 +111,18 @@ VS_FIXEDFILEINFO :: struct {
 	dwFileVersionLS:    DWORD, /* e.g. 0x00000031 = "0.31" */
 	dwProductVersionMS: DWORD, /* e.g. 0x00030010 = "3.10" */
 	dwProductVersionLS: DWORD, /* e.g. 0x00000031 = "0.31" */
-	dwFileFlagsMask:    DWORD, /* = 0x3F for version "0.42" */
-	dwFileFlags:        DWORD, /* e.g. VFF_DEBUG | VFF_PRERELEASE */
-	dwFileOS:           DWORD, /* e.g. VOS_DOS_WINDOWS16 */
-	dwFileType:         DWORD, /* e.g. VFT_DRIVER */
-	dwFileSubtype:      DWORD, /* e.g. VFT2_DRV_KEYBOARD */
+	dwFileFlagsMask:    VS_FILEFLAGS, /* = 0x3F for version "0.42" */
+	dwFileFlags:        VS_FILEFLAGS, /* e.g. VFF_DEBUG | VFF_PRERELEASE */
+	dwFileOS:           struct { /* e.g. VOS_DOS_WINDOWS16 */
+		VOS:  VOS,
+		VOS2: VOS2,
+	},
+	dwFileType:         VFT, /* e.g. VFT_DRIVER */
+	dwFileSubtype:      struct #raw_union { /* e.g. VFT2_DRV_KEYBOARD */
+		DRV:  VFT2_WINDOWS_DRV,
+		FONT: VFT2_WINDOWS_FONT,
+		VXD:  DWORD,
+	},
 	dwFileDateMS:       DWORD, /* e.g. 0 */
 	dwFileDateLS:       DWORD, /* e.g. 0 */
 }
@@ -271,7 +278,7 @@ foreign Dbghelp {
 		UserStreamParam: ^MINIDUMP_USER_STREAM_INFORMATION,
 		CallbackPara:    ^MINIDUMP_CALLBACK_INFORMATION,
 	) -> BOOL ---
-	
+
 	MiniDumpReadDumpStream :: proc(
 		BaseOfDump:    PVOID,
 		StreamNumber:  ULONG,
