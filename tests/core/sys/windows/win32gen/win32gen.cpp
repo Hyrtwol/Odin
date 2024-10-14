@@ -74,6 +74,18 @@ static std::string ConvertLPCWSTRToString(const LPCWSTR lpcwszStr)
 #define expect_value_str(s) out \
 	<< '\t' << "expect_value_str(t, win32." << #s << ", L(\"" << ConvertLPCWSTRToString(s) << "\"))" << endl
 
+#define expect_value_enum(e, s) out \
+	<< '\t' << "expect_value(t, win32." << e << "." << #s << ", " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+
+#define expect_value_enum_remap(e, v, s) out \
+	<< '\t' << "expect_value(t, win32." << e << "." << v << ", " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+
+#define expect_flags(e, v, s) out \
+	<< '\t' << "expect_flags(t, win32." << e << "{." << v << "}, " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+
 static void verify_win32_type_sizes(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("minwindef.h");
@@ -640,23 +652,23 @@ static void verify_gdi32(ofstream& out) {
 	expect_value(R2_MERGEPEN);
 	expect_value(R2_WHITE);
 	test_proc_comment("Ternary raster operations");
-	expect_value(SRCCOPY);
-	expect_value(SRCPAINT);
-	expect_value(SRCAND);
-	expect_value(SRCINVERT);
-	expect_value(SRCERASE);
-	expect_value(NOTSRCCOPY);
-	expect_value(NOTSRCERASE);
-	expect_value(MERGECOPY);
-	expect_value(MERGEPAINT);
-	expect_value(PATCOPY);
-	expect_value(PATPAINT);
-	expect_value(PATINVERT);
-	expect_value(DSTINVERT);
-	expect_value(BLACKNESS);
-	expect_value(WHITENESS);
-	expect_value(NOMIRRORBITMAP);
-	expect_value(CAPTUREBLT);
+	expect_value_enum("ROP", SRCCOPY);
+	expect_value_enum("ROP", SRCPAINT);
+	expect_value_enum("ROP", SRCAND);
+	expect_value_enum("ROP", SRCINVERT);
+	expect_value_enum("ROP", SRCERASE);
+	expect_value_enum("ROP", NOTSRCCOPY);
+	expect_value_enum("ROP", NOTSRCERASE);
+	expect_value_enum("ROP", MERGECOPY);
+	expect_value_enum("ROP", MERGEPAINT);
+	expect_value_enum("ROP", PATCOPY);
+	expect_value_enum("ROP", PATPAINT);
+	expect_value_enum("ROP", PATINVERT);
+	expect_value_enum("ROP", DSTINVERT);
+	expect_value_enum("ROP", BLACKNESS);
+	expect_value_enum("ROP", WHITENESS);
+	expect_value_enum("ROP", NOMIRRORBITMAP);
+	expect_value_enum("ROP", CAPTUREBLT);
 	test_proc_comment("Region Flags");
 	expect_value(ERROR);
 	expect_value(NULLREGION);
