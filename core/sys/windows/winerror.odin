@@ -19,7 +19,6 @@ HRESULT :: bit_field LONG {
 	N:        bool     | 1,
 	Customer: bool     | 1,
 	R:        bool     | 1,
-	//Severity: SEVERITY | 1,
 	IsError:  bool     | 1,
 }
 HRESULT_DETAILS :: HRESULT
@@ -255,13 +254,13 @@ FAILED :: #force_inline proc "contextless" (#any_int result: int) -> bool { retu
 
 // Generic test for error on any status value.
 //IS_ERROR :: #force_inline proc(#any_int hr: int) -> bool { return u32(hr) >> 31 == u32(SEVERITY.ERROR) }
-IS_ERROR :: #force_inline proc "contextless" (#any_int hr: int) -> bool { return HRESULT(hr).IsError }
+IS_ERROR :: #force_inline proc "contextless" (#any_int hr: int) -> bool { return HRESULT_DETAILS(hr).IsError }
 
 // Return the code
-HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> u16 { return HRESULT(hr).Code }
+HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> u16 { return HRESULT_DETAILS(hr).Code }
 
 //  Return the facility
-//HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return HRESULT(hr).Facility }
+//HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return HRESULT_DETAILS(hr).Facility }
 HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return FACILITY((u32(hr) >> 16) & 0x1FFF) }
 
 //  Return the severity
