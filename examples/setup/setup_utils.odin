@@ -28,9 +28,10 @@ struct IconDirectoryEntry {
 TIconFileHeader :: struct #packed {
 	// (6 bytes)
 	Reserved:  WORD, // Reserved (2 bytes), always 0
-	IconType:  WORD, // IconType (2 bytes), if the image is an icon it�s 1, for cursors the value is 2.
+	IconType:  WORD, // IconType (2 bytes), if the image is an icon it's 1, for cursors the value is 2.
 	IconCount: WORD, // IconCount (2 bytes), number of icons in this file.
 }
+#assert(size_of(TIconFileHeader) == 6)
 
 TIconInfo :: struct #packed {
 	// (16 bytes)
@@ -43,6 +44,7 @@ TIconInfo :: struct #packed {
 	ImageSize:   DWORD, // ImageSize (4 bytes), Length of resource in bytes
 	ImageOffset: DWORD, // ImageOffset (4 bytes), start of the image in the file.
 }
+#assert(size_of(TIconInfo) == 16)
 
 /*
     src.ReadBuffer(IconFileHeader, SizeOf(TIconFileHeader));
