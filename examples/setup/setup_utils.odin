@@ -25,15 +25,15 @@ struct IconDirectoryEntry {
     DWORD dwImageOffset;
 };
 */
-TIconFileHeader :: struct #packed {
+Icon_File_Header :: struct #packed {
 	// (6 bytes)
 	Reserved:  WORD, // Reserved (2 bytes), always 0
 	IconType:  WORD, // IconType (2 bytes), if the image is an icon it's 1, for cursors the value is 2.
 	IconCount: WORD, // IconCount (2 bytes), number of icons in this file.
 }
-#assert(size_of(TIconFileHeader) == 6)
+#assert(size_of(Icon_File_Header) == 6)
 
-TIconInfo :: struct #packed {
+Icon_Info :: struct #packed {
 	// (16 bytes)
 	Width:       BYTE, // (1 byte), Width of Icon (1 to 255)
 	Height:      BYTE, // Height (1 byte), Height of Icon (1 to 255)
@@ -44,13 +44,13 @@ TIconInfo :: struct #packed {
 	ImageSize:   DWORD, // ImageSize (4 bytes), Length of resource in bytes
 	ImageOffset: DWORD, // ImageOffset (4 bytes), start of the image in the file.
 }
-#assert(size_of(TIconInfo) == 16)
+#assert(size_of(Icon_Info) == 16)
 
 /*
-    src.ReadBuffer(IconFileHeader, SizeOf(TIconFileHeader));
+    src.ReadBuffer(IconFileHeader, SizeOf(Icon_File_Header));
     WriteIconFileHeader(IconFileHeader);
 
-    src.ReadBuffer(IconInfo, SizeOf(TIconInfo));
+    src.ReadBuffer(IconInfo, SizeOf(Icon_Info));
     WriteIconInfoHeader(IconInfo);
 
     src.ReadBuffer(bmiHeader, SizeOf(TBitmapInfoHeader));
@@ -72,7 +72,7 @@ TIconInfo :: struct #packed {
 dump_icon :: proc() {
 	icon_path := filepath.clean("misc/emblem.ico")
 
-	//ii: TIconInfo
+	//ii: Icon_Info
 
 	fd: os.Handle
 	err: os.Errno
@@ -84,28 +84,28 @@ dump_icon :: proc() {
 	if err != 0 {panic("os.open")}
 	defer os.close(fd)
 
-	ifh: TIconFileHeader
-	n, err = os.read_ptr(fd, &ifh, size_of(TIconFileHeader))
+	ifh: Icon_File_Header
+	n, err = os.read_ptr(fd, &ifh, size_of(Icon_File_Header))
 	assert(err == 0)
-	assert(n == size_of(TIconFileHeader))
+	assert(n == size_of(Icon_File_Header))
 	fmt.printfln("ifh: %#v", ifh)
 
 	po, err = os.seek(fd, 0, 1)
 	fmt.printfln("po: %d", po)
 
-	iis := make([]TIconInfo, ifh.IconCount)
+	iis := make([]Icon_Info, ifh.IconCount)
 	defer delete(iis)
 
 	for i in 0 ..< ifh.IconCount {
-		n, err = os.read_ptr(fd, &iis[i], size_of(TIconInfo))
+		n, err = os.read_ptr(fd, &iis[i], size_of(Icon_Info))
 		assert(err == 0)
-		assert(n == size_of(TIconInfo))
+		assert(n == size_of(Icon_Info))
 		//fmt.printfln("ii: %#v", ii)
 		po, err = os.seek(fd, 0, 1)
 		fmt.printfln("po: %d", po)
 	}
 
-	ii: ^TIconInfo = nil
+	ii: ^Icon_Info = nil
 	for i in 0 ..< ifh.IconCount {
 		if ii == nil {ii = &iis[i]}
 		//fmt.printfln("ii: %#v", &iis[i])
