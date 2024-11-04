@@ -60,6 +60,25 @@
 			}
 		},
 		{
+			"label": "test vendor/directx",
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"test",
+				".",
+				"-vet",
+				"-strict-style"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/tests/vendor/directx"
+			}
+		},
+		{
 			"label": "run examples/setup",
 			"type": "shell",
 			"command": "call examples/setup/build.bat",
