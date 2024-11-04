@@ -5,7 +5,7 @@ import "core:testing"
 import dxgi "vendor:directx/dxgi"
 
 @(test)
-verify_dxgi1_4 :: proc(t: ^testing.T) {
+verify_dxgi_types :: proc(t: ^testing.T) {
 	// dxgi1_4.h
 	expect_size(t, dxgi.LUID, 8)
 	expect_size(t, dxgi.IID, 16)
@@ -32,7 +32,7 @@ verify_dxgi1_4 :: proc(t: ^testing.T) {
 }
 
 @(test)
-verify_error_codes :: proc(t: ^testing.T) {
+verify_dxgi_error_codes :: proc(t: ^testing.T) {
 	// winerror.h
 	expect_value(t, dxgi.ERROR_ACCESS_DENIED, 0x887A002B)
 	expect_value(t, dxgi.ERROR_ACCESS_LOST, 0x887A0026)
