@@ -29,12 +29,13 @@
 #include <cstdint>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <cassert>
 
 #define sut "dxgi"
 #include "..\..\..\..\misc\testgen\odintestgen.h"
 
-static void verify_dxgi1_4(ofstream& out) {
+static void verify_dxgi_types(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("dxgi1_4.h");
 
@@ -61,7 +62,6 @@ static void verify_dxgi1_4(ofstream& out) {
 
 	// Unknwnbase.h
 	expect_size(IUnknown);
-	//expect_size(IUnknown_VTable         );
 	expect_size(LPUNKNOWN);
 
 	//expect_value(STANDARD_MULTISAMPLE_QUALITY_PATTERN);
@@ -71,7 +71,7 @@ static void verify_dxgi1_4(ofstream& out) {
 	test_proc_end();
 }
 
-static void verify_error_codes(ofstream& out) {
+static void verify_dxgi_error_codes(ofstream& out) {
 	test_proc_begin();
 	test_proc_comment("winerror.h");
 
@@ -116,9 +116,9 @@ static void test_vendor_directx(ofstream& out) {
 		<< "import \"core:testing\"" << endl
 		<< "import dxgi \"vendor:directx/dxgi\"" << endl;
 
-	verify_dxgi1_4(out);
+	verify_dxgi_types(out);
 
-	verify_error_codes(out);
+	verify_dxgi_error_codes(out);
 }
 
 int main(int argc, char* argv[]) {
