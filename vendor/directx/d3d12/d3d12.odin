@@ -7,6 +7,8 @@ import "../dxgi"
 import "../d3d_common"
 import win32 "core:sys/windows"
 
+D3D12_SDK_VERSION :: #config(D3D12_SDK_VERSION, 5)
+
 IUnknown        :: dxgi.IUnknown
 IUnknown_VTable :: dxgi.IUnknown_VTable
 
