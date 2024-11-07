@@ -5,6 +5,7 @@ colours
 cstring
 ctprintf
 devmodew
+directx
 dword
 dxgi
 dynlib
@@ -44,6 +45,7 @@ lparam
 lpctstr
 lresult
 maxlong
+memcpy
 memset
 microarch
 microui
