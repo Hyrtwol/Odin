@@ -1,4 +1,5 @@
 // D:\dev\malerion\packages\Microsoft.Direct3D.D3D12.1.614.1\build\native\include\d3dx12\d3dx12_resource_helpers.h
+#+build windows
 package directx_d3d12
 
 //import "../dxgi"
@@ -249,7 +250,8 @@ UpdateSubresources2 :: proc "contextless" (
 
 // Heap-allocating UpdateSubresources implementation
 //@(private = "file")
-UpdateSubresources3 :: proc "contextless" (
+//UpdateSubresources3 :: proc "contextless" (
+UpdateSubresources3 :: proc (
 	pCmdList: ^IGraphicsCommandList,
 	pDestinationResource: ^IResource,
 	pIntermediate: ^IResource,
@@ -261,11 +263,11 @@ UpdateSubresources3 :: proc "contextless" (
 	RequiredSize: u64 = 0
 	MemToAlloc := cast(UINT64)((size_of(PLACED_SUBRESOURCE_FOOTPRINT) + size_of(UINT) + size_of(UINT64)) * int(NumSubresources))
 	if MemToAlloc > UINT64(SIZE_MAX) {
-		return 0
+		panic("MemToAlloc > UINT64(SIZE_MAX)") // return 0
 	}
 	pMem: rawptr = win32.HeapAlloc(win32.GetProcessHeap(), 0, cast(SIZE_T)(MemToAlloc))
 	if pMem == nil {
-		return 0
+		panic("pMem == nil") // return 0
 	}
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
 	pRowSizesInBytes := cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
