@@ -265,7 +265,7 @@ UpdateSubresources3 :: proc (
 	if MemToAlloc > UINT64(SIZE_MAX) {
 		panic("MemToAlloc > UINT64(SIZE_MAX)") // return 0
 	}
-	pMem: rawptr = win32.HeapAlloc(win32.GetProcessHeap(), 0, cast(SIZE_T)(MemToAlloc))
+	pMem: rawptr = win32.HeapAlloc(win32.GetProcessHeap(), 0, cast(SIZE_T)(MemToAlloc)) // TODO Odinify
 	if pMem == nil {
 		panic("pMem == nil") // return 0
 	}
@@ -306,7 +306,7 @@ UpdateSubresources4 :: proc "contextless" (
 	if MemToAlloc > UINT64(SIZE_MAX) {
 		return 0
 	}
-	pMem: rawptr = win32.HeapAlloc(win32.GetProcessHeap(), 0, cast(SIZE_T)(MemToAlloc))
+	pMem: rawptr = win32.HeapAlloc(win32.GetProcessHeap(), 0, cast(SIZE_T)(MemToAlloc)) // TODO Odinify
 	if pMem == nil {
 		return 0
 	}
