@@ -12,7 +12,7 @@
             "scope": "user"
         }
     },
-	"cSpell.enableFiletypes": [
+	"#cSpell.enableFiletypes#": [
 		"odin"
 	],
 	"markdownlint.config": {
