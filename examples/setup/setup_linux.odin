@@ -6,6 +6,7 @@ import "base:intrinsics"
 import "base:runtime"
 import "core:fmt"
 import "core:path/filepath"
+import os "core:os/os2"
 
 BYTE :: u8
 WORD :: u16
@@ -33,10 +34,10 @@ BITMAPINFOHEADER :: struct {
 	biClrImportant:  DWORD,
 }
 
-_Path_Separator :: '/'
-_Path_Separator_Str :: "/"
-_Path_List_Separator :: ':'
-_Path_List_Separator_Str :: ":"
+//Path_Separator :: os.Path_Separator
+Path_Separator_String :: os.Path_Separator_String
+//Path_List_Separator :: os.Path_List_Separator
+Path_List_Separator_String :: ":"
 
 @(private = "package")
 setup_linux :: proc() -> int {
