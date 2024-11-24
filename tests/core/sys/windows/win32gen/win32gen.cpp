@@ -703,6 +703,33 @@ static void verify_gdi32(ofstream& out) {
 	expect_value(TA_RTLREADING);
 	expect_value(TA_MASK);
 
+	expect_value(VTA_BASELINE);
+	expect_value(VTA_LEFT);
+	expect_value(VTA_RIGHT);
+	expect_value(VTA_CENTER);
+	expect_value(VTA_BOTTOM);
+	expect_value(VTA_TOP);
+
+	expect_value(ETO_OPAQUE);
+	expect_value(ETO_CLIPPED);
+	expect_value(ETO_GLYPH_INDEX);
+	expect_value(ETO_RTLREADING);
+	expect_value(ETO_NUMERICSLOCAL);
+	expect_value(ETO_NUMERICSLATIN);
+	expect_value(ETO_IGNORELANGUAGE);
+	expect_value(ETO_PDY);
+	expect_value(ETO_REVERSE_INDEX_MAP);
+
+	expect_value(ASPECT_FILTERING);
+
+	test_proc_comment("Bounds Accumulation APIs");
+	expect_value(DCB_RESET);
+	expect_value(DCB_ACCUMULATE);
+	expect_value(DCB_DIRTY);
+	expect_value(DCB_SET);
+	expect_value(DCB_ENABLE);
+	expect_value(DCB_DISABLE);
+
 	test_proc_comment("enum BKMODE");
 	expect_value_enum("BKMODE", TRANSPARENT);
 	expect_value_enum("BKMODE", OPAQUE);
