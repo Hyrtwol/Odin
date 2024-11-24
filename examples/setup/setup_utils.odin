@@ -3,7 +3,7 @@ package main
 
 import "base:intrinsics"
 import "core:fmt"
-import "core:os"
+import os "core:os/os2"
 import "core:path/filepath"
 
 /*
@@ -72,25 +72,24 @@ Icon_Info :: struct #packed {
 dump_icon :: proc() {
 	icon_path := filepath.clean("misc/emblem.ico")
 
-	//ii: Icon_Info
-
-	fd: os.Handle
-	err: os.Errno
+	fd: ^os.File
+	err: os.Error
+	ERROR_NONE :: os.ERROR_NONE
 	n: int
 	po: i64
 
 	fd, err = os.open(icon_path, os.O_RDONLY, 0)
-	assert(err == 0)
-	if err != 0 {panic("os.open")}
+	assert(err == ERROR_NONE)
+	if err != ERROR_NONE {panic("os.open")}
 	defer os.close(fd)
 
 	ifh: Icon_File_Header
 	n, err = os.read_ptr(fd, &ifh, size_of(Icon_File_Header))
-	assert(err == 0)
+	assert(err == ERROR_NONE)
 	assert(n == size_of(Icon_File_Header))
 	fmt.printfln("ifh: %#v", ifh)
 
-	po, err = os.seek(fd, 0, 1)
+	po, err = os.seek(fd, 0, .Current)
 	fmt.printfln("po: %d", po)
 
 	iis := make([]Icon_Info, ifh.IconCount)
@@ -98,10 +97,10 @@ dump_icon :: proc() {
 
 	for i in 0 ..< ifh.IconCount {
 		n, err = os.read_ptr(fd, &iis[i], size_of(Icon_Info))
-		assert(err == 0)
+		assert(err == ERROR_NONE)
 		assert(n == size_of(Icon_Info))
 		//fmt.printfln("ii: %#v", ii)
-		po, err = os.seek(fd, 0, 1)
+		po, err = os.seek(fd, 0, .Current)
 		fmt.printfln("po: %d", po)
 	}
 
@@ -116,28 +115,28 @@ dump_icon :: proc() {
 		// bytes:= make([]u8, ii.ImageSize)
 		// defer delete(bytes)
 
-		os.seek(fd, i64(ii.ImageOffset), 0)
+		os.seek(fd, i64(ii.ImageOffset), .Start)
 
 		bih: BITMAPINFOHEADER // (40 bytes)
 
 		n, err = os.read_ptr(fd, &bih, size_of(BITMAPINFOHEADER))
-		assert(err == 0)
+		assert(err == ERROR_NONE)
 		assert(n == size_of(BITMAPINFOHEADER))
 		fmt.printfln("read_ptr: %v %v", n, err)
 		fmt.printfln("bih: %#v", bih)
-		po, err = os.seek(fd, 0, 1)
+		po, err = os.seek(fd, 0, .Current)
 		fmt.printfln("po: %d", po)
 
 		rgba: RGBQUAD
 		palette: [256][4]u8
 		for i in 0 ..< 256 {
 			n, err = os.read_ptr(fd, &rgba, size_of(RGBQUAD))
-			assert(err == 0)
+			assert(err == ERROR_NONE)
 			assert(n == 4)
 			palette[i] = transmute([4]u8)rgba
 		}
 
-		po, err = os.seek(fd, 0, 1)
+		po, err = os.seek(fd, 0, .Current)
 		fmt.printfln("po: %d", po)
 
 		stride := ((i32((i32(bih.biWidth) * i32(bih.biBitCount)) + 31) & ~i32(31)) >> 3)
