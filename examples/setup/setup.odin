@@ -2,7 +2,7 @@
 package main
 
 import "core:fmt"
-import "core:os"
+import os "core:os/os2"
 
 print_key_value :: proc(key: string, value: any) {
 	fmt.printfln("  %-20s: %v", key, value)
