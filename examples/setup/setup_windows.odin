@@ -5,7 +5,7 @@ package main
 import "base:intrinsics"
 import "base:runtime"
 import "core:fmt"
-import "core:os"
+import os "core:os/os2"
 import "core:path/filepath"
 import "core:strings"
 import win32 "core:sys/windows"
@@ -24,10 +24,10 @@ LONG :: win32.LONG
 RGBQUAD :: win32.RGBQUAD
 BITMAPINFOHEADER :: win32.BITMAPINFOHEADER
 
-_Path_Separator :: '\\'
-_Path_Separator_Str :: "\\"
-_Path_List_Separator :: ';'
-_Path_List_Separator_Str :: ";"
+// Path_Separator :: os.Path_Separator
+Path_Separator_String :: os.Path_Separator_String
+// Path_List_Separator :: os.Path_List_Separator
+Path_List_Separator_String :: ";"
 
 // https://learn.microsoft.com/en-us/windows/win32/sysinfo/enumerating-registry-subkeys
 MAX_KEY_LENGTH: win32.DWORD : 255
@@ -669,7 +669,7 @@ check_virtual_terminal_level :: proc() {
 
 check_environment_variables :: proc() {
 
-	odin_root := strings.trim_right(ODIN_ROOT, _Path_Separator_Str)
+	odin_root := strings.trim_right(ODIN_ROOT, Path_Separator_String)
 	//fmt.println("odin_root:", odin_root)
 
 	found_odin_root := ""
@@ -726,7 +726,7 @@ check_environment_variables :: proc() {
 	if found_path != "" {
 		odin_root_path :: "%ODIN_ROOT%"
 		//fmt.println("Path:", found_path)
-		parts := strings.split(found_path, _Path_List_Separator_Str)
+		parts := strings.split(found_path, Path_List_Separator_String)
 		found := false
 		for p in parts {
 			if p == odin_root_path {
