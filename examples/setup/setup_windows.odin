@@ -726,7 +726,7 @@ check_environment_variables :: proc() {
 	if found_path != "" {
 		odin_root_path :: "%ODIN_ROOT%"
 		//fmt.println("Path:", found_path)
-		parts := strings.split(found_path, Path_List_Separator_String)
+		parts := strings.split(found_path, Path_List_Separator_String, context.temp_allocator)
 		found := false
 		for p in parts {
 			if p == odin_root_path {
