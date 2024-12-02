@@ -1,8 +1,9 @@
-// D:\dev\malerion\packages\Microsoft.Direct3D.D3D12.1.614.1\build\native\include\d3dx12\d3dx12_resource_helpers.h
 #+build windows
+// <D:\dev\malerion\packages\Microsoft.Direct3D.D3D12.1.614.1\build\native\include\d3dx12\d3dx12_resource_helpers.h>
 package directx_d3d12
 
 //import "../dxgi"
+import "base:intrinsics"
 import "base:runtime"
 import "core:c"
 import "core:slice"
@@ -29,14 +30,15 @@ MemcpySubresource1 :: #force_inline proc "contextless" (
 	RowSizeInBytes: SIZE_T,
 	NumRows, NumSlices: u32,
 ) {
-	for z: u32 = 0; z < NumSlices; z += 1 {
-		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * int(z))
-		pSrcSlice := uintptr(pSrc.pData) + uintptr(int(pSrc.SlicePitch) * int(win32.LONG_PTR(z)))
-		for y: u32 = 0; y < NumRows; y += 1 {
+	row_size := int(RowSizeInBytes)
+	for z in 0..< int(NumSlices) {
+		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * z)
+		pSrcSlice := uintptr(pSrc.pData) + uintptr(int(pSrc.SlicePitch) * z)
+		for y in 0 ..< int(NumRows) {
 			runtime.mem_copy(
-				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * int(y))),
-				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * int(win32.LONG_PTR(y)))),
-				int(RowSizeInBytes))
+				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)),
+				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)),
+				row_size)
 		}
 	}
 }
@@ -51,14 +53,15 @@ MemcpySubresource2 :: #force_inline proc "contextless" (
 	RowSizeInBytes: SIZE_T,
 	NumRows, NumSlices: u32,
 ) {
-	for z: u32 = 0; z < NumSlices; z += 1 {
-		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * int(z))
-		pSrcSlice := uintptr(pResourceData) + uintptr(int(pSrc.Offset) + int(pSrc.DepthPitch) * int(win32.ULONG_PTR(z)))
-		for y: u32 = 0; y < NumRows; y += 1 {
+	row_size := int(RowSizeInBytes)
+	for z in 0..< int(NumSlices) {
+		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * z)
+		pSrcSlice := uintptr(pResourceData) + uintptr(int(pSrc.Offset) + int(pSrc.DepthPitch) * z)
+		for y in 0 ..< int(NumRows) {
 			runtime.mem_copy(
-				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * int(y))),
-				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * int(win32.ULONG_PTR(y)))),
-				int(RowSizeInBytes))
+				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)),
+				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)),
+				row_size)
 		}
 	}
 }
@@ -270,8 +273,10 @@ UpdateSubresources3 :: proc (
 		panic("pMem == nil") // return 0
 	}
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
-	pRowSizesInBytes := cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
-	pNumRows := cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
+	//pRowSizesInBytes : ^UINT64 = cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
+	pRowSizesInBytes : ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
+	//pNumRows : ^UINT = cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
+	pNumRows : ^UINT = cast(^UINT)intrinsics.ptr_offset(pRowSizesInBytes, int(NumSubresources))
 
 	Desc, tmpDesc: RESOURCE_DESC
 	Desc = pDestinationResource->GetDesc(&tmpDesc)^
@@ -311,8 +316,10 @@ UpdateSubresources4 :: proc "contextless" (
 		return 0
 	}
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
-	pRowSizesInBytes := cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
-	pNumRows := cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
+	// pRowSizesInBytes := cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
+	// pNumRows := cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
+	pRowSizesInBytes : ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
+	pNumRows : ^UINT = cast(^UINT)intrinsics.ptr_offset(pRowSizesInBytes,int(NumSubresources))
 
 	Desc, tmpDesc: RESOURCE_DESC
 	Desc = pDestinationResource->GetDesc(&tmpDesc)^
