@@ -1,0 +1,38 @@
+{
+	"editor.wordWrapColumn": 120,
+	"editor.rulers": [
+		120
+	],
+	"cSpell.language": "en",
+    "cSpell.customDictionaries": {
+        "custom-dictionary-user": {
+            "name": "odin-dictionary",
+            "path": "misc/odin-dictionary.txt",
+            "addWords": true,
+            "scope": "user"
+        }
+    },
+	"#cSpell.enableFiletypes#": [
+		"odin"
+	],
+	"markdownlint.config": {
+		"no-hard-tabs": false,
+		"line-length": false
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+	},
+	"omnisharp.autoStart": false,
+	"typescript.tsc.autoDetect": "off",
+	"npm.autoDetect": "off",
+	"files.exclude": {
+		"**/.git": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/desktop.ini": true
+	},
+	"files.associations": {
+		"*.rc": "cpp",
+		"*.rh": "cpp"
+	}
+}
