@@ -1,0 +1,127 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build odin",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"command": "make",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "build odin release",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat release"
+			},
+			"command": "make",
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
+		{
+			"label": "test core",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/tests/core"
+			}
+		},
+		{
+			"label": "test sys/windows",
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"test",
+				".",
+				"-vet",
+				"-strict-style"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/tests/core/sys/windows"
+			}
+		},
+		{
+			"label": "test vendor/directx",
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"test",
+				".",
+				"-vet",
+				"-strict-style"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/tests/vendor/directx"
+			}
+		},
+		{
+			"label": "run examples/setup",
+			"type": "shell",
+			"command": "call examples/setup/build.bat",
+			"problemMatcher": [],
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "build ols",
+			"type": "shell",
+			"windows": {
+				"command": "call build.bat"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}/shared/ols"
+			}
+		},
+		{
+			"label": "format",
+			"type": "process",
+			"command": "${workspaceFolder}\\shared\\ols\\odinfmt.exe",
+			"args": [
+				"-w",
+				"${workspaceFolder}\\${relativeFile}"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${workspaceFolder}\\${relativeFileDirname}"
+			}
+		}
+	]
+}
