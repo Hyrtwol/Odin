@@ -272,6 +272,7 @@ UpdateSubresources3 :: proc (
 	if pMem == nil {
 		panic("pMem == nil") // return 0
 	}
+	defer win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
 	//pRowSizesInBytes : ^UINT64 = cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
 	pRowSizesInBytes : ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
@@ -289,7 +290,7 @@ UpdateSubresources3 :: proc (
 
 	Result := UpdateSubresources1(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData)
 	// HeapFree(GetProcessHeap(), 0, pMem);
-	win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
+	// win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
 	return Result
 }
 
@@ -315,6 +316,7 @@ UpdateSubresources4 :: proc "contextless" (
 	if pMem == nil {
 		return 0
 	}
+	defer win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
 	// pRowSizesInBytes := cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
 	// pNumRows := cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
@@ -332,7 +334,7 @@ UpdateSubresources4 :: proc "contextless" (
 
 	Result := UpdateSubresources2(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pResourceData, pSrcData)
 	//HeapFree(GetProcessHeap(), 0, pMem);
-	win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
+	//win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
 	return Result
 }
 
