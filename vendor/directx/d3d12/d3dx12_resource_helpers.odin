@@ -28,9 +28,8 @@ MemcpySubresource1 :: #force_inline proc "contextless" (
 	pDest: ^MEMCPY_DEST,
 	pSrc: ^SUBRESOURCE_DATA,
 	RowSizeInBytes: SIZE_T,
-	NumRows, NumSlices: u32,
+	NumRows, NumSlices: UINT,
 ) {
-	row_size := int(RowSizeInBytes)
 	for z in 0..< int(NumSlices) {
 		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * z)
 		pSrcSlice := uintptr(pSrc.pData) + uintptr(int(pSrc.SlicePitch) * z)
@@ -38,7 +37,7 @@ MemcpySubresource1 :: #force_inline proc "contextless" (
 			runtime.mem_copy(
 				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)),
 				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)),
-				row_size)
+				int(RowSizeInBytes))
 		}
 	}
 }
@@ -51,9 +50,8 @@ MemcpySubresource2 :: #force_inline proc "contextless" (
 	pResourceData: rawptr,
 	pSrc: ^SUBRESOURCE_INFO,
 	RowSizeInBytes: SIZE_T,
-	NumRows, NumSlices: u32,
+	NumRows, NumSlices: UINT,
 ) {
-	row_size := int(RowSizeInBytes)
 	for z in 0..< int(NumSlices) {
 		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * z)
 		pSrcSlice := uintptr(pResourceData) + uintptr(int(pSrc.Offset) + int(pSrc.DepthPitch) * z)
@@ -61,7 +59,7 @@ MemcpySubresource2 :: #force_inline proc "contextless" (
 			runtime.mem_copy(
 				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)),
 				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)),
-				row_size)
+				int(RowSizeInBytes))
 		}
 	}
 }
@@ -75,8 +73,8 @@ MemcpySubresource2 :: #force_inline proc "contextless" (
 // Returns required size of a buffer to be used for data upload
 //
 // <https://github.com/microsoft/DirectX-Headers/blob/main/include/directx/d3dx12_resource_helpers.h#L73>
-GetRequiredIntermediateSize :: proc "contextless" (pDestinationResource: ^IResource, FirstSubresource, NumSubresources: u32) -> u64 {
-	RequiredSize: u64 = 0
+GetRequiredIntermediateSize :: proc "contextless" (pDestinationResource: ^IResource, FirstSubresource, NumSubresources: UINT) -> UINT64 {
+	RequiredSize: UINT64 = 0
 	desc, tmpDesc: RESOURCE_DESC
 	desc = pDestinationResource->GetDesc(&tmpDesc)^
 	pDevice: ^IDevice = nil
@@ -94,14 +92,14 @@ UpdateSubresources1 :: proc "contextless" (
 	pCmdList: ^IGraphicsCommandList,
 	pDestinationResource: ^IResource,
 	pIntermediate: ^IResource,
-	FirstSubresource: u32,
-	NumSubresources: u32,
-	RequiredSize: u64,
+	FirstSubresource: UINT,
+	NumSubresources: UINT,
+	RequiredSize: UINT64,
 	pLayouts: ^PLACED_SUBRESOURCE_FOOTPRINT,
-	pNumRows: ^u32,
-	pRowSizesInBytes: ^u64,
+	pNumRows: ^UINT,
+	pRowSizesInBytes: ^UINT64,
 	pSrcData: ^SUBRESOURCE_DATA,
-) -> u64 {
+) -> UINT64 {
 	// Minor validation
 
 	layouts := slice.from_ptr(pLayouts, int(NumSubresources))
@@ -154,7 +152,7 @@ UpdateSubresources1 :: proc "contextless" (
 	// 	}
 	// }
 	if DestinationDesc.Dimension == .BUFFER {
-		pCmdList->CopyBufferRegion(pDestinationResource, 0, pIntermediate, layouts[0].Offset, u64(layouts[0].Footprint.Width))
+		pCmdList->CopyBufferRegion(pDestinationResource, 0, pIntermediate, layouts[0].Offset, UINT64(layouts[0].Footprint.Width))
 	} else {
 		for i: UINT = 0; i < NumSubresources; i += 1 {
 			// const CD3DX12_TEXTURE_COPY_LOCATION Dst(pDestinationResource, i + FirstSubresource);
