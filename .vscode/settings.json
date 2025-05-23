@@ -34,5 +34,8 @@
 	"files.associations": {
 		"*.rc": "cpp",
 		"*.rh": "cpp"
-	}
+	},
+	"cSpell.words": [
+		"cstring"
+	]
 }
