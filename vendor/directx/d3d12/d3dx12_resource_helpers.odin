@@ -28,16 +28,14 @@ MemcpySubresource1 :: #force_inline proc "contextless" (
 	pDest: ^MEMCPY_DEST,
 	pSrc: ^SUBRESOURCE_DATA,
 	RowSizeInBytes: SIZE_T,
-	NumRows, NumSlices: UINT,
+	NumRows,
+	NumSlices: UINT,
 ) {
-	for z in 0..< int(NumSlices) {
+	for z in 0 ..< int(NumSlices) {
 		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * z)
 		pSrcSlice := uintptr(pSrc.pData) + uintptr(int(pSrc.SlicePitch) * z)
 		for y in 0 ..< int(NumRows) {
-			runtime.mem_copy(
-				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)),
-				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)),
-				int(RowSizeInBytes))
+			runtime.mem_copy(rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)), rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)), int(RowSizeInBytes))
 		}
 	}
 }
@@ -45,21 +43,12 @@ MemcpySubresource1 :: #force_inline proc "contextless" (
 // Row-by-row memcpy
 //
 // <https://github.com/microsoft/DirectX-Headers/blob/main/include/directx/d3dx12_resource_helpers.h#L50>
-MemcpySubresource2 :: #force_inline proc "contextless" (
-	pDest: ^MEMCPY_DEST,
-	pResourceData: rawptr,
-	pSrc: ^SUBRESOURCE_INFO,
-	RowSizeInBytes: SIZE_T,
-	NumRows, NumSlices: UINT,
-) {
-	for z in 0..< int(NumSlices) {
+MemcpySubresource2 :: #force_inline proc "contextless" (pDest: ^MEMCPY_DEST, pResourceData: rawptr, pSrc: ^SUBRESOURCE_INFO, RowSizeInBytes: SIZE_T, NumRows, NumSlices: UINT) {
+	for z in 0 ..< int(NumSlices) {
 		pDestSlice := uintptr(pDest.pData) + uintptr(int(pDest.SlicePitch) * z)
 		pSrcSlice := uintptr(pResourceData) + uintptr(int(pSrc.Offset) + int(pSrc.DepthPitch) * z)
 		for y in 0 ..< int(NumRows) {
-			runtime.mem_copy(
-				rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)),
-				rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)),
-				int(RowSizeInBytes))
+			runtime.mem_copy(rawptr(pDestSlice + uintptr(int(pDest.RowPitch) * y)), rawptr(pSrcSlice + uintptr(int(pSrc.RowPitch) * y)), int(RowSizeInBytes))
 		}
 	}
 }
@@ -128,9 +117,9 @@ UpdateSubresources1 :: proc "contextless" (
 
 	for i: UINT = 0; i < NumSubresources; i += 1 {
 		if rowSizesInBytes[i] > UINT64(~SIZE_T(0)) {return 0}
-		DestData := MEMCPY_DEST{
-			pData = rawptr(uintptr(pData) + uintptr(layouts[i].Offset)),
-			RowPitch = SIZE_T(layouts[i].Footprint.RowPitch),
+		DestData := MEMCPY_DEST {
+			pData      = rawptr(uintptr(pData) + uintptr(layouts[i].Offset)),
+			RowPitch   = SIZE_T(layouts[i].Footprint.RowPitch),
 			SlicePitch = SIZE_T(layouts[i].Footprint.RowPitch) * SIZE_T(numRows[i]),
 		}
 		MemcpySubresource1(&DestData, &srcData[i], cast(SIZE_T)(rowSizesInBytes[i]), numRows[i], layouts[i].Footprint.Depth)
@@ -154,7 +143,7 @@ UpdateSubresources1 :: proc "contextless" (
 	if DestinationDesc.Dimension == .BUFFER {
 		pCmdList->CopyBufferRegion(pDestinationResource, 0, pIntermediate, layouts[0].Offset, UINT64(layouts[0].Footprint.Width))
 	} else {
-		for i: UINT = 0; i < NumSubresources; i += 1 {
+		for i : UINT = 0; i < NumSubresources; i += 1 {
 			// const CD3DX12_TEXTURE_COPY_LOCATION Dst(pDestinationResource, i + FirstSubresource);
 			// const CD3DX12_TEXTURE_COPY_LOCATION Src(pIntermediate, pLayouts[i]);
 			Dst := TEXTURE_COPY_LOCATION {
@@ -216,9 +205,9 @@ UpdateSubresources2 :: proc "contextless" (
 	for i: UINT = 0; i < NumSubresources; i += 1 {
 		//if (pRowSizesInBytes[i] > SIZE_T(-1)) {return 0}
 		if (rowSizesInBytes[i] > UINT64(~SIZE_T(0))) {return 0}
-		DestData := MEMCPY_DEST{
-			pData = rawptr(uintptr(pData) + uintptr(layouts[i].Offset)),
-			RowPitch = SIZE_T(layouts[i].Footprint.RowPitch),
+		DestData := MEMCPY_DEST {
+			pData      = rawptr(uintptr(pData) + uintptr(layouts[i].Offset)),
+			RowPitch   = SIZE_T(layouts[i].Footprint.RowPitch),
 			SlicePitch = SIZE_T(layouts[i].Footprint.RowPitch) * SIZE_T(numRows[i]),
 		}
 		MemcpySubresource2(&DestData, pResourceData, &srcData[i], cast(SIZE_T)(rowSizesInBytes[i]), numRows[i], layouts[i].Footprint.Depth)
@@ -228,7 +217,7 @@ UpdateSubresources2 :: proc "contextless" (
 	if DestinationDesc.Dimension == .BUFFER {
 		pCmdList->CopyBufferRegion(pDestinationResource, 0, pIntermediate, layouts[0].Offset, u64(layouts[0].Footprint.Width))
 	} else {
-		for i: UINT = 0; i < NumSubresources; i += 1 {
+		for i : UINT = 0; i < NumSubresources; i += 1 {
 			// const CD3DX12_TEXTURE_COPY_LOCATION Dst(pDestinationResource, i + FirstSubresource);
 			// const CD3DX12_TEXTURE_COPY_LOCATION Src(pIntermediate, pLayouts[i]);
 			Dst := TEXTURE_COPY_LOCATION {
@@ -252,7 +241,7 @@ UpdateSubresources2 :: proc "contextless" (
 // Heap-allocating UpdateSubresources implementation
 //@(private = "file")
 //UpdateSubresources3 :: proc "contextless" (
-UpdateSubresources3 :: proc (
+UpdateSubresources3 :: proc(
 	pCmdList: ^IGraphicsCommandList,
 	pDestinationResource: ^IResource,
 	pIntermediate: ^IResource,
@@ -273,9 +262,9 @@ UpdateSubresources3 :: proc (
 	defer win32.HeapFree(win32.GetProcessHeap(), 0, pMem)
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
 	//pRowSizesInBytes : ^UINT64 = cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
-	pRowSizesInBytes : ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
+	pRowSizesInBytes: ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
 	//pNumRows : ^UINT = cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
-	pNumRows : ^UINT = cast(^UINT)intrinsics.ptr_offset(pRowSizesInBytes, int(NumSubresources))
+	pNumRows: ^UINT = cast(^UINT)intrinsics.ptr_offset(pRowSizesInBytes, int(NumSubresources))
 
 	Desc, tmpDesc: RESOURCE_DESC
 	Desc = pDestinationResource->GetDesc(&tmpDesc)^
@@ -318,8 +307,8 @@ UpdateSubresources4 :: proc "contextless" (
 	pLayouts := cast(^PLACED_SUBRESOURCE_FOOTPRINT)(pMem)
 	// pRowSizesInBytes := cast(^UINT64)(uintptr(pLayouts) + uintptr(NumSubresources))
 	// pNumRows := cast(^UINT)(uintptr(pRowSizesInBytes) + uintptr(NumSubresources))
-	pRowSizesInBytes : ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
-	pNumRows : ^UINT = cast(^UINT)intrinsics.ptr_offset(pRowSizesInBytes,int(NumSubresources))
+	pRowSizesInBytes: ^UINT64 = cast(^UINT64)intrinsics.ptr_offset(pLayouts, int(NumSubresources))
+	pNumRows: ^UINT = cast(^UINT)intrinsics.ptr_offset(pRowSizesInBytes, int(NumSubresources))
 
 	Desc, tmpDesc: RESOURCE_DESC
 	Desc = pDestinationResource->GetDesc(&tmpDesc)^
