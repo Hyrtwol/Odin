@@ -12,7 +12,7 @@ package sys_windows
 // * Code (2 bytes): The remainder of the error code.
 //
 // <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/0642cb2f-2075-4469-918c-4441e69c548a>
-HRESULT :: bit_field LONG {
+HRESULT_DETAILS :: bit_field LONG {
 	Code:     u16      | 16,
 	Facility: FACILITY | 11,
 	X:        bool     | 1,
@@ -21,7 +21,7 @@ HRESULT :: bit_field LONG {
 	R:        bool     | 1,
 	IsError:  bool     | 1,
 }
-HRESULT_DETAILS :: HRESULT
+//HRESULT :: HRESULT_DETAILS
 
 // Define the facility codes
 FACILITY :: enum u16 {

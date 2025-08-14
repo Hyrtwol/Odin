@@ -23,7 +23,7 @@ HANDLE :: distinct LPVOID
 PHANDLE :: ^HANDLE
 HINSTANCE :: HANDLE
 HMODULE :: distinct HINSTANCE
-//HRESULT :: distinct LONG
+HRESULT :: distinct LONG
 HWND :: distinct HANDLE
 HDC :: distinct HANDLE
 HMONITOR :: distinct HANDLE
