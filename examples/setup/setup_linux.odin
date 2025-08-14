@@ -1,5 +1,6 @@
 //private file
 //+build linux
+#+build !windows
 package main
 
 import "base:intrinsics"
