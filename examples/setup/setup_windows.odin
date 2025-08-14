@@ -12,8 +12,6 @@ import win32 "core:sys/windows"
 
 L :: intrinsics.constant_utf16_cstring
 wstring :: win32.wstring
-wstring_to_utf8 :: win32.wstring_to_utf8
-utf8_to_wstring :: win32.utf8_to_wstring
 LSTATUS :: win32.LSTATUS
 LSUCCESS :: LSTATUS(win32.ERROR_SUCCESS)
 
@@ -113,7 +111,7 @@ show_last_error :: proc(caption: string, loc := #caller_location) {
 	error_text: [512]win32.WCHAR
 	cch := win32.FormatMessageW(win32.FORMAT_MESSAGE_FROM_SYSTEM | win32.FORMAT_MESSAGE_IGNORE_INSERTS, nil, last_error, LANGID_NEUTRAL, &error_text[0], len(error_text) - 1, nil)
 	if cch > 0 {
-		error_string, err := wstring_to_utf8(&error_text[0], int(cch))
+		error_string, err := win32.wstring_to_utf8(cstring16(&error_text[0]), int(cch))
 		if err == .None {
 			fmt.eprintln(error_string)
 			return
@@ -126,7 +124,7 @@ lcid_to_local_name :: proc(lcid: win32.LCID) -> string {
 	wc: [512]win32.WCHAR
 	cch := win32.LCIDToLocaleName(lcid, &wc[0], len(wc) - 1, 0)
 	if cch != 0 {
-		name, err := wstring_to_utf8(&wc[0], int(cch))
+		name, err := win32.wstring_to_utf8(cstring16(&wc[0]), int(cch))
 		if err == .None {
 			return name
 		}
@@ -143,7 +141,7 @@ get_language_name :: proc(lang: win32.DWORD, allocator := context.allocator) -> 
 		hr = -3
 	} else {
 		err: runtime.Allocator_Error
-		res, err = wstring_to_utf8(&text[0], int(cch), allocator = allocator)
+		res, err = win32.wstring_to_utf8(cstring16(&text[0]), int(cch), allocator = allocator)
 		hr = int(err)
 	}
 	return
@@ -164,13 +162,13 @@ get_codepage_and_language :: proc(info: []u8) -> (u16, u16, int) {
 query_string_file_info :: proc(info: []u8, cplhex, key: string, allocator := context.allocator) -> (text: string, hr: int) {
 	wtext: wstring
 	cch: win32.UINT
-	cplstr := utf8_to_wstring(fmt.tprintf("\\StringFileInfo\\%s\\%s", cplhex, key))
+	cplstr := win32.utf8_to_wstring(fmt.tprintf("\\StringFileInfo\\%s\\%s", cplhex, key))
 	if !win32.VerQueryValueW(&info[0], cplstr, (^rawptr)(&wtext), &cch) {
 		hr = -7
 		return
 	}
 	err: runtime.Allocator_Error
-	text, err = wstring_to_utf8(wtext, int(cch), allocator = allocator)
+	text, err = win32.wstring_to_utf8(wtext, int(cch), allocator = allocator)
 	hr = int(err)
 	return
 }
@@ -291,8 +289,8 @@ show_system_defaults :: proc() {
 	print_language("LangID", win32.GetSystemDefaultLangID())
 
 	w: [512]win32.WCHAR
-	cch := win32.GetSystemDefaultLocaleName(wstring(&w), len(w))
-	locale_name, err := wstring_to_utf8(wstring(&w), int(cch))
+	cch := win32.GetSystemDefaultLocaleName(&w[0], len(w))
+	locale_name, err := win32.wstring_to_utf8(cstring16(&w[0]), int(cch))
 	if err != .None {show_last_error("wstring_to_utf8");return}
 	fmt.printfln("  %-20s: \"%s\"", "Locale Name", locale_name)
 }
@@ -380,8 +378,8 @@ show_icon_info :: proc(icon: win32.HICON) {
 			print_key_value("ResID", icon_info.wResID)
 			// print_key_value("ModName", icon_info.szModName)
 			// print_key_value("ResName", icon_info.szResName)
-			fmt.printfln("  %-20s: \"%s\"", "ModName", wstring(&icon_info.szModName))
-			fmt.printfln("  %-20s: \"%s\"", "ResName", wstring(&icon_info.szResName))
+			fmt.printfln("  %-20s: \"%s\"", "ModName", cstring16(&icon_info.szModName[0]))
+			fmt.printfln("  %-20s: \"%s\"", "ResName", cstring16(&icon_info.szResName[0]))
 		}
 		if .icon in options {
 			pixels: []rgba = nil
@@ -427,12 +425,16 @@ show_icon_info :: proc(icon: win32.HICON) {
 }
 
 show_icon :: proc(module: win32.HMODULE, icon_id: int, icon_size: i32 = 16) {
-	hResource := win32.FindResourceW(module, win32.MAKEINTRESOURCEW(icon_id), win32.RT_GROUP_ICON)
+	iid := win32.MAKEINTRESOURCEW(icon_id)
+	gid := win32.RT_GROUP_ICON
+	hResource := win32.FindResourceW(module, cstring16(iid), cstring16(gid))
 	if hResource == nil {show_last_error("FindResource");return}
 	hMem := win32.LoadResource(module, hResource)
 	lpResource := win32.LockResource(hMem)
 	nID := win32.LookupIconIdFromDirectoryEx(win32.PBYTE(lpResource), true, icon_size, icon_size, win32.LR_DEFAULTCOLOR)
-	hResource = win32.FindResourceW(module, win32.MAKEINTRESOURCEW(nID), win32.MAKEINTRESOURCEW(uintptr(win32.RT_ICON)))
+	iid = win32.MAKEINTRESOURCEW(nID)
+	gid = win32.MAKEINTRESOURCEW(uintptr(win32.RT_ICON))
+	hResource = win32.FindResourceW(module, cstring16(iid), cstring16(gid))
 	if hResource == nil {show_last_error("FindResource");return}
 	hMem = win32.LoadResource(module, hResource)
 	lpResource = win32.LockResource(hMem)
@@ -449,7 +451,7 @@ get_module_filename :: proc(module: win32.HMODULE) -> string {
 	w: [512]win32.WCHAR
 	cch := win32.GetModuleFileNameW(module, &w[0], len(w) - 1)
 	if cch != 0 {
-		name, err := wstring_to_utf8(&w[0], int(cch))
+		name, err := win32.wstring_to_utf8(cstring16(&w[0]), int(cch))
 		if err == .None {
 			return name
 		}
@@ -459,7 +461,7 @@ get_module_filename :: proc(module: win32.HMODULE) -> string {
 
 show_module :: proc(path: string) {
 	//module := win32.GetModuleHandleW(nil)
-	module := win32.LoadLibraryExW(utf8_to_wstring(path), nil, {.LOAD_LIBRARY_AS_DATAFILE})
+	module := win32.LoadLibraryExW(win32.utf8_to_wstring(path), nil, {.LOAD_LIBRARY_AS_DATAFILE})
 	if module == nil {show_last_error("LoadLibraryExW");return}
 	defer {if !win32.FreeLibrary(module) {fmt.eprintln("Unable to free library!")}}
 	if .module_info in options {
@@ -487,7 +489,7 @@ query_key :: proc(hKey: win32.HKEY) {
 			ftLastWriteTime: win32.FILETIME
 			err = win32.RegEnumKeyExW(hKey, i, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
 			if err == 0 {
-				name, err := wstring_to_utf8(&wchKey[0], int(cbName))
+				name, err := win32.wstring_to_utf8(cstring16(&wchKey[0]), int(cbName))
 				if err == .None {
 					fmt.printfln("(%d) Key '%s' ????", i + 1, name)
 				}
@@ -508,7 +510,7 @@ query_key :: proc(hKey: win32.HKEY) {
 
 			if err == 0 {
 				if cchValue != 0 {
-					name, err := wstring_to_utf8(&wchValue[0], int(cchValue))
+					name, err := win32.wstring_to_utf8(cstring16(&wchValue[0]), int(cchValue))
 					if err == .None {
 						fmt.printfln("(%d) '%s'", i + 1, name)
 					}
@@ -519,7 +521,7 @@ query_key :: proc(hKey: win32.HKEY) {
 }
 
 reg_open_key :: proc(hkey: win32.HKEY, sub_key: string, options: win32.DWORD = 0, sam_desired: win32.REGSAM = win32.KEY_READ) -> (hkey_result: win32.HKEY, err: i32) {
-	err = win32.RegOpenKeyExW(hkey, utf8_to_wstring(sub_key), options, sam_desired, &hkey_result)
+	err = win32.RegOpenKeyExW(hkey, win32.utf8_to_wstring(sub_key), options, sam_desired, &hkey_result)
 	if err != 0 {show_last_error(fmt.tprintf("RegOpenKeyExW %s %d", sub_key, err))}
 	return
 }
@@ -565,7 +567,7 @@ reg_enum_key :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := contex
 	err = win32.RegEnumKeyExW(hKey, dwIndex, &wchKey[0], &cbName, nil, nil, nil, &ftLastWriteTime)
 	if err == 0 {
 		aerr: runtime.Allocator_Error
-		name, aerr = wstring_to_utf8(&wchKey[0], int(cbName))
+		name, aerr = win32.wstring_to_utf8(cstring16(&wchKey[0]), int(cbName))
 		err = i32(aerr)
 	}
 	if err != 0 {show_last_error("reg_enum_key")}
@@ -589,18 +591,18 @@ reg_enum_value :: proc(hKey: win32.HKEY, dwIndex: win32.DWORD, allocator := cont
 	}
 	if cchValue > 0 {
 		aerr: runtime.Allocator_Error
-		key, aerr = wstring_to_utf8(&wchValue[0], int(cchValue), allocator = allocator)
+		key, aerr = win32.wstring_to_utf8(cstring16(&wchValue[0]), int(cchValue), allocator = allocator)
 		err = i32(aerr)
 	}
 	if cbData > 0 {
 		switch type {
 		case win32.REG_SZ:
 			aerr: runtime.Allocator_Error
-			value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
+			value, aerr = win32.wstring_to_utf8(cstring16(([^]u16)(&data[0])), int(cbData), allocator = allocator)
 			err = i32(aerr)
 		case win32.REG_EXPAND_SZ:
 			aerr: runtime.Allocator_Error
-			value, aerr = wstring_to_utf8(([^]u16)(&data[0]), int(cbData), allocator = allocator)
+			value, aerr = win32.wstring_to_utf8(cstring16(([^]u16)(&data[0])), int(cbData), allocator = allocator)
 			err = i32(aerr)
 		case win32.REG_DWORD:
 			assert(cbData == size_of(win32.DWORD))
@@ -714,8 +716,8 @@ check_environment_variables :: proc() {
 			return
 		}
 		defer win32.RegCloseKey(hKey)
-		v := utf8_to_wstring(odin_root)
-		status := win32.RegSetValueExW(hKey, L("ODIN_ROOT"), 0, win32.REG_SZ, (^win32.BYTE)(v), u32(len(odin_root) * size_of(win32.WCHAR)))
+		v := win32.utf8_to_wstring(odin_root)
+		status := win32.RegSetValueExW(hKey, L("ODIN_ROOT"), 0, win32.REG_SZ, (^win32.BYTE)(&v), u32(len(odin_root) * size_of(win32.WCHAR)))
 		if win32.FAILED(status) {
 			fmt.eprintln("RegSetValueExW:", status)
 		} else {
@@ -759,7 +761,7 @@ check_environment_variables :: proc() {
 			} else if bufCharCount == 0 {
 				fmt.eprintln("  ExpandEnvironmentStrings")
 			} else {
-				val, err := wstring_to_utf8(&infoBuf[0], int(bufCharCount))
+				val, err := win32.wstring_to_utf8(cstring16(&infoBuf[0]), int(bufCharCount))
 				if err == nil {
 					fmt.printfln("  %s", val)
 				}
@@ -843,7 +845,7 @@ setup_windows :: proc() -> int {
 
 	odin_path := filepath.join({ODIN_ROOT, "odin.exe"}, allocator = context.temp_allocator)
 	if .version_info in options {
-		odin_path_w := utf8_to_wstring(odin_path)
+		odin_path_w := win32.utf8_to_wstring(odin_path)
 		info_size := win32.GetFileVersionInfoSizeW(odin_path_w, nil)
 		if info_size == 0 {
 			fmt.eprintfln("Unable to get file information from %s (0x%X)", odin_path, win32.GetLastError())
@@ -911,7 +913,8 @@ setup_windows :: proc() -> int {
 }
 
 @(init)
-init_console :: proc() {
+init_console :: proc "contextless" () {
+	context = runtime.default_context()
 	enable_virtual_terminal_processing :: proc(which: win32.DWORD) -> bool {
 		hnd := win32.GetStdHandle(which)
 		mode: win32.DWORD = 0
