@@ -26,15 +26,13 @@ struct IconDirectoryEntry {
 };
 */
 Icon_File_Header :: struct #packed {
-	// (6 bytes)
 	Reserved:  WORD, // Reserved (2 bytes), always 0
 	IconType:  WORD, // IconType (2 bytes), if the image is an icon it's 1, for cursors the value is 2.
 	IconCount: WORD, // IconCount (2 bytes), number of icons in this file.
 }
 #assert(size_of(Icon_File_Header) == 6)
 
-Icon_Info :: struct #packed {
-	// (16 bytes)
+Icon_Directory_Entry :: struct #packed {
 	Width:       BYTE, // (1 byte), Width of Icon (1 to 255)
 	Height:      BYTE, // Height (1 byte), Height of Icon (1 to 255)
 	ColorCount:  BYTE, // ColorCount (1 byte), Number of colors, either 0 for 24 bit or higher, 2 for monochrome or 16 for 16 color images.
@@ -44,29 +42,7 @@ Icon_Info :: struct #packed {
 	ImageSize:   DWORD, // ImageSize (4 bytes), Length of resource in bytes
 	ImageOffset: DWORD, // ImageOffset (4 bytes), start of the image in the file.
 }
-#assert(size_of(Icon_Info) == 16)
-
-/*
-    src.ReadBuffer(IconFileHeader, SizeOf(Icon_File_Header));
-    WriteIconFileHeader(IconFileHeader);
-
-    src.ReadBuffer(IconInfo, SizeOf(Icon_Info));
-    WriteIconInfoHeader(IconInfo);
-
-    src.ReadBuffer(bmiHeader, SizeOf(TBitmapInfoHeader));
-    WriteBitmapInfoHeader(bmiHeader);
-
-    {Memo1.Lines.Add('TBitmapFileHeader');
-      Memo1.Lines.Add('Header.bfType: ' + IntToStr(BMP.Header.bfType));
-      Memo1.Lines.Add('Header.bfSize: ' + IntToStr(BMP.Header.bfSize));
-      Memo1.Lines.Add('Header.bfReserved1: ' + IntToStr(BMP.Header.bfReserved1));
-      Memo1.Lines.Add('Header.bfReserved2: ' + IntToStr(BMP.Header.bfReserved2));
-    Memo1.Lines.Add('Header.bfOffBits: ' + IntToStr(BMP.Header.bfOffBits));}
-
-    //Pal.palVersion := $300;
-    palNumEntries := 1 shl bmiHeader.biBitCount;
-    src.ReadBuffer(Pal, palNumEntries * 4);
-*/
+#assert(size_of(Icon_Directory_Entry) == 16)
 
 @(private = "package")
 dump_icon :: proc() {
@@ -92,19 +68,19 @@ dump_icon :: proc() {
 	po, err = os.seek(fd, 0, .Current)
 	fmt.printfln("po: %d", po)
 
-	iis := make([]Icon_Info, ifh.IconCount)
+	iis := make([]Icon_Directory_Entry, ifh.IconCount)
 	defer delete(iis)
 
 	for i in 0 ..< ifh.IconCount {
-		n, err = os.read_ptr(fd, &iis[i], size_of(Icon_Info))
+		n, err = os.read_ptr(fd, &iis[i], size_of(Icon_Directory_Entry))
 		assert(err == ERROR_NONE)
-		assert(n == size_of(Icon_Info))
+		assert(n == size_of(Icon_Directory_Entry))
 		//fmt.printfln("ii: %#v", ii)
 		po, err = os.seek(fd, 0, .Current)
 		fmt.printfln("po: %d", po)
 	}
 
-	ii: ^Icon_Info = nil
+	ii: ^Icon_Directory_Entry = nil
 	for i in 0 ..< ifh.IconCount {
 		if ii == nil {ii = &iis[i]}
 		//fmt.printfln("ii: %#v", &iis[i])
