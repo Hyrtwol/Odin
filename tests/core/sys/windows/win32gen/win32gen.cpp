@@ -233,15 +233,17 @@ static void verify_winuser(ofstream& out) {
 	expect_size(HARDWAREINPUT);
 	expect_size(INPUT);
 
-	// expect_size(ICONINFO);
-	// expect_size(CURSORSHAPE);
+	expect_size(ICONINFO);
 	expect_size(ICONINFOEXW);
 
 	expect_size(CURSORINFO);
+	expect_size(CURSORSHAPE);
 	//expect_value(CURSOR_SHOWING);
 	//expect_value(CURSOR_SUPPRESSED);
 
 	expect_size(WINDOWINFO);
+
+	expect_size(MENUINFO);
 
 	expect_size(RAWINPUTHEADER);
 	//expect_size(RAWHID);
@@ -1058,4 +1060,5 @@ int main(int argc, char* argv[]) {
 	ofstream out(filepath);
 	test_core_sys_windows(out);
 	out.close();
+	return 0;
 }

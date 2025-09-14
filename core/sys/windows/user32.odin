@@ -107,6 +107,7 @@ foreign user32 {
 
 	LoadIconA :: proc(hInstance: HINSTANCE, lpIconName: LPCSTR) -> HICON ---
 	LoadIconW :: proc(hInstance: HINSTANCE, lpIconName: LPCWSTR) -> HICON ---
+	GetIconInfo :: proc(hIcon: HICON, piconinfo: PICONINFO) -> BOOL ---
 	GetIconInfoExW :: proc(hIcon: HICON, piconinfo: PICONINFOEXW) -> BOOL ---
 	LoadCursorA :: proc(hInstance: HINSTANCE, lpCursorName: LPCSTR) -> HCURSOR ---
 	LoadCursorW :: proc(hInstance: HINSTANCE, lpCursorName: LPCWSTR) -> HCURSOR ---
@@ -114,6 +115,7 @@ foreign user32 {
 
 	CreateIcon :: proc(hInstance: HINSTANCE, nWidth, nHeight: INT, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: PBYTE, lpbXORbits: PBYTE) -> HICON ---
 	CreateIconFromResource :: proc(presbits: PBYTE, dwResSize: DWORD, fIcon: BOOL, dwVer: DWORD) -> HICON ---
+	CreateIconIndirect :: proc(piconinfo: PICONINFO) -> HICON ---
 	DestroyIcon :: proc(hIcon: HICON) -> BOOL ---
 	DrawIcon :: proc(hDC: HDC, X, Y: INT, hIcon: HICON) -> BOOL ---
 
@@ -150,6 +152,9 @@ foreign user32 {
 	AppendMenuW :: proc(hMenu: HMENU, uFlags: UINT, uIDNewItem: UINT_PTR, lpNewItem: LPCWSTR) -> BOOL ---
 	GetMenu :: proc(hWnd: HWND) -> HMENU ---
 	SetMenu :: proc(hWnd: HWND, hMenu: HMENU) -> BOOL ---
+	GetMenuInfo :: proc(hMenu: HMENU, lpMenuInfo: LPMENUINFO) -> BOOL ---
+	SetMenuInfo :: proc(hMenu: HMENU, lpMenuInfo: LPMENUINFO) -> BOOL ---
+
 	TrackPopupMenu :: proc(hMenu: HMENU, uFlags: UINT, x, y: INT, nReserved: INT, hWnd: HWND, prcRect: ^RECT) -> INT ---
 	RegisterWindowMessageW :: proc(lpString: LPCWSTR) -> UINT ---
 
@@ -610,6 +615,34 @@ CURSORINFO :: struct {
 }
 PCURSORINFO :: ^CURSORINFO
 
+// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorshape>
+CURSORSHAPE :: struct {
+    xHotSpot, yHotSpot: INT,
+    cx, cy: INT,
+    cbWidth: INT,
+    Planes: BYTE,
+    BitsPixel: BYTE,
+}
+
+// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-iconinfo>
+ICONINFO :: struct {
+    fIcon: BOOL,
+    xHotspot, yHotspot: DWORD,
+    hbmMask, hbmColor: HBITMAP,
+}
+PICONINFO :: ^ICONINFO
+
+// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-iconinfoexw>
+ICONINFOEXW :: struct {
+	cbSize:             DWORD,
+	fIcon:              BOOL,
+	xHotspot, yHotspot: DWORD,
+	hbmMask, hbmColor:  HBITMAP,
+	wResID:             WORD,
+	szModName:          [MAX_PATH]WCHAR,
+	szResName:          [MAX_PATH]WCHAR,
+}
+PICONINFOEXW :: ^ICONINFOEXW
 
 DRAWTEXTPARAMS :: struct {
 	cbSize: UINT,
@@ -744,6 +777,19 @@ MENUITEMINFOW :: struct {
 	hbmpItem: HBITMAP,      // used if MIIM_BITMAP
 }
 LPMENUITEMINFOW :: ^MENUITEMINFOW
+
+// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-menuinfo>
+MENUINFO :: struct {
+    cbSize: DWORD,
+    fMask: DWORD,
+    dwStyle: DWORD,
+    cyMax: UINT,
+    hbrBack: HBRUSH,
+    dwContextHelpID: DWORD,
+    dwMenuData: ULONG_PTR,
+}
+LPMENUINFO :: ^MENUINFO
+
 DISPLAY_DEVICEW :: struct {
 	cb: DWORD,
 	DeviceName: [32]WCHAR,
