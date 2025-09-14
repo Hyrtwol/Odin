@@ -645,11 +645,11 @@ gb_internal void lb_begin_procedure_body(lbProcedure *p) {
 						ptr.value = LLVMGetParam(p->value, param_offset+param_index);
 						ptr.type = alloc_type_pointer(e->type);
 
-						if (do_callee_copy) {
+						/*if (do_callee_copy) {
 							lbValue new_ptr = lb_add_local_generated(p, e->type, false).addr;
 							lb_mem_copy_non_overlapping(p, new_ptr, ptr, lb_const_int(p->module, t_uint, sz));
 							ptr = new_ptr;
-						}
+						}*/
 
 						lb_add_entity(p->module, e, ptr);
 						lb_add_debug_param_variable(p, ptr.value, e->type, e->token, param_index+1, p->decl_block);
