@@ -1699,6 +1699,7 @@ FOF_NO_UI                 :: (FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | 
 
 FILEOP_FLAGS :: WORD
 
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-devmodew>
 DEVMODEW :: struct {
 	dmDeviceName:   [32]wchar_t,
 	dmSpecVersion:   WORD,

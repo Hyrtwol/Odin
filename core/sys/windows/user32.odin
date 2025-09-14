@@ -790,16 +790,6 @@ MENUINFO :: struct {
 }
 LPMENUINFO :: ^MENUINFO
 
-DISPLAY_DEVICEW :: struct {
-	cb: DWORD,
-	DeviceName: [32]WCHAR,
-	DeviceString: [128]WCHAR,
-	StateFlags: DWORD,
-	DeviceID: [128]WCHAR,
-	DeviceKey: [128]WCHAR,
-}
-PDISPLAY_DEVICEW :: ^DISPLAY_DEVICEW
-
 // OUTOFCONTEXT is the zero value, use {}
 WinEventFlags :: bit_set[WinEventFlag; DWORD]
 
