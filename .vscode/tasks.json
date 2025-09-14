@@ -27,10 +27,17 @@
 		},
 		{
 			"label": "test core",
-			"type": "shell",
-			"windows": {
-				"command": "call build.bat"
-			},
+			"type": "process",
+			"command": "odin",
+			"args": [
+				"test",
+				"normal.odin",
+				"-file",
+				"-debug",
+				"-all-packages",
+				"-vet",
+				"-strict-style"
+			],
 			"problemMatcher": [],
 			"group": {
 				"kind": "test",
@@ -81,7 +88,7 @@
 		{
 			"label": "run examples/setup",
 			"type": "shell",
-			"command": "call examples/setup/build.bat",
+			"command": "call examples/setup/build.bat -all",
 			"problemMatcher": [],
 			"group": {
 				"kind": "none",
