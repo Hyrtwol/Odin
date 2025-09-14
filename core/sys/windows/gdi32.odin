@@ -123,15 +123,17 @@ PALETTEINDEX :: #force_inline proc "contextless" (#any_int i: int) -> COLORREF {
 
 FXPT2DOT30 :: distinct fixed.Fixed(i32, 30)
 
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-ciexyz>
 CIEXYZ :: struct {
 	ciexyzX, ciexyzY, ciexyzZ: FXPT2DOT30,
 }
 
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-ciexyztriple>
 CIEXYZTRIPLE :: struct {
 	ciexyzRed, ciexyzGreen, ciexyzBlue: CIEXYZ,
 }
 
-// https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header>
 BITMAPV5HEADER :: struct {
 	bV5Size:          DWORD,
 	bV5Width:         LONG,
@@ -159,10 +161,12 @@ BITMAPV5HEADER :: struct {
 	bV5Reserved:      DWORD,
 }
 
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-paletteentry>
 PALETTEENTRY :: struct {
 	peRed, peGreen, peBlue, peFlags: BYTE,
 }
 
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-logpalette>
 LOGPALETTE :: struct {
 	palVersion:    WORD,
 	palNumEntries: WORD,
@@ -406,3 +410,14 @@ ArcDirection :: enum INT {
 }
 
 LINEDDAPROC :: #type proc(x, y: INT, lpData: LPARAM)
+
+// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-display_devicew>
+DISPLAY_DEVICEW :: struct {
+	cb: DWORD,
+	DeviceName: [32]WCHAR,
+	DeviceString: [128]WCHAR,
+	StateFlags: DWORD,
+	DeviceID: [128]WCHAR,
+	DeviceKey: [128]WCHAR,
+}
+PDISPLAY_DEVICEW :: ^DISPLAY_DEVICEW
