@@ -305,6 +305,7 @@ static void verify_winuser(ofstream& out) {
 	expect_size(CURSORSHAPE);
 
 	expect_size(CURSORINFO);
+	expect_size(CURSORSHAPE);
 	//expect_value(CURSOR_SHOWING);
 	//expect_value(CURSOR_SUPPRESSED);
 
@@ -1190,4 +1191,5 @@ int main(int argc, char* argv[]) {
 	ofstream out(filepath);
 	test_core_sys_windows(out);
 	out.close();
+	return 0;
 }
