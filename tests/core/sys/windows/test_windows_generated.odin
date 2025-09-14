@@ -167,6 +167,7 @@ verify_winuser :: proc(t: ^testing.T) {
 	expect_size(t, win32.ICONINFOEXW, 1080)
 	expect_size(t, win32.CURSORSHAPE, 24)
 	expect_size(t, win32.CURSORINFO, 24)
+	expect_size(t, win32.CURSORSHAPE, 24)
 	expect_size(t, win32.WINDOWINFO, 60)
 	expect_size(t, win32.MENUINFO, 40)
 	expect_size(t, win32.RAWINPUTHEADER, 24)
