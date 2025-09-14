@@ -149,6 +149,12 @@ static void verify_win32_type_sizes(ofstream& out) {
 	// expect_size(HKL);
 
 	//expect_size(HFILE);
+	expect_size(FILETIME);
+
+	test_proc_comment("processthreadsapi.h");
+	expect_size(PROCESS_INFORMATION);
+	expect_size(STARTUPINFOW);
+	//expect_size(APC_CALLBACK_DATA);
 
 	test_proc_comment("windef.h");
 	expect_size(HWND);
@@ -280,6 +286,15 @@ static void verify_winnt(ofstream& out) {
 	expect_value(LANG_INVARIANT);
 	expect_value(SUBLANG_NEUTRAL);
 	expect_value(SUBLANG_DEFAULT);
+	expect_size(CONTEXT);
+
+	test_proc_comment("Token Object Definitions");
+	expect_size(TOKEN_PRIMARY_GROUP);
+	expect_size(TOKEN_OWNER);
+	expect_size(TOKEN_GROUPS_AND_PRIVILEGES);
+	expect_size(TOKEN_DEFAULT_DACL);
+	test_proc_comment("ACL and ACE");
+	expect_size(ACL);
 	test_proc_end();
 }
 
@@ -643,7 +658,6 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(DEVMODEW);
 	// expect_size(RGBTRIPLE);
 	expect_size(RGBQUAD);
-	expect_size(PIXELFORMATDESCRIPTOR);
 	expect_size(BITMAPINFOHEADER);
 	expect_size(BITMAPFILEHEADER);
 	expect_size(BITMAP);
@@ -651,11 +665,12 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(CIEXYZTRIPLE);
 	expect_size(CIEXYZ);
 	expect_size(FXPT2DOT30);
+	expect_size(PALETTEENTRY);
+	// expect_size(LOGPALETTE);
+	expect_size(LOGBRUSH);
 	expect_size(TEXTMETRICW);
 	expect_size(POINTFLOAT);
 	expect_size(GLYPHMETRICSFLOAT);
-	// expect_size(LOGPALETTE);
-	expect_size(PALETTEENTRY);
 	expect_size(DESIGNVECTOR);
 	expect_value(LF_FACESIZE);
 	expect_value(LF_FULLFACESIZE);
@@ -671,6 +686,7 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(GRADIENT_TRIANGLE);
 	expect_size(GRADIENT_RECT);
 	expect_size(BLENDFUNCTION);
+
 	expect_size(DISPLAY_DEVICEW);
 	expect_value(AC_SRC_OVER);
 	expect_value(AC_SRC_ALPHA);
@@ -961,13 +977,86 @@ static void verify_winmm(ofstream& out) {
 	test_proc_comment("mmsyscom.h");
 	expect_size(MMVERSION);
 	expect_size(MMTIME);
+	expect_value(MMSYSERR_BASE);
+	expect_value(WAVERR_BASE);
+	expect_value(MIDIERR_BASE);
+	expect_value(TIMERR_BASE);
+	expect_value(JOYERR_BASE);
+	expect_value(MCIERR_BASE);
+	expect_value(MIXERR_BASE);
+	expect_value(MCI_STRING_OFFSET);
+	expect_value(MCI_VD_OFFSET);
+	expect_value(MCI_CD_OFFSET);
+	expect_value(MCI_WAVE_OFFSET);
+	expect_value(MCI_SEQ_OFFSET);
+
 	test_proc_comment("mmreg.h");
 	expect_size(WAVEFORMATEX);
 	expect_size(WAVEFORMATEXTENSIBLE);
 	test_proc_comment("mmeapi.h");
+	test_proc_comment("waveform audio error return values");
+	expect_value_enum("MMRESULT", WAVERR_BADFORMAT);
+	expect_value_enum("MMRESULT", WAVERR_STILLPLAYING);
+	expect_value_enum("MMRESULT", WAVERR_UNPREPARED);
+	expect_value_enum("MMRESULT", WAVERR_SYNC);
+	expect_value_enum("MMRESULT", WAVERR_LASTERROR);
+	test_proc_comment("wave callback messages");
+	expect_value(WOM_OPEN);
+	expect_value(WOM_CLOSE);
+	expect_value(WOM_DONE);
+	expect_value(WIM_OPEN);
+	expect_value(WIM_CLOSE);
+	expect_value(WIM_DATA);
+	test_proc_comment("device ID for wave device mapper");
+	expect_value(WAVE_MAPPER);
+	test_proc_comment("flags for dwFlags parameter in waveOutOpen() and waveInOpen()");
+	expect_value(WAVE_FORMAT_QUERY);
+	expect_value(WAVE_ALLOWSYNC);
+	expect_value(WAVE_MAPPED);
+	expect_value(WAVE_FORMAT_DIRECT);
+	expect_value(WAVE_FORMAT_DIRECT_QUERY);
+	expect_value(WAVE_MAPPED_DEFAULT_COMMUNICATION_DEVICE);
 	expect_size(WAVEHDR);
-	expect_size(WAVEINCAPSW);
+	expect_value(WHDR_DONE);
+	expect_value(WHDR_PREPARED);
+	expect_value(WHDR_BEGINLOOP);
+	expect_value(WHDR_ENDLOOP);
+	expect_value(WHDR_INQUEUE);
 	expect_size(WAVEOUTCAPSW);
+	expect_value(WAVECAPS_PITCH);
+	expect_value(WAVECAPS_PLAYBACKRATE);
+	expect_value(WAVECAPS_VOLUME);
+	expect_value(WAVECAPS_LRVOLUME);
+	expect_value(WAVECAPS_SYNC);
+	expect_value(WAVECAPS_SAMPLEACCURATE);
+	expect_size(WAVEINCAPSW);
+	test_proc_comment("defines for dwFormat field of WAVEINCAPS and WAVEOUTCAPS");
+	expect_value(WAVE_INVALIDFORMAT);
+	expect_value(WAVE_FORMAT_1M08);
+	expect_value(WAVE_FORMAT_1S08);
+	expect_value(WAVE_FORMAT_1M16);
+	expect_value(WAVE_FORMAT_1S16);
+	expect_value(WAVE_FORMAT_2M08);
+	expect_value(WAVE_FORMAT_2S08);
+	expect_value(WAVE_FORMAT_2M16);
+	expect_value(WAVE_FORMAT_2S16);
+	expect_value(WAVE_FORMAT_4M08);
+	expect_value(WAVE_FORMAT_4S08);
+	expect_value(WAVE_FORMAT_4M16);
+	expect_value(WAVE_FORMAT_4S16);
+	expect_value(WAVE_FORMAT_44M08);
+	expect_value(WAVE_FORMAT_44S08);
+	expect_value(WAVE_FORMAT_44M16);
+	expect_value(WAVE_FORMAT_44S16);
+	expect_value(WAVE_FORMAT_48M08);
+	expect_value(WAVE_FORMAT_48S08);
+	expect_value(WAVE_FORMAT_48M16);
+	expect_value(WAVE_FORMAT_48S16);
+	expect_value(WAVE_FORMAT_96M08);
+	expect_value(WAVE_FORMAT_96S08);
+	expect_value(WAVE_FORMAT_96M16);
+	expect_value(WAVE_FORMAT_96S16);
+
 	test_proc_end();
 }
 
