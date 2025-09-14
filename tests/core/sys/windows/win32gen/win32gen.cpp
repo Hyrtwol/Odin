@@ -530,7 +530,6 @@ static void verify_gdi32(ofstream& out) {
 	expect_size(BITMAPFILEHEADER);
 	expect_size(BITMAP);
 	expect_size(BITMAPV5HEADER);
-	expect_size(BITMAPFILEHEADER);
 	expect_size(CIEXYZTRIPLE);
 	expect_size(CIEXYZ);
 	expect_size(FXPT2DOT30);
