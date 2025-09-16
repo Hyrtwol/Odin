@@ -8,6 +8,7 @@ import "core:fmt"
 import os "core:os/os2"
 import "core:path/filepath"
 import "core:strings"
+import "core:terminal/ansi"
 import win32 "core:sys/windows"
 
 L :: intrinsics.constant_utf16_cstring
@@ -315,17 +316,14 @@ show_system_info :: proc() {
 CHECK_OK :: "👍"
 CHECK_FAIL :: "👎"
 
-ESC :: "\x1B"
-CSI :: ESC + "["
-
 rgba :: [4]u8
 
 vt_set_color :: proc(mode: i32, col: rgba) {
-	fmt.printf(CSI + "%d;2;%d;%d;%dm", mode, col.b, col.g, col.r)
+	fmt.printf(ansi.CSI + "%d;2;%d;%d;%dm", mode, col.b, col.g, col.r)
 }
 
 vt_restore_color :: proc() {
-	fmt.println(CSI + "0m")
+	fmt.println(ansi.CSI + "0m")
 }
 
 print_icon_big :: proc(pixels: []rgba, width, height: i32) {
