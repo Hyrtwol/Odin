@@ -617,18 +617,18 @@ PCURSORINFO :: ^CURSORINFO
 
 // <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorshape>
 CURSORSHAPE :: struct {
-    xHotSpot, yHotSpot: INT,
-    cx, cy: INT,
-    cbWidth: INT,
-    Planes: BYTE,
-    BitsPixel: BYTE,
+	xHotSpot, yHotSpot: INT,
+	cx, cy: INT,
+	cbWidth: INT,
+	Planes: BYTE,
+	BitsPixel: BYTE,
 }
 
 // <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-iconinfo>
 ICONINFO :: struct {
-    fIcon: BOOL,
-    xHotspot, yHotspot: DWORD,
-    hbmMask, hbmColor: HBITMAP,
+	fIcon: BOOL,
+	xHotspot, yHotspot: DWORD,
+	hbmMask, hbmColor: HBITMAP,
 }
 PICONINFO :: ^ICONINFO
 
@@ -780,13 +780,13 @@ LPMENUITEMINFOW :: ^MENUITEMINFOW
 
 // <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-menuinfo>
 MENUINFO :: struct {
-    cbSize: DWORD,
-    fMask: DWORD,
-    dwStyle: DWORD,
-    cyMax: UINT,
-    hbrBack: HBRUSH,
-    dwContextHelpID: DWORD,
-    dwMenuData: ULONG_PTR,
+	cbSize: DWORD,
+	fMask: DWORD,
+	dwStyle: DWORD,
+	cyMax: UINT,
+	hbrBack: HBRUSH,
+	dwContextHelpID: DWORD,
+	dwMenuData: ULONG_PTR,
 }
 LPMENUINFO :: ^MENUINFO
 
