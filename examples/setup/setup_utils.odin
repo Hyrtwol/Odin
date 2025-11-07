@@ -54,7 +54,7 @@ dump_icon :: proc() {
 	n: int
 	po: i64
 
-	fd, err = os.open(icon_path, os.O_RDONLY, 0)
+	fd, err = os.open(icon_path, os.O_RDONLY)
 	assert(err == ERROR_NONE)
 	if err != ERROR_NONE {panic("os.open")}
 	defer os.close(fd)
