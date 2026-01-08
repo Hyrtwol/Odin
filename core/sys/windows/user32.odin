@@ -36,7 +36,7 @@ foreign user32 {
 	RegisterHotKey :: proc(hnwd: HWND, id: c_int, fsModifiers: UINT, vk: UINT) -> BOOL ---
 
 	CreateWindowExW :: proc(
-		dwExStyle:             DWORD,
+		dwExStyle:             WS_EX_STYLES,
 		lpClassName:           LPCWSTR,
 		lpWindowName:          LPCWSTR,
 		dwStyle:               WS_STYLES,
