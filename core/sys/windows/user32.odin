@@ -37,7 +37,7 @@ foreign user32 {
 	UnregisterHotKey :: proc(hnwd: HWND, id: c_int) -> BOOL ---
 
 	CreateWindowExW :: proc(
-		dwExStyle:             DWORD,
+		dwExStyle:             WS_EX_STYLES,
 		lpClassName:           LPCWSTR,
 		lpWindowName:          LPCWSTR,
 		dwStyle:               WS_STYLES,
