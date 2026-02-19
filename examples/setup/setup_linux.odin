@@ -7,7 +7,7 @@ import "base:intrinsics"
 import "base:runtime"
 import "core:fmt"
 import "core:path/filepath"
-import os "core:os/os2"
+import "core:os"
 
 BYTE :: u8
 WORD :: u16
