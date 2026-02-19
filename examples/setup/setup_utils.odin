@@ -3,7 +3,7 @@ package main
 
 import "base:intrinsics"
 import "core:fmt"
-import os "core:os/os2"
+import "core:os"
 import "core:path/filepath"
 
 /*
@@ -46,7 +46,7 @@ Icon_Directory_Entry :: struct #packed {
 
 @(private = "package")
 dump_icon :: proc() {
-	icon_path := filepath.clean("misc/emblem.ico")
+	icon_path := filepath.clean("misc/emblem.ico", allocator = context.temp_allocator) or_else panic("filepath.clean")
 
 	fd: ^os.File
 	err: os.Error
