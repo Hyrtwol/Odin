@@ -5,7 +5,7 @@ package main
 import "base:intrinsics"
 import "base:runtime"
 import "core:fmt"
-import os "core:os/os2"
+import "core:os"
 import "core:path/filepath"
 import "core:strings"
 import "core:terminal/ansi"
@@ -841,7 +841,7 @@ setup_windows :: proc() -> int {
 		print_key_value("Module Filename", get_module_filename(module))
 	}
 
-	odin_path := filepath.join({ODIN_ROOT, "odin.exe"}, allocator = context.temp_allocator)
+	odin_path := filepath.join({ODIN_ROOT, "odin.exe"}, allocator = context.temp_allocator) or_else panic("filepath.join")
 	if .version_info in options {
 		odin_path_w := win32.utf8_to_wstring(odin_path)
 		info_size := win32.GetFileVersionInfoSizeW(odin_path_w, nil)
