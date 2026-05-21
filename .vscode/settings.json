@@ -23,7 +23,7 @@
 		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
 	},
 	"omnisharp.autoStart": false,
-	"typescript.tsc.autoDetect": "off",
+	"js/ts.tsc.autoDetect": "off",
 	"npm.autoDetect": "off",
 	"files.exclude": {
 		"**/.git": true,
