@@ -12,12 +12,15 @@
 #include <shlwapi.h>
 #include <wincrypt.h>
 
-#include <cassert>
-#include <codecvt>
-#include <cstdint>
 #include <iostream>
-#include <locale>
-#include <string>
+#include <fstream>
+#include <filesystem>
+//#include <map>
+//#include <cassert>
+//#include <codecvt>
+//#include <cstdint>
+//#include <locale>
+//#include <string>
 using namespace std;
 using namespace std::filesystem;
 
@@ -69,6 +72,18 @@ static std::string ConvertLPCWSTRToString(const LPCWSTR lpcwszStr)
 
 #define expect_value_str(s) out \
 	<< '\t' << "expect_value_str(t, win32." << #s << ", L(\"" << ConvertLPCWSTRToString(s) << "\"))" << endl
+
+#define expect_value_enum(e, s) out \
+	<< '\t' << "expect_value(t, win32." << e << "." << #s << ", " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+
+#define expect_value_enum_remap(e, v, s) out \
+	<< '\t' << "expect_value(t, win32." << e << "." << v << ", " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+
+#define expect_flags(e, v, s) out \
+	<< '\t' << "expect_flags(t, win32." << e << "{." << v << "}, " \
+	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
 
 static void verify_win32_type_sizes(ofstream& out) {
 	test_proc_begin();
@@ -563,35 +578,6 @@ static void verify_winuser(ofstream& out) {
 	expect_flags("WinEventFlags", "INCONTEXT", WINEVENT_INCONTEXT);
 
 	test_proc_comment("Window Styles");
-	//expect_flags("WS_STYLES", "WS_OVERLAPPED", WS_OVERLAPPED);
-	//expect_flags("WS_STYLES", "WS_POPUP", WS_POPUP);
-	//expect_flags("WS_STYLES", "WS_CHILD", WS_CHILD);
-	//expect_flags("WS_STYLES", "WS_MINIMIZE", WS_MINIMIZE);
-	//expect_flags("WS_STYLES", "WS_VISIBLE", WS_VISIBLE);
-	//expect_flags("WS_STYLES", "WS_DISABLED", WS_DISABLED);
-	//expect_flags("WS_STYLES", "WS_CLIPSIBLINGS", WS_CLIPSIBLINGS);
-	//expect_flags("WS_STYLES", "WS_CLIPCHILDREN", WS_CLIPCHILDREN);
-	//expect_flags("WS_STYLES", "WS_MAXIMIZE", WS_MAXIMIZE);
-	////expect_flags("WS_STYLES", "WS_CAPTION", WS_CAPTION);
-	//expect_flags("WS_STYLES", "WS_BORDER", WS_BORDER);
-	//expect_flags("WS_STYLES", "WS_DLGFRAME", WS_DLGFRAME);
-	//expect_flags("WS_STYLES", "WS_VSCROLL", WS_VSCROLL);
-	//expect_flags("WS_STYLES", "WS_HSCROLL", WS_HSCROLL);
-	//expect_flags("WS_STYLES", "WS_SYSMENU", WS_SYSMENU);
-	//expect_flags("WS_STYLES", "WS_THICKFRAME", WS_THICKFRAME);
-	//expect_flags("WS_STYLES", "WS_GROUP", WS_GROUP);
-	//expect_flags("WS_STYLES", "WS_TABSTOP", WS_TABSTOP);
-	//expect_flags("WS_STYLES", "WS_MINIMIZEBOX", WS_MINIMIZEBOX);
-	//expect_flags("WS_STYLES", "WS_MAXIMIZEBOX", WS_MAXIMIZEBOX);
-
-	//expect_flags("WS_STYLES", "WS_TILED", WS_TILED);
-	//expect_flags("WS_STYLES", "WS_ICONIC", WS_ICONIC);
-	//expect_flags("WS_STYLES", "WS_SIZEBOX", WS_SIZEBOX);
-	//expect_flags("WS_STYLES", "WS_TILEDWINDOW", WS_TILEDWINDOW);
-	//expect_flags("WS_STYLES", "WS_OVERLAPPEDWINDOW", WS_OVERLAPPEDWINDOW);
-	//expect_flags("WS_STYLES", "WS_POPUPWINDOW", WS_POPUPWINDOW);
-	//expect_flags("WS_STYLES", "WS_CHILDWINDOW", WS_CHILDWINDOW);
-
 	expect_value(WS_OVERLAPPED);
 	expect_value(WS_POPUP);
 	expect_value(WS_CHILD);
@@ -621,31 +607,34 @@ static void verify_winuser(ofstream& out) {
 	expect_value(WS_CHILDWINDOW);
 
 	test_proc_comment("Extended Window Styles");
-	expect_flags("WS_EX_STYLES", "WS_EX_DLGMODALFRAME", WS_EX_DLGMODALFRAME);
-	//expect_flags("WS_EX_STYLES", "WS_EX_DRAGDETECT", WS_EX_DRAGDETECT);
-	expect_flags("WS_EX_STYLES", "WS_EX_NOPARENTNOTIFY", WS_EX_NOPARENTNOTIFY);
-	expect_flags("WS_EX_STYLES", "WS_EX_TOPMOST", WS_EX_TOPMOST);
-	expect_flags("WS_EX_STYLES", "WS_EX_ACCEPTFILES", WS_EX_ACCEPTFILES);
-	expect_flags("WS_EX_STYLES", "WS_EX_TRANSPARENT", WS_EX_TRANSPARENT);
-	expect_flags("WS_EX_STYLES", "WS_EX_MDICHILD", WS_EX_MDICHILD);
-	expect_flags("WS_EX_STYLES", "WS_EX_TOOLWINDOW", WS_EX_TOOLWINDOW);
-	expect_flags("WS_EX_STYLES", "WS_EX_WINDOWEDGE", WS_EX_WINDOWEDGE);
-	expect_flags("WS_EX_STYLES", "WS_EX_CLIENTEDGE", WS_EX_CLIENTEDGE);
-	expect_flags("WS_EX_STYLES", "WS_EX_CONTEXTHELP", WS_EX_CONTEXTHELP);
-	expect_flags("WS_EX_STYLES", "WS_EX_RIGHT", WS_EX_RIGHT);
-	expect_flags("WS_EX_STYLES", "WS_EX_RTLREADING", WS_EX_RTLREADING);
-	expect_flags("WS_EX_STYLES", "WS_EX_LEFTSCROLLBAR", WS_EX_LEFTSCROLLBAR);
-	expect_flags("WS_EX_STYLES", "WS_EX_CONTROLPARENT", WS_EX_CONTROLPARENT);
-	expect_flags("WS_EX_STYLES", "WS_EX_STATICEDGE", WS_EX_STATICEDGE);
-	expect_flags("WS_EX_STYLES", "WS_EX_APPWINDOW", WS_EX_APPWINDOW);
-	expect_flags("WS_EX_STYLES", "WS_EX_LAYERED", WS_EX_LAYERED);
-	expect_flags("WS_EX_STYLES", "WS_EX_NOINHERITLAYOUT", WS_EX_NOINHERITLAYOUT);
-	expect_flags("WS_EX_STYLES", "WS_EX_NOREDIRECTIONBITMAP", WS_EX_NOREDIRECTIONBITMAP);
-	expect_flags("WS_EX_STYLES", "WS_EX_LAYOUTRTL", WS_EX_LAYOUTRTL);
-	expect_flags("WS_EX_STYLES", "WS_EX_COMPOSITED", WS_EX_COMPOSITED);
-	expect_flags("WS_EX_STYLES", "WS_EX_NOACTIVATE", WS_EX_NOACTIVATE);
-
-	// expect_value(WS_EX_LEFT);
+	expect_value(WS_EX_ACCEPTFILES);
+	expect_value(WS_EX_APPWINDOW);
+	expect_value(WS_EX_CLIENTEDGE);
+	expect_value(WS_EX_COMPOSITED);
+	expect_value(WS_EX_CONTEXTHELP);
+	expect_value(WS_EX_CONTROLPARENT);
+	expect_value(WS_EX_DLGMODALFRAME);
+	// expect_value(WS_EX_DRAGDETECT);
+	expect_value(WS_EX_LAYERED);
+	expect_value(WS_EX_LAYOUTRTL);
+	expect_value(WS_EX_LEFT);
+	expect_value(WS_EX_LEFTSCROLLBAR);
+	expect_value(WS_EX_LTRREADING);
+	expect_value(WS_EX_MDICHILD);
+	expect_value(WS_EX_NOACTIVATE);
+	expect_value(WS_EX_NOINHERITLAYOUT);
+	expect_value(WS_EX_NOPARENTNOTIFY);
+	expect_value(WS_EX_NOREDIRECTIONBITMAP);
+	expect_value(WS_EX_OVERLAPPEDWINDOW);
+	expect_value(WS_EX_PALETTEWINDOW);
+	expect_value(WS_EX_RIGHT);
+	expect_value(WS_EX_RIGHTSCROLLBAR);
+	expect_value(WS_EX_RTLREADING);
+	expect_value(WS_EX_STATICEDGE);
+	expect_value(WS_EX_TOOLWINDOW);
+	expect_value(WS_EX_TOPMOST);
+	expect_value(WS_EX_TRANSPARENT);
+	expect_value(WS_EX_WINDOWEDGE);
 
 	test_proc_end();
 }
