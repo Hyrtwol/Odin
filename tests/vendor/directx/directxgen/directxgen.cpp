@@ -11,7 +11,6 @@
 #include <shlwapi.h>
 #include <wincrypt.h>
 
-#include <windows.h>
 #include <wrl.h>
 #include <dxgi1_4.h>
 #include <d3d12.h>
