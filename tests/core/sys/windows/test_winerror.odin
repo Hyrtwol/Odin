@@ -28,7 +28,8 @@ make_hresult :: proc(t: ^testing.T) {
 @(test)
 decode_hresult :: proc(t: ^testing.T) {
 	details := win32.DECODE_HRESULT(win32.E_INVALIDARG)
-	expect_value(t, details.IsError, win32.SEVERITY.ERROR)
+	//expect_value(t, details.IsError, win32.SEVERITY.ERROR)
+	testing.expect(t, details.IsError)
 	expect_value(t, details.Facility, win32.FACILITY.WIN32)
 	expect_value(t, details.Code, win32.System_Error.INVALID_PARAMETER)
 }
