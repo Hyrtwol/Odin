@@ -577,6 +577,21 @@ static void verify_winuser(ofstream& out) {
 	expect_flags("WinEventFlags", "SKIPOWNPROCESS", WINEVENT_SKIPOWNPROCESS);
 	expect_flags("WinEventFlags", "INCONTEXT", WINEVENT_INCONTEXT);
 
+	test_proc_comment("Window Class Styles");
+	expect_value(CS_VREDRAW);
+	expect_value(CS_HREDRAW);
+	expect_value(CS_DBLCLKS);
+	expect_value(CS_OWNDC);
+	expect_value(CS_CLASSDC);
+	expect_value(CS_PARENTDC);
+	expect_value(CS_NOCLOSE);
+	expect_value(CS_SAVEBITS);
+	expect_value(CS_BYTEALIGNCLIENT);
+	expect_value(CS_BYTEALIGNWINDOW);
+	expect_value(CS_GLOBALCLASS);
+	// expect_value(CS_IME);
+	expect_value(CS_DROPSHADOW);
+
 	test_proc_comment("Window Styles");
 	expect_value(WS_OVERLAPPED);
 	expect_value(WS_POPUP);
