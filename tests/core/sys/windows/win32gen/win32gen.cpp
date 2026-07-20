@@ -70,7 +70,7 @@ static std::string ConvertLPCWSTRToString(const LPCWSTR lpcwszStr)
 #define expect_value_str(s) out \
 	<< '\t' << "expect_value_str(t, win32." << #s << ", L(\"" << ConvertLPCWSTRToString(s) << "\"))" << endl
 
-	#define expect_value_enum(e, s) out \
+#define expect_value_enum(e, s) out \
 	<< '\t' << "expect_value(t, win32." << e << "." << #s << ", " \
 	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
 
