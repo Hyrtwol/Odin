@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="win32gen.cpp">
+    <ClCompile Include="directxgen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="build.bat">
-      <Filter>Source Files</Filter>
-    </None>
+    <ClInclude Include="..\..\..\..\misc\testgen\odintestgen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
