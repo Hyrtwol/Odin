@@ -83,7 +83,6 @@ foreign gdi32 {
 	Polygon     :: proc(hdc: HDC, apt: [^]POINT, cpt: c_int) -> BOOL ---
 	PolyPolygon :: proc(hdc: HDC, apt: [^]POINT, asz: [^]c_int, csz: c_int) -> BOOL ---
 
-	// Line Drawing Functions
 	AngleArc :: proc(hdc: HDC, x, y: INT, r: DWORD, StartAngle, SweepAngle: FLOAT) -> BOOL ---
 	Arc :: proc(hdc: HDC, x1, y1, x2, y2, x3, y3, x4, y4: INT) -> BOOL ---
 	ArcTo :: proc(hdc: HDC, left, top, right, bottom, xr1, yr1, xr2, yr2: INT) -> BOOL ---
@@ -117,17 +116,15 @@ PALETTEINDEX :: #force_inline proc "contextless" (#any_int i: int) -> COLORREF {
 
 FXPT2DOT30 :: distinct i32 // fixed.Fixed(i32, 30)
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-ciexyz>
 CIEXYZ :: struct {
 	ciexyzX, ciexyzY, ciexyzZ: FXPT2DOT30,
 }
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-ciexyztriple>
 CIEXYZTRIPLE :: struct {
 	ciexyzRed, ciexyzGreen, ciexyzBlue: CIEXYZ,
 }
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header>
+// https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header
 BITMAPV5HEADER :: struct {
 	bV5Size:          DWORD,
 	bV5Width:         LONG,
@@ -155,12 +152,10 @@ BITMAPV5HEADER :: struct {
 	bV5Reserved:      DWORD,
 }
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-paletteentry>
 PALETTEENTRY :: struct {
 	peRed, peGreen, peBlue, peFlags: BYTE,
 }
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-logpalette>
 LOGPALETTE :: struct {
 	palVersion:    WORD,
 	palNumEntries: WORD,
@@ -411,14 +406,3 @@ ArcDirection :: enum INT {
 }
 
 LINEDDAPROC :: #type proc(x, y: INT, lpData: LPARAM)
-
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-display_devicew>
-DISPLAY_DEVICEW :: struct {
-	cb:           DWORD,
-	DeviceName:   [32]WCHAR,
-	DeviceString: [128]WCHAR,
-	StateFlags:   DWORD,
-	DeviceID:     [128]WCHAR,
-	DeviceKey:    [128]WCHAR,
-}
-PDISPLAY_DEVICEW :: ^DISPLAY_DEVICEW
