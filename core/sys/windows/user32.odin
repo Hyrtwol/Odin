@@ -324,7 +324,7 @@ foreign user32 {
 
 	GetProcessWindowStation   :: proc() -> HWINSTA ---
 	GetUserObjectInformationW :: proc(hObj: HANDLE, nIndex: GetUserObjectInformationFlags, pvInfo: PVOID, nLength: DWORD, lpnLengthNeeded: LPDWORD) -> BOOL ---
-
+	
 	OpenClipboard                 :: proc(hWndNewOwner: HWND) -> BOOL ---
 	CloseClipboard                :: proc() -> BOOL ---
 	GetClipboardData              :: proc(uFormat: UINT) -> HANDLE ---
@@ -656,7 +656,6 @@ CURSORINFO :: struct {
 }
 PCURSORINFO :: ^CURSORINFO
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorshape>
 CURSORSHAPE :: struct {
 	xHotSpot, yHotSpot: INT,
 	cx, cy: INT,
@@ -665,7 +664,6 @@ CURSORSHAPE :: struct {
 	BitsPixel: BYTE,
 }
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-iconinfo>
 ICONINFO :: struct {
 	fIcon: BOOL,
 	xHotspot, yHotspot: DWORD,
@@ -673,7 +671,6 @@ ICONINFO :: struct {
 }
 PICONINFO :: ^ICONINFO
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-iconinfoexw>
 ICONINFOEXW :: struct {
 	cbSize:             DWORD,
 	fIcon:              BOOL,
@@ -819,7 +816,6 @@ MENUITEMINFOW :: struct {
 }
 LPMENUITEMINFOW :: ^MENUITEMINFOW
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-menuinfo>
 MENUINFO :: struct {
 	cbSize:          DWORD,
 	fMask:           DWORD,
@@ -830,6 +826,16 @@ MENUINFO :: struct {
 	dwMenuData:      ULONG_PTR,
 }
 LPMENUINFO :: ^MENUINFO
+
+DISPLAY_DEVICEW :: struct {
+	cb:           DWORD,
+	DeviceName:   [32]WCHAR,
+	DeviceString: [128]WCHAR,
+	StateFlags:   DWORD,
+	DeviceID:     [128]WCHAR,
+	DeviceKey:    [128]WCHAR,
+}
+PDISPLAY_DEVICEW :: ^DISPLAY_DEVICEW
 
 // OUTOFCONTEXT is the zero value, use {}
 WinEventFlags :: distinct bit_set[WinEventFlag; DWORD]

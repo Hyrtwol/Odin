@@ -181,8 +181,8 @@ FACILITY :: enum u16 {
 	PIX                                      = 2748,
 }
 
-NO_ERROR :: HRESULT(0)
-SEC_E_OK :: NO_ERROR
+NO_ERROR :: 0
+SEC_E_OK : HRESULT : NO_ERROR
 
 ERROR_SUCCESS                : DWORD : 0
 ERROR_INVALID_FUNCTION       : DWORD : 1
@@ -261,37 +261,28 @@ SUCCEEDED :: #force_inline proc "contextless" (#any_int result: int) -> bool { r
 FAILED :: #force_inline proc "contextless" (#any_int result: int) -> bool { return result < S_OK }
 
 // Generic test for error on any status value.
-//IS_ERROR :: #force_inline proc(#any_int hr: int) -> bool { return u32(hr) >> 31 == u32(SEVERITY.ERROR) }
-IS_ERROR :: #force_inline proc "contextless" (#any_int hr: int) -> bool { return HRESULT_DETAILS(hr).IsError }
+IS_ERROR :: #force_inline proc "contextless" (#any_int status: int) -> bool { return u32(status) >> 31 == u32(SEVERITY.ERROR) }
 
 // Return the code
-HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> u16 { return HRESULT_DETAILS(hr).Code }
+HRESULT_CODE :: #force_inline proc "contextless" (#any_int hr: int) -> int { return int(u32(hr) & 0xFFFF) }
 
 //  Return the facility
-//HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return HRESULT_DETAILS(hr).Facility }
 HRESULT_FACILITY :: #force_inline proc "contextless" (#any_int hr: int) -> FACILITY { return FACILITY((u32(hr) >> 16) & 0x1FFF) }
 
 //  Return the severity
 HRESULT_SEVERITY :: #force_inline proc "contextless" (#any_int hr: int) -> SEVERITY { return SEVERITY((u32(hr) >> 31) & 0x1) }
 
 // Create an HRESULT value from component pieces
-MAKE_HRESULT :: #force_inline proc "contextless" (#any_int severity: int, #any_int facility: int, #any_int code: int) -> HRESULT {
-	return HRESULT(
-		((uint(severity) & 0x1) << 31) |
-		((uint(facility) & 0x7FFF) << 16) |
-		(uint(code) & 0xFFFF))
+MAKE_HRESULT :: #force_inline proc "contextless" (#any_int sev: int, #any_int fac: int, #any_int code: int) -> HRESULT {
+	return HRESULT((uint(sev)<<31) | (uint(fac)<<16) | (uint(code)))
 }
 
 HRESULT_FROM_WIN32 :: #force_inline proc "contextless" (#any_int code: int) -> HRESULT {
-	return code <= 0 ? HRESULT(code) : HRESULT(uint(code & 0x0000FFFF) | (uint(FACILITY.WIN32) << 16) | 0x80000000)
+	return HRESULT(code) <= 0 ? HRESULT(code) : HRESULT(uint(code & 0x0000FFFF) | (uint(FACILITY.WIN32) << 16) | 0x80000000)
 }
 
-// DECODE_HRESULT :: #force_inline proc "contextless" (#any_int hr: int) -> (SEVERITY, FACILITY, int) {
-// 	return HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr)
-// }
-
-DECODE_HRESULT :: #force_inline proc "contextless" (#any_int hr: int) -> HRESULT_DETAILS {
-	return HRESULT_DETAILS(hr)
+DECODE_HRESULT :: #force_inline proc "contextless" (#any_int hr: int) -> (SEVERITY, FACILITY, int) {
+	return HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr)
 }
 
 // aka ERROR or WIN32_ERROR to hint the WIN32 facility
