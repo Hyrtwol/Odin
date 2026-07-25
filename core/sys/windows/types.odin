@@ -2594,7 +2594,6 @@ BITMAP :: struct {
 	bmBits:       LPVOID,
 }
 
-// <https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapfileheader>
 BITMAPFILEHEADER :: struct #max_field_align(2) {
 	// The file type; must be 0x4d42 (the ASCII string "BM").
 	bfType: WORD,
