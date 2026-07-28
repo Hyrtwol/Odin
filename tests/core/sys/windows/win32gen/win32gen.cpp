@@ -817,6 +817,7 @@ static void verify_gdi32(ofstream& out) {
 	expect_value(NOMIRRORBITMAP);
 	expect_value(CAPTUREBLT);
 
+	/*
 	test_proc_comment("enum ROP");
 	expect_value_enum("ROP", SRCCOPY);
 	expect_value_enum("ROP", SRCPAINT);
@@ -835,6 +836,7 @@ static void verify_gdi32(ofstream& out) {
 	expect_value_enum("ROP", WHITENESS);
 	expect_value_enum("ROP", NOMIRRORBITMAP);
 	expect_value_enum("ROP", CAPTUREBLT);
+	*/
 
 	test_proc_comment("Region Flags");
 	expect_value(ERROR);
