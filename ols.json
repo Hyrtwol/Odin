@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "tests",
-			"path": "tests/common"
+			"path": "tests"
 		}
 	],
 	"profiles": [
