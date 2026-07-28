@@ -129,6 +129,26 @@
 			"options": {
 				"cwd": "${workspaceFolder}\\${relativeFileDirname}"
 			}
+		},
+		{
+			"label": "odin test",
+			"type": "shell",
+			"command": "odin",
+			"args": [
+				"test",
+				".",
+				"${config:odin.collection.shared}",
+				"-vet",
+				"-strict-style"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"options": {
+				"cwd": "${relativeFileDirname}"
+			}
 		}
 	]
 }
