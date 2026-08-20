@@ -778,7 +778,7 @@ check_acp :: proc() {
 	fmt.printfln("Current Active Codepage %v is not %v to make life easier you can enable", acp, wanted_code_page)
 	fmt.printfln("Beta: Use Unicode UTF-8 for worldwide language support")
 	fmt.printfln("https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page")
-	fmt.printfln(
+	fmt.println(
 		strings.join({"\tWin+R -> intl.cpl", "\tAdministrative tab", "\tClick the Change system locale button.", "\tEnable Beta: Use Unicode UTF-8 for worldwide language support", "\tReboot"}, "\n"),
 	)
 
