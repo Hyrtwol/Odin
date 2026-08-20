@@ -3,30 +3,26 @@ package sys_windows
 
 // https://learn.microsoft.com/en-us/windows/win32/api/winerror/
 
-//  Values are 32 bit values laid out as follows:
+// Values are 32 bit values laid out as follows:
 //
-//   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
-//   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-//  +---+-+-+-----------------------+-------------------------------+
-//  |Sev|C|R|     Facility          |               Code            |
-//  +---+-+-+-----------------------+-------------------------------+
+// * S (1 bit): Severity. If set, indicates a failure result. If clear, indicates a success result.
+// * R (1 bit): Reserved. If the N bit is clear, this bit MUST be set to 0. If the N bit is set, this bit is defined by the NTSTATUS numbering space.
+// * C (1 bit): Customer. This bit specifies if the value is customer-defined or Microsoft-defined. The bit is set for customer-defined values and clear for Microsoft-defined values.
+// * N (1 bit): If set, indicates that the error code is an NTSTATUS value, except that this bit is set.
+// * X (1 bit):  Reserved.  SHOULD be set to 0.
+// * Facility (11 bits): An indicator of the source of the error. New facilities are occasionally added by Microsoft.
+// * Code (2 bytes): The remainder of the error code.
 //
-//  where
-//
-//      Sev - is the severity code
-//
-//          00 - Success
-//          01 - Informational
-//          10 - Warning
-//          11 - Error
-//
-//      C - is the Customer code flag
-//
-//      R - is a reserved bit
-//
-//      Facility - is the facility code
-//
-//      Code - is the facility's status code
+// <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/0642cb2f-2075-4469-918c-4441e69c548a>
+HRESULT_DETAILS :: bit_field HRESULT {
+	Code:     u16      | 16,
+	Facility: FACILITY | 11,
+	X:        bool     | 1,
+	N:        bool     | 1,
+	Customer: bool     | 1,
+	R:        bool     | 1,
+	IsError:  bool     | 1,
+}
 
 // Define the facility codes
 FACILITY :: enum DWORD {
@@ -187,10 +183,10 @@ FACILITY :: enum DWORD {
 	PIX                                      = 2748,
 }
 
-ERROR_SUCCESS : DWORD : 0
 NO_ERROR :: 0
-SEC_E_OK : HRESULT : 0x00000000
+SEC_E_OK : HRESULT : NO_ERROR
 
+ERROR_SUCCESS                : DWORD : 0
 ERROR_INVALID_FUNCTION       : DWORD : 1
 ERROR_FILE_NOT_FOUND         : DWORD : 2
 ERROR_PATH_NOT_FOUND         : DWORD : 3
