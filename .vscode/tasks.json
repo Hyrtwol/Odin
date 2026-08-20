@@ -9,8 +9,7 @@
 			},
 			"command": "make",
 			"group": {
-				"kind": "build",
-				"isDefault": true
+				"kind": "build"
 			}
 		},
 		{
@@ -22,7 +21,7 @@
 			"command": "make",
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			}
 		},
 		{
@@ -40,8 +39,7 @@
 			],
 			"problemMatcher": [],
 			"group": {
-				"kind": "test",
-				"isDefault": false
+				"kind": "test"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}/tests/core"
@@ -59,8 +57,7 @@
 			],
 			"problemMatcher": [],
 			"group": {
-				"kind": "test",
-				"isDefault": false
+				"kind": "test"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}/tests/core/sys/windows"
@@ -78,8 +75,7 @@
 			],
 			"problemMatcher": [],
 			"group": {
-				"kind": "test",
-				"isDefault": false
+				"kind": "test"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}/tests/vendor/directx"
@@ -91,8 +87,7 @@
 			"command": "call examples/setup/build.bat -all",
 			"problemMatcher": [],
 			"group": {
-				"kind": "none",
-				"isDefault": false
+				"kind": "none"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -106,8 +101,7 @@
 			},
 			"problemMatcher": [],
 			"group": {
-				"kind": "none",
-				"isDefault": false
+				"kind": "none"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}/shared/ols"
@@ -123,8 +117,7 @@
 			],
 			"problemMatcher": [],
 			"group": {
-				"kind": "none",
-				"isDefault": false
+				"kind": "none"
 			},
 			"options": {
 				"cwd": "${workspaceFolder}\\${relativeFileDirname}"
@@ -143,8 +136,7 @@
 			],
 			"problemMatcher": [],
 			"group": {
-				"kind": "build",
-				"isDefault": false
+				"kind": "build"
 			},
 			"options": {
 				"cwd": "${relativeFileDirname}"
