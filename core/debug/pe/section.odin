@@ -1,7 +1,7 @@
 package debug_pe
 
 Section_Header32 :: struct {
-	name:                    [8]u8,
+	name:                    [8]u8 `fmt:"s,0"`,
 	virtual_size:            u32le,
 	virtual_address:         u32le,
 	size_of_raw_data:        u32le,
