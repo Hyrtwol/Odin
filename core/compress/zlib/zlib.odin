@@ -54,6 +54,11 @@ General_Error :: compress.General_Error
 ZLIB_Error    :: compress.ZLIB_Error
 Deflate_Error :: compress.Deflate_Error
 
+DEFLATE_BLOCK_TYPE_STORED   :: 0
+DEFLATE_BLOCK_TYPE_FIXED    :: 1
+DEFLATE_BLOCK_TYPE_DYNAMIC  :: 2
+DEFLATE_BLOCK_TYPE_RESERVED :: 3
+
 DEFLATE_MAX_CHUNK_SIZE   :: 65535
 DEFLATE_MAX_LITERAL_SIZE :: 65535
 DEFLATE_MAX_DISTANCE     :: 32768
@@ -526,7 +531,7 @@ inflate_raw :: proc(z: ^$C, expected_output_size := -1, allocator := context.all
 		// fmt.printf("Final: %v | Type: %v\n", final, type)
 
 		switch type {
-		case 0:
+		case DEFLATE_BLOCK_TYPE_STORED:
 			// fmt.printf("Method 0: STORED\n")
 			// Uncompressed block
 
@@ -555,11 +560,11 @@ inflate_raw :: proc(z: ^$C, expected_output_size := -1, allocator := context.all
 			}
 			assert(uncompressed_len == 0)
 
-		case 3:
+		case DEFLATE_BLOCK_TYPE_RESERVED:
 			return .BType_3
 		case:
 			// fmt.printf("Err: %v | Final: %v | Type: %v\n", err, final, type)
-			if type == 1 {
+			if type == DEFLATE_BLOCK_TYPE_FIXED {
 				// Use fixed code lengths.
 				build_huffman(z_repeat, Z_FIXED_LENGTH[:]) or_return
 				build_huffman(z_offset, Z_FIXED_DIST[:])  or_return
