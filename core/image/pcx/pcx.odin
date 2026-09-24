@@ -9,6 +9,13 @@ PCX_MAGIC :: 0xA
 // Control byte 0xC before the palette.
 PAL_MAGIC :: 0xC
 
+PCXColor :: [3]u8
+
+PCX_Encoding :: enum u8 {
+	None = 0,
+	RLE = 1,
+}
+
 PCXHeader :: struct {
 	// The fixed header field valued at a hexadecimal 0x0A (= 10 in decimal).
 	id:             u8,
@@ -22,7 +29,7 @@ PCXHeader :: struct {
 	// The method used for encoding the image data. Can be:
 	// * 0 No encoding (rarely used)
 	// * 1 Run-length encoding (RLE)
-	encoding:       u8,
+	encoding:       PCX_Encoding,
 	// The number of bits constituting one plane. Most often 1, 2, 4 or 8.
 	bits_per_px:    u8,
 	// The minimum co-ordinate of the image position.
@@ -48,8 +55,6 @@ PCXHeader :: struct {
 	// The second reserved field, intended for future extensions, and usually set to zero bytes.
 	_reserved_2:    [54]u8,
 }
-
-PCXColor :: [3]u8
 
 PCXPalette :: [256]PCXColor
 
