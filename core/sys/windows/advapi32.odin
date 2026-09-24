@@ -9,6 +9,7 @@ HCRYPTPROV :: distinct HANDLE
 foreign advapi32 {
 	@(link_name = "SystemFunction036")
 	RtlGenRandom :: proc(RandomBuffer: ^u8, RandomBufferLength: ULONG) -> BOOLEAN ---
+
 	OpenProcessToken :: proc(ProcessHandle: HANDLE,
 	                         DesiredAccess: DWORD,
 	                         TokenHandle: ^HANDLE) -> BOOL ---
@@ -225,6 +226,8 @@ foreign advapi32 {
 		GrantedAccess: LPDWORD,
 		AccessStatus: LPBOOL,
 	) -> BOOL ---
+
+	GetUserNameW :: proc(lpBuffer: LPWSTR, pcbBuffer: LPDWORD) -> BOOL ---
 }
 
 PTOKEN_INFORMATION_CLASS :: ^TOKEN_INFORMATION_CLASS
