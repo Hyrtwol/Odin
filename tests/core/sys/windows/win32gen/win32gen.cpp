@@ -869,6 +869,28 @@ static void verify_gdi32(ofstream& out) {
 	expect_value(WHITENESS);
 	expect_value(NOMIRRORBITMAP);
 	expect_value(CAPTUREBLT);
+
+	/*
+	test_proc_comment("enum ROP");
+	expect_value_enum("ROP", SRCCOPY);
+	expect_value_enum("ROP", SRCPAINT);
+	expect_value_enum("ROP", SRCAND);
+	expect_value_enum("ROP", SRCINVERT);
+	expect_value_enum("ROP", SRCERASE);
+	expect_value_enum("ROP", NOTSRCCOPY);
+	expect_value_enum("ROP", NOTSRCERASE);
+	expect_value_enum("ROP", MERGECOPY);
+	expect_value_enum("ROP", MERGEPAINT);
+	expect_value_enum("ROP", PATCOPY);
+	expect_value_enum("ROP", PATPAINT);
+	expect_value_enum("ROP", PATINVERT);
+	expect_value_enum("ROP", DSTINVERT);
+	expect_value_enum("ROP", BLACKNESS);
+	expect_value_enum("ROP", WHITENESS);
+	expect_value_enum("ROP", NOMIRRORBITMAP);
+	expect_value_enum("ROP", CAPTUREBLT);
+	*/
+
 	test_proc_comment("Region Flags");
 	expect_value(ERROR);
 	expect_value(NULLREGION);
