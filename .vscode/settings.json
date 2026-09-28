@@ -3,7 +3,6 @@
 	"editor.rulers": [
 		120
 	],
-	"cSpell.enabled": true,
 	"cSpell.language": "en",
     "cSpell.customDictionaries": {
         "custom-dictionary-user": {
