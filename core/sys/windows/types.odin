@@ -1643,10 +1643,10 @@ CREATESTRUCTW:: struct {
 	cx:             c_int,
 	y:              c_int,
 	x:              c_int,
-	style:          WS_STYLES,
+	style:          DWORD,
 	lpszName:       LPCWSTR,
 	lpszClass:      LPCWSTR,
-	dwExStyle:      WS_EX_STYLES,
+	dwExStyle:      DWORD,
 }
 
 MAX_LINKID_TEXT :: 48
@@ -1885,7 +1885,6 @@ AURL_ENABLEEAURLS       :: 8
 AURL_ENABLEDRIVELETTERS :: 16
 AURL_DISABLEMIXEDLGC    :: 32 // Disable mixed Latin Greek Cyrillic IDNs
 
-WS_STYLES :: UINT
 WS_BORDER           : UINT : 0x0080_0000
 WS_CAPTION          : UINT : 0x00C0_0000
 WS_CHILD            : UINT : 0x4000_0000
@@ -1914,7 +1913,6 @@ WS_TILEDWINDOW      : UINT : WS_OVERLAPPEDWINDOW
 WS_VISIBLE          : UINT : 0x1000_0000
 WS_VSCROLL          : UINT : 0x0020_0000
 
-WS_EX_STYLES :: UINT
 WS_EX_ACCEPTFILES           : UINT : 0x0000_0010
 WS_EX_APPWINDOW             : UINT : 0x0004_0000
 WS_EX_CLIENTEDGE            : UINT : 0x0000_0200
@@ -1943,7 +1941,6 @@ WS_EX_TOOLWINDOW            : UINT : 0x0000_0080
 WS_EX_TOPMOST               : UINT : 0x0000_0008
 WS_EX_TRANSPARENT           : UINT : 0x0000_0020
 WS_EX_WINDOWEDGE            : UINT : 0x0000_0100
-}
 
 PBS_SMOOTH        :: 0x01
 PBS_VERTICAL      :: 0x04
