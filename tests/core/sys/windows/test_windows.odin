@@ -25,8 +25,8 @@ expect_value_64 :: proc(t: ^testing.T, #any_int act: u64, #any_int exp: u64, loc
 }
 
 @(private)
-expect_value_int :: proc(t: ^testing.T, act, exp: int, loc := #caller_location) {
-	expectf(t, act == exp, "0x%8X (should be: 0x%8X)", act, exp, loc = loc)
+expect_value_int :: proc(t: ^testing.T, #any_int act, exp: int, loc := #caller_location) {
+	expectf(t, act == exp, "%d (should be: %d)", act, exp, loc = loc)
 }
 
 @(private)
