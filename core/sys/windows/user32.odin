@@ -40,7 +40,7 @@ foreign user32 {
 		dwExStyle:             DWORD,
 		lpClassName:           LPCWSTR,
 		lpWindowName:          LPCWSTR,
-		dwStyle:               WS_STYLES,
+		dwStyle:               DWORD,
 		X, Y, nWidth, nHeight: INT,
 		hWndParent:            HWND,
 		hMenu:                 HMENU,
@@ -132,9 +132,9 @@ foreign user32 {
 	SetWindowPos             :: proc(hWnd: HWND, hWndInsertAfter: HWND, X, Y, cx, cy: INT, uFlags: UINT) -> BOOL ---
 	MoveWindow               :: proc(hWnd: HWND, X, Y, hWidth, hHeight: INT, bRepaint: BOOL) -> BOOL ---
 	GetSystemMetrics         :: proc(nIndex: INT) -> INT ---
-	AdjustWindowRect         :: proc(lpRect: LPRECT, dwStyle: WS_STYLES, bMenu: BOOL) -> BOOL ---
-	AdjustWindowRectEx       :: proc(lpRect: LPRECT, dwStyle: WS_STYLES, bMenu: BOOL, dwExStyle: WS_EX_STYLES) -> BOOL ---
-	AdjustWindowRectExForDpi :: proc(lpRect: LPRECT, dwStyle: WS_STYLES, bMenu: BOOL, dwExStyle: WS_EX_STYLES, dpi: UINT) -> BOOL ---
+	AdjustWindowRect         :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL) -> BOOL ---
+	AdjustWindowRectEx       :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL, dwExStyle: DWORD) -> BOOL ---
+	AdjustWindowRectExForDpi :: proc(lpRect: LPRECT, dwStyle: DWORD, bMenu: BOOL, dwExStyle: DWORD, dpi: UINT) -> BOOL ---
 
 	SystemParametersInfoW :: proc(uiAction, uiParam: UINT, pvParam: PVOID, fWinIni: UINT) -> BOOL ---
 	GetMonitorInfoW       :: proc(hMonitor: HMONITOR, lpmi: LPMONITORINFO) -> BOOL ---
@@ -359,7 +359,7 @@ foreign user32 {
 CreateWindowW :: #force_inline proc "system" (
 	lpClassName:  LPCTSTR,
 	lpWindowName: LPCTSTR,
-	dwStyle:      WS_STYLES,
+	dwStyle:      DWORD,
 	X:            INT,
 	Y:            INT,
 	nWidth:       INT,
@@ -370,7 +370,7 @@ CreateWindowW :: #force_inline proc "system" (
 	lpParam:      LPVOID,
 ) -> HWND {
 	return CreateWindowExW(
-		{},
+		0,
 		lpClassName,
 		lpWindowName,
 		dwStyle,
@@ -642,8 +642,8 @@ WINDOWINFO :: struct {
 	cbSize:          DWORD,
 	rcWindow:        RECT,
 	rcClient:        RECT,
-	dwStyle:         WS_STYLES,
-	dwExStyle:       WS_EX_STYLES,
+	dwStyle:         DWORD,
+	dwExStyle:       DWORD,
 	dwWindowStatus:  DWORD,
 	cxWindowBorders: UINT,
 	cyWindowBorders: UINT,
