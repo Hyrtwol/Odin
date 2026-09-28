@@ -11,7 +11,6 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <wincrypt.h>
-
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -743,14 +742,11 @@ static void verify_gdi32(ofstream& out) {
 
 	test_proc_comment("Pixel format descriptor");
 	expect_size(PIXELFORMATDESCRIPTOR);
-	//test_proc_comment("pixel types");
 	expect_value(PFD_TYPE_RGBA);
 	expect_value(PFD_TYPE_COLORINDEX);
-	//test_proc_comment("layer types");
 	expect_value(PFD_MAIN_PLANE);
 	expect_value(PFD_OVERLAY_PLANE);
-	//expect_value(PFD_UNDERLAY_PLANE);
-	//test_proc_comment("PIXELFORMATDESCRIPTOR flags");
+	expect_value_int(PFD_UNDERLAY_PLANE);
 	expect_value(PFD_DOUBLEBUFFER);
 	expect_value(PFD_STEREO);
 	expect_value(PFD_DRAW_TO_WINDOW);
