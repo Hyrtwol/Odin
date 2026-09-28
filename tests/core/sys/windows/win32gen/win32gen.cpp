@@ -11,16 +11,9 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <wincrypt.h>
-
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-//#include <map>
-//#include <cassert>
-//#include <codecvt>
-//#include <cstdint>
-//#include <locale>
-//#include <string>
 using namespace std;
 using namespace std::filesystem;
 
@@ -53,6 +46,10 @@ static std::string ConvertLPCWSTRToString(const LPCWSTR lpcwszStr)
 #define expect_value(s) out \
 	<< '\t' << "expect_value(t, win32." << #s << ", " \
 	<< "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex << s << ")" << endl
+
+#define expect_value_int(s) out \
+	<< '\t' << "expect_value_int(t, win32." << #s << ", " \
+	<< std::dec << s << ")" << endl
 
 #define expect_value_bool(s) out \
 	<< '\t' << "expect_value(t, uint(win32." << #s << "), " \
@@ -745,14 +742,11 @@ static void verify_gdi32(ofstream& out) {
 
 	test_proc_comment("Pixel format descriptor");
 	expect_size(PIXELFORMATDESCRIPTOR);
-	//test_proc_comment("pixel types");
 	expect_value(PFD_TYPE_RGBA);
 	expect_value(PFD_TYPE_COLORINDEX);
-	//test_proc_comment("layer types");
 	expect_value(PFD_MAIN_PLANE);
 	expect_value(PFD_OVERLAY_PLANE);
-	//expect_value(PFD_UNDERLAY_PLANE);
-	//test_proc_comment("PIXELFORMATDESCRIPTOR flags");
+	expect_value_int(PFD_UNDERLAY_PLANE);
 	expect_value(PFD_DOUBLEBUFFER);
 	expect_value(PFD_STEREO);
 	expect_value(PFD_DRAW_TO_WINDOW);
