@@ -3,6 +3,7 @@
 	"editor.rulers": [
 		120
 	],
+	"cSpell.enabled": false,
 	"cSpell.language": "en",
     "cSpell.customDictionaries": {
         "custom-dictionary-user": {
@@ -12,9 +13,7 @@
             "scope": "user"
         }
     },
-	"#cSpell.enableFiletypes#": [
-		"odin"
-	],
+	"markdownlint.enable": false,
 	"markdownlint.config": {
 		"no-hard-tabs": false,
 		"line-length": false
@@ -22,7 +21,6 @@
 	"[markdown]": {
 		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
 	},
-	"omnisharp.autoStart": false,
 	"js/ts.tsc.autoDetect": "off",
 	"npm.autoDetect": "off",
 	"files.exclude": {
@@ -34,8 +32,5 @@
 	"files.associations": {
 		"*.rc": "cpp",
 		"*.rh": "cpp"
-	},
-	"cSpell.words": [
-		"cstring"
-	]
+	}
 }

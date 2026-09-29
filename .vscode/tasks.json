@@ -82,6 +82,25 @@
 			}
 		},
 		{
+			"label": "odin test",
+			"type": "shell",
+			"command": "odin",
+			"args": [
+				"test",
+				".",
+				"${config:odin.collection.shared}",
+				"-vet",
+				"-strict-style"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "test"
+			},
+			"options": {
+				"cwd": "${relativeFileDirname}"
+			}
+		},
+		{
 			"label": "run examples/setup",
 			"type": "shell",
 			"command": "call examples/setup/build.bat -all",
