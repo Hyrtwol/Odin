@@ -994,11 +994,11 @@ static void verify_winmm(ofstream& out) {
 	expect_size(WAVEFORMATEXTENSIBLE);
 	test_proc_comment("mmeapi.h");
 	test_proc_comment("waveform audio error return values");
-	expect_value_enum("MMRESULT", WAVERR_BADFORMAT);
-	expect_value_enum("MMRESULT", WAVERR_STILLPLAYING);
-	expect_value_enum("MMRESULT", WAVERR_UNPREPARED);
-	expect_value_enum("MMRESULT", WAVERR_SYNC);
-	expect_value_enum("MMRESULT", WAVERR_LASTERROR);
+	expect_value(WAVERR_BADFORMAT);
+	expect_value(WAVERR_STILLPLAYING);
+	expect_value(WAVERR_UNPREPARED);
+	expect_value(WAVERR_SYNC);
+	expect_value(WAVERR_LASTERROR);
 	test_proc_comment("wave callback messages");
 	expect_value(WOM_OPEN);
 	expect_value(WOM_CLOSE);
