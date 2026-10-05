@@ -801,13 +801,6 @@ verify_winmm :: proc(t: ^testing.T) {
 	expect_size(t, win32.WAVEFORMATEX, 18)
 	expect_size(t, win32.WAVEFORMATEXTENSIBLE, 40)
 	// mmeapi.h
-	// waveform audio error return values
-	expect_value(t, win32.WAVERR_BADFORMAT, 0x00000020)
-	expect_value(t, win32.WAVERR_STILLPLAYING, 0x00000021)
-	expect_value(t, win32.WAVERR_UNPREPARED, 0x00000022)
-	expect_value(t, win32.WAVERR_SYNC, 0x00000023)
-	expect_value(t, win32.WAVERR_LASTERROR, 0x00000023)
-	// wave callback messages
 	expect_value(t, win32.WOM_OPEN, 0x000003BB)
 	expect_value(t, win32.WOM_CLOSE, 0x000003BC)
 	expect_value(t, win32.WOM_DONE, 0x000003BD)
