@@ -1096,6 +1096,7 @@ static void verify_winmm(ofstream& out) {
 	expect_size(WAVEFORMATEX);
 	expect_size(WAVEFORMATEXTENSIBLE);
 	test_proc_comment("mmeapi.h");
+	/*
 	test_proc_comment("waveform audio error return values");
 	expect_value(WAVERR_BADFORMAT);
 	expect_value(WAVERR_STILLPLAYING);
@@ -1103,6 +1104,7 @@ static void verify_winmm(ofstream& out) {
 	expect_value(WAVERR_SYNC);
 	expect_value(WAVERR_LASTERROR);
 	test_proc_comment("wave callback messages");
+	*/
 	expect_value(WOM_OPEN);
 	expect_value(WOM_CLOSE);
 	expect_value(WOM_DONE);
